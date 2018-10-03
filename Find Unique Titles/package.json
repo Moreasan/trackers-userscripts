@@ -1,0 +1,57 @@
+{
+  "name": "webpack-userscript-template",
+  "description": "Build your UserScript with webpack",
+  "version": "0.0.1",
+  "author": {
+    "name": "Mea01"
+  },
+  "scripts": {
+    "dev": "webpack server --node-env development --config config/webpack.config.ts",
+    "build": "webpack --node-env production --progress --config config/webpack.config.ts",
+    "format": "prettier --write --ignore-unknown src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trim21/webpack-userscript-template"
+  },
+  "private": true,
+  "dependencies": {
+    "@trim21/gm-fetch": "^0.1.13",
+    "jquery": "^3.6.4",
+    "common": "1.0.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "prettier --ignore-path ./.prettierignore --write "
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
+    "@babel/preset-typescript": "^7.21.4",
+    "@babel/register": "^7.21.0",
+    "@crashmax/prettier-config": "^3.2.1",
+    "@types/copy-webpack-plugin": "^10.1.0",
+    "@types/tampermonkey": "^4.0.10",
+    "@types/terser-webpack-plugin": "^5.2.0",
+    "@types/webpack": "^5.28.1",
+    "@types/webpack-dev-server": "^4.7.2",
+    "babel-loader": "^9.1.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.7.3",
+    "sass-loader": "^13.2.2",
+    "style-loader": "^3.3.2",
+    "terser-webpack-plugin": "^5.3.7",
+    "typed-emitter": "^2.1.0",
+    "typescript": "^5.0.4",
+    "webpack": "^5.78.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.13.2",
+    "webpack-userscript": "^3.1.0"
+  },
+  "browserslist": [
+    "last 1 chrome version",
+    "last 1 firefox version"
+  ]
+}

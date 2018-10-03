@@ -1,0 +1,8 @@
+{
+  "name": "trackers-userscripts",
+  "workspaces": [
+    "common",
+    "Find Unique Titles",
+    "PTP - Add IMDB Cover"
+  ]
+}
