@@ -19,18 +19,20 @@ await (async function () {
     const addListener = () => {
       if (window.location.href.includes('requests.php')) {
         document.querySelectorAll('#request_form > div').forEach((d) => {
-          if (d.querySelector('label') !== undefined && d.querySelector('label').textContent.includes('Image:')) {
-            d.querySelector('label').style.cursor = 'pointer'
-            d.querySelector('label').addEventListener('click', () => {
+          let labelElement = d.querySelector('label');
+          if (labelElement && labelElement.textContent.includes('Image:')) {
+            labelElement.style.cursor = 'pointer'
+            labelElement.addEventListener('click', () => {
               window.open(document.querySelector('#image').value, '_blank').focus();
             })
           }
         })
       } else {
         document.querySelectorAll('#upload_table > div').forEach((d) => {
-          if (d.querySelector('label') !== undefined && d.querySelector('label').textContent.includes('Cover art')) {
-            d.querySelector('label').style.cursor = 'pointer'
-            d.querySelector('label').addEventListener('click', () => {
+          let labelElement = d.querySelector('label');
+          if (labelElement && labelElement.textContent.includes('Cover art')) {
+            labelElement.style.cursor = 'pointer'
+            labelElement.addEventListener('click', () => {
               window.open(document.querySelector('#image').value, '_blank').focus();
             })
           }
@@ -224,6 +226,24 @@ await (async function () {
       document.getElementById("image").value = await uploadToPtpimg(value, apiToken)
     })
     addListener()
+    document.getElementById("image").addEventListener('change', async (event) => {
+        const cover = event.target.value
+        if (!document.getElementById("cover-preview")) {
+          const imgParent = document.createElement('div')
+          imgParent.style.position = 'absolute'
+          imgParent.style.right = '0'
+          imgParent.style.maxWidth = '230px'
+          imgParent.style.maxHeight = '325px'
+          const img = document.createElement('img')
+          img.id = "cover-preview"
+          img.classList.add('sidebar-cover-image')
+          imgParent.appendChild(img)
+          document.getElementById("image").parentElement.appendChild(imgParent)
+        }
+        const img = document.getElementById("cover-preview")
+        img.src = cover
+      }
+    )
   }
 )
 ();
