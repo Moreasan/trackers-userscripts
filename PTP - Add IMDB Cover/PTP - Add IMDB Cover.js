@@ -210,6 +210,7 @@ await (async function () {
       return apiToken
     }
 
+    let coverInput = document.getElementById("image");
     document.querySelector('#autofill')
       .addEventListener('click', async () => {
         let apiToken = await getPtpImgApiKey()
@@ -217,16 +218,18 @@ await (async function () {
         if (value.startsWith('http')) value = 'tt' + value.split('/tt')[1].split('/')[0]
         const url = await fetchCover(value)
         console.log(url)
-        document.getElementById("image").value = await uploadToPtpimg(url, apiToken)
+        coverInput.value = await uploadToPtpimg(url, apiToken)
+        coverInput.dispatchEvent(new Event('change'))
       })
-    document.getElementById("image").addEventListener('change', async (event) => {
+    coverInput.addEventListener('change', async (event) => {
       let apiToken = await getPtpImgApiKey()
       const value = event.target.value
       if (value.indexOf('ptpimg') > -1) return
-      document.getElementById("image").value = await uploadToPtpimg(value, apiToken)
+      coverInput.value = await uploadToPtpimg(value, apiToken)
+      coverInput.dispatchEvent(new Event('change'))
     })
     addListener()
-    document.getElementById("image").addEventListener('change', async (event) => {
+    coverInput.addEventListener('change', async (event) => {
         const cover = event.target.value
         if (!document.getElementById("cover-preview")) {
           const imgParent = document.createElement('div')
@@ -238,7 +241,7 @@ await (async function () {
           img.id = "cover-preview"
           img.classList.add('sidebar-cover-image')
           imgParent.appendChild(img)
-          document.getElementById("image").parentElement.appendChild(imgParent)
+          coverInput.parentElement.appendChild(imgParent)
         }
         const img = document.getElementById("cover-preview")
         img.src = cover
