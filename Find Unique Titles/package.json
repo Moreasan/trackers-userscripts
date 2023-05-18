@@ -1,6 +1,6 @@
 {
-  "name": "webpack-userscript-template",
-  "description": "Build your UserScript with webpack",
+  "name": "find.unique.titles",
+  "description": "Find unique titles to cross seed",
   "version": "0.0.1",
   "author": {
     "name": "Mea01"
