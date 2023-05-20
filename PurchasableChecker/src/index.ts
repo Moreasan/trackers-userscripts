@@ -40,7 +40,7 @@ const checkRequests = async (domainsList) => {
       const purchasableLink = getPurchasableLink(result)
       if (purchasableLink) {
         const domain = extractDomain(purchasableLink)
-        if (matches(domainsList, domain)) {
+        if (!matches(domainsList, domain)) {
           removeRequest(requestLink);
         }
       } else {
@@ -52,16 +52,23 @@ const checkRequests = async (domainsList) => {
   }
 }
 
-$(document).ready(async () => {
+const saveDomains = async () => {
+  await GM.setValue('GMSavedDomains', $('#domainOptions').val());
+}
 
-  const path = window.location.pathname
+const getDomains = async () => {
   let domainsList: string[] = [];
   const domains: string | null = await GM.getValue('GMSavedDomains')
-  console.log(path);
-// Load saved settings if they exist
   if (domains) {
     domainsList = domains.split(',');
   }
+  return {domainsList, domains};
+}
+
+$(document).ready(async () => {
+
+  const path = window.location.pathname
+  let {domainsList, domains} = await getDomains();
 
 // Check and run different parts of the script on appropriate pages
 
@@ -86,11 +93,13 @@ $(document).ready(async () => {
 
     $('#domainOptions').val(domains);
 
-    $('#setdomainOptions').click(function () {
-      GM.setValue('GMSavedDomains', $('#domainOptions').val());
+    $('#setdomainOptions').click(async () => {
+      await saveDomains();
     });
 
     $('#filter-purchasable').click(async () => {
+      await saveDomains()
+      let {domainsList} = await getDomains();
       await checkRequests(domainsList);
     });
   }

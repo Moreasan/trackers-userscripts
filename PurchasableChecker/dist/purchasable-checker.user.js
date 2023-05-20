@@ -368,7 +368,7 @@ var checkRequests = /*#__PURE__*/function () {
         var purchasableLink = getPurchasableLink(result);
         if (purchasableLink) {
           var domain = extractDomain(purchasableLink);
-          if (matches(domainsList, domain)) {
+          if (!matches(domainsList, domain)) {
             removeRequest(requestLink);
           }
         } else {
@@ -383,15 +383,36 @@ var checkRequests = /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }();
+var saveDomains = /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator(function* () {
+    yield GM.setValue('GMSavedDomains', $('#domainOptions').val());
+  });
+  return function saveDomains() {
+    return _ref2.apply(this, arguments);
+  };
+}();
+var getDomains = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator(function* () {
+    var domainsList = [];
+    var domains = yield GM.getValue('GMSavedDomains');
+    if (domains) {
+      domainsList = domains.split(',');
+    }
+    return {
+      domainsList,
+      domains
+    };
+  });
+  return function getDomains() {
+    return _ref3.apply(this, arguments);
+  };
+}();
 $(document).ready( /*#__PURE__*/_asyncToGenerator(function* () {
   var path = window.location.pathname;
-  var domainsList = [];
-  var domains = yield GM.getValue('GMSavedDomains');
-  console.log(path);
-  // Load saved settings if they exist
-  if (domains) {
-    domainsList = domains.split(',');
-  }
+  var {
+    domainsList,
+    domains
+  } = yield getDomains();
 
   // Check and run different parts of the script on appropriate pages
 
@@ -403,10 +424,14 @@ $(document).ready( /*#__PURE__*/_asyncToGenerator(function* () {
     // Input field for users libraries
     $(searchForm).prepend('<tr><td style="padding-bottom:20px;" class="Flabel"><label for="domainOptions">Search string:</label></td>' + '<td class="Ffield"><input style="margin-right: 20px;margin-left: 15px;" id="domainOptions" type="text" value="" name="domainOptions" size="95">' + '<span class="search-form__footer__buttons">' + '<input id="setdomainOptions" value="Set" type="button" role="button"></input></span>' + '<td>' + '<span class="search-form__footer__buttons">' + '<input id="filter-purchasable" value="Filter" type="button" role="button"></input></span>' + '<td>' + '</tr><br>');
     $('#domainOptions').val(domains);
-    $('#setdomainOptions').click(function () {
-      GM.setValue('GMSavedDomains', $('#domainOptions').val());
-    });
+    $('#setdomainOptions').click( /*#__PURE__*/_asyncToGenerator(function* () {
+      yield saveDomains();
+    }));
     $('#filter-purchasable').click( /*#__PURE__*/_asyncToGenerator(function* () {
+      yield saveDomains();
+      var {
+        domainsList
+      } = yield getDomains();
       yield checkRequests(domainsList);
     }));
   }
