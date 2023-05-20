@@ -3,12 +3,12 @@ import {existsInCache, addToCache} from "./utils/cache";
 import * as trackers from "./trackers";
 import {tracker} from "./trackers/tracker";
 import {
-  addCounter,
+  addCounter, showWaitingMessage,
   createTrackersSelect,
   updateCount,
   updateNewContent,
-  updateTotalCount
-} from "./utils/dom";
+  updateTotalCount, hideMessageBox
+} from './utils/dom';
 import tracker_tools from "common";
 
 const main = async function () {
@@ -35,19 +35,19 @@ const main = async function () {
     }
   });
   if (sourceTracker == null) return
-  addCounter();
   const select = createTrackersSelect(targetTrackers.map((tracker) => tracker.name()));
   select.addEventListener("change", async () => {
     let answer = confirm("Start searching new content for:  " + select.value);
     if (answer) {
-      let counter: HTMLElement = document.querySelector(".counter_div") as HTMLElement;
-      counter.style.display = "block";
       const targetTracker = targetTrackers.find(
         (tracker) => tracker.name() === select.value
       ) as tracker;
       let i = 1
       let newContent = 0
+      showWaitingMessage()
       let searchRequest = await (sourceTracker as tracker).getSearchRequest();
+      hideMessageBox()
+      addCounter();
       updateTotalCount(searchRequest.length)
       for await (const request of searchRequest) {
         updateCount(i++)

@@ -1,6 +1,7 @@
 import tracker_tools from "common";
 import {parseImdbIdFromLink, parseSize} from "../utils/utils";
 import {tracker, Request} from "./tracker";
+import {updateCount, updateTotalCount} from '../utils/dom';
 
 export default class FL implements tracker {
   canBeUsedAsSource(): boolean {
@@ -18,7 +19,10 @@ export default class FL implements tracker {
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
     let nodes = document.querySelectorAll('.torrentrow');
+    updateTotalCount(nodes.length)
+    let i = 1
     for (const element of nodes) {
+      updateCount(i++)
       const link: HTMLAnchorElement | null = element.querySelector('a[href*="details.php?id"]')
       if (!link) {
         continue;

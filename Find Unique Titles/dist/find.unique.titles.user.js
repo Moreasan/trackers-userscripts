@@ -77,17 +77,17 @@ var main = /*#__PURE__*/function () {
       }
     });
     if (sourceTracker == null) return;
-    (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.addCounter)();
     var select = (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.createTrackersSelect)(targetTrackers.map(tracker => tracker.name()));
     select.addEventListener("change", /*#__PURE__*/_asyncToGenerator(function* () {
       var answer = confirm("Start searching new content for:  " + select.value);
       if (answer) {
-        var counter = document.querySelector(".counter_div");
-        counter.style.display = "block";
         var targetTracker = targetTrackers.find(tracker => tracker.name() === select.value);
         var i = 1;
         var newContent = 0;
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.showWaitingMessage)();
         var searchRequest = yield sourceTracker.getSearchRequest();
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.hideMessageBox)();
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.addCounter)();
         (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(searchRequest.length);
         var _iteratorAbruptCompletion = false;
         var _didIteratorError = false;
@@ -657,8 +657,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/dom */ "./src/utils/dom.ts");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 
 
 class FL {
@@ -675,8 +677,11 @@ class FL {
     return _asyncToGenerator(function* () {
       var requests = [];
       var nodes = document.querySelectorAll('.torrentrow');
+      (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(nodes.length);
+      var i = 1;
       for (var element of nodes) {
         var _element$querySelecto;
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
         var link = element.querySelector('a[href*="details.php?id"]');
         if (!link) {
           continue;
@@ -1211,53 +1216,73 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "addCounter": () => (/* binding */ addCounter),
 /* harmony export */   "createTrackersSelect": () => (/* binding */ createTrackersSelect),
+/* harmony export */   "hideMessageBox": () => (/* binding */ hideMessageBox),
+/* harmony export */   "showWaitingMessage": () => (/* binding */ showWaitingMessage),
 /* harmony export */   "updateCount": () => (/* binding */ updateCount),
 /* harmony export */   "updateNewContent": () => (/* binding */ updateNewContent),
 /* harmony export */   "updateTotalCount": () => (/* binding */ updateTotalCount)
 /* harmony export */ });
 var createTrackersSelect = trackers => {
-  var select_dom = document.createElement("select");
-  select_dom.style.margin = "0 5px";
-  var opt = document.createElement("option");
+  var select_dom = document.createElement('select');
+  select_dom.style.margin = '0 5px';
+  var opt = document.createElement('option');
   opt.disabled = true;
   opt.selected = true;
-  opt.innerHTML = "Select target tracker";
+  opt.innerHTML = 'Select target tracker';
   select_dom.appendChild(opt);
   for (var i = 0; i < trackers.length; i++) {
-    var _opt = document.createElement("option");
+    var _opt = document.createElement('option');
     _opt.value = trackers[i];
     _opt.innerHTML = trackers[i];
     select_dom.appendChild(_opt);
   }
   return select_dom;
 };
-var addCounter = () => {
-  var div = document.createElement("div");
-  div.className = "counter_div";
-  div.innerHTML = 'Checked: <span class="checked_count">0</span>/<span class="total_torrents_count">0</span> | New content: <span class="new_content_count">0</span>';
-  div.style.padding = "9px 26px";
-  div.style.position = "fixed";
-  div.style.top = "50px";
-  div.style.right = "50px";
-  div.style.background = "#eaeaea";
-  div.style.borderRadius = "9px";
-  div.style.fontSize = "17px";
-  div.style.color = "#111";
-  div.style.cursor = "pointer";
-  div.style.border = "2px solid #111";
-  div.style.display = "none";
-  div.style.zIndex = "4591363";
-  div.addEventListener("click", () => div.style.display = "none");
+var createMessageBox = () => {
+  var div = document.getElementById('message-box');
+  if (div) return div;
+  div = document.createElement('div');
+  div.id = 'message-box';
+  addStyle(div);
+  div.addEventListener('click', () => div.style.display = 'none');
   document.body.appendChild(div);
+  return div;
+};
+var addCounter = () => {
+  var messageBox = createMessageBox();
+  messageBox.innerHTML = 'Checked: <span class="checked_count">0</span>/<span class="total_torrents_count">0</span> | New content: <span class="new_content_count">0</span>';
+  messageBox.style.display = 'block';
+};
+var addStyle = messageBox => {
+  messageBox.style.padding = '9px 26px';
+  messageBox.style.position = 'fixed';
+  messageBox.style.top = '50px';
+  messageBox.style.right = '50px';
+  messageBox.style.background = '#eaeaea';
+  messageBox.style.borderRadius = '9px';
+  messageBox.style.fontSize = '17px';
+  messageBox.style.color = '#111';
+  messageBox.style.cursor = 'pointer';
+  messageBox.style.border = '2px solid #111';
+  messageBox.style.zIndex = '4591363';
+  messageBox.style.maxWidth = '300px';
+};
+var showWaitingMessage = () => {
+  var messageBox = createMessageBox();
+  messageBox.innerHTML = 'Getting search list: <span class="checked_count">0</span>/<span class="total_torrents_count">0</span>';
+  messageBox.style.display = 'block';
+};
+var hideMessageBox = () => {
+  document.getElementById('message-box').style.display = 'none';
 };
 var updateCount = count => {
-  document.querySelector(".checked_count").textContent = String(count);
+  document.querySelector('.checked_count').textContent = String(count);
 };
 var updateTotalCount = count => {
-  document.querySelector(".total_torrents_count").textContent = String(count);
+  document.querySelector('.total_torrents_count').textContent = String(count);
 };
 var updateNewContent = count => {
-  document.querySelector(".new_content_count").textContent = String(count);
+  document.querySelector('.new_content_count').textContent = String(count);
 };
 
 /***/ }),
