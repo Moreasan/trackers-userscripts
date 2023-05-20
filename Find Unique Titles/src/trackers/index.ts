@@ -12,5 +12,6 @@ import AvistaZ from "./AvistaZ";
 import FL from "./FL";
 import HDB from "./HDB";
 import TL from "./TL";
+import HDT from "./HDT";
 
-export { PTP, SC, CLANSUD, KG, CG, BHD, BLU, NewInsane, BTarg, CinemaZ, AvistaZ, FL, HDB, TL };
+export { PTP, SC, CLANSUD, KG, CG, HDT, BHD, BLU, NewInsane, BTarg, CinemaZ, AvistaZ, FL, HDB, TL };
