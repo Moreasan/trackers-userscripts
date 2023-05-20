@@ -22,6 +22,15 @@ function removeRequest(requestLink: HTMLAnchorElement) {
   requestLink.parentElement.parentElement.remove()
 }
 
+const matches = (domainsList, domain: string) => {
+  for (let wantedDomain of domainsList) {
+    if (wantedDomain.includes(domain) || domain.includes(wantedDomain)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const checkRequests = async (domainsList) => {
   const requestLinks = $('a[class="l_movie"]');
   for (let i = 0; i < requestLinks.length; i++) {
@@ -31,7 +40,7 @@ const checkRequests = async (domainsList) => {
       const purchasableLink = getPurchasableLink(result)
       if (purchasableLink) {
         const domain = extractDomain(purchasableLink)
-        if (domainsList.indexOf(domain) < 0) {
+        if (matches(domainsList, domain)) {
           removeRequest(requestLink);
         }
       } else {

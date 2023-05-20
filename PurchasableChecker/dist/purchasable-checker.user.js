@@ -7,7 +7,6 @@
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
-// @grant GM.openInTab
 // @namespace http://tampermonkey.net/
 // @require https://cdn.jsdelivr.net/npm/jquery@^3.6.4/dist/jquery.min.js
 // ==/UserScript==
@@ -351,6 +350,14 @@ var getPurchasableLink = html => {
 function removeRequest(requestLink) {
   requestLink.parentElement.parentElement.remove();
 }
+var matches = (domainsList, domain) => {
+  for (var wantedDomain of domainsList) {
+    if (wantedDomain.includes(domain) || domain.includes(wantedDomain)) {
+      return true;
+    }
+  }
+  return false;
+};
 var checkRequests = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(function* (domainsList) {
     var requestLinks = $('a[class="l_movie"]');
@@ -361,7 +368,7 @@ var checkRequests = /*#__PURE__*/function () {
         var purchasableLink = getPurchasableLink(result);
         if (purchasableLink) {
           var domain = extractDomain(purchasableLink);
-          if (domainsList.indexOf(domain) < 0) {
+          if (matches(domainsList, domain)) {
             removeRequest(requestLink);
           }
         } else {
