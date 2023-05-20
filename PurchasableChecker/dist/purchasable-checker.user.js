@@ -329,11 +329,41 @@ var __webpack_exports__ = {};
   !*** ./src/index.ts ***!
   \**********************/
 __webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addCounter": () => (/* binding */ addCounter)
+/* harmony export */ });
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 console.log('PurchasableChecker loaded');
+var addCounter = () => {
+  var div = document.createElement('div');
+  div.className = 'counter_div';
+  div.innerHTML = 'Checked: <span class="checked_count">0</span>/<span class="total_requests_count">0</span> | Matched requests: <span class="matched_requests_count">0</span>';
+  div.style.padding = '9px 26px';
+  div.style.position = 'fixed';
+  div.style.top = '50px';
+  div.style.right = '50px';
+  div.style.background = '#eaeaea';
+  div.style.borderRadius = '9px';
+  div.style.fontSize = '17px';
+  div.style.color = '#111';
+  div.style.cursor = 'pointer';
+  div.style.border = '2px solid #111';
+  div.style.zIndex = '4591363';
+  div.addEventListener('click', () => div.style.display = 'none');
+  document.body.appendChild(div);
+};
+var updateCount = count => {
+  document.querySelector('.checked_count').textContent = String(count);
+};
+var updateTotalCount = count => {
+  document.querySelector('.total_requests_count').textContent = String(count);
+};
+var updateMatchedRequestsCount = count => {
+  document.querySelector('.matched_requests_count').textContent = String(count);
+};
 var extractDomain = url => {
   var domain = new URL(url);
   return domain.hostname;
@@ -361,6 +391,8 @@ var matches = (domainsList, domain) => {
 var checkRequests = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(function* (domainsList) {
     var requestLinks = $('a[class="l_movie"]');
+    updateTotalCount(requestLinks.length);
+    var matched = 0;
     for (var i = 0; i < requestLinks.length; i++) {
       var requestLink = requestLinks[i];
       if (requestLink.parentElement.innerText.includes('Purchasable')) {
@@ -370,6 +402,9 @@ var checkRequests = /*#__PURE__*/function () {
           var domain = extractDomain(purchasableLink);
           if (!matches(domainsList, domain)) {
             removeRequest(requestLink);
+          } else {
+            matched++;
+            updateMatchedRequestsCount(matched);
           }
         } else {
           removeRequest(requestLink);
@@ -377,6 +412,7 @@ var checkRequests = /*#__PURE__*/function () {
       } else {
         removeRequest(requestLink);
       }
+      updateCount(i + 1);
     }
   });
   return function checkRequests(_x) {
@@ -385,7 +421,9 @@ var checkRequests = /*#__PURE__*/function () {
 }();
 var saveDomains = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator(function* () {
-    yield GM.setValue('GMSavedDomains', $('#domainOptions').val());
+    var value = $('#domainOptions').val();
+    value = value.replace(' ', '');
+    yield GM.setValue('GMSavedDomains', value);
   });
   return function saveDomains() {
     return _ref2.apply(this, arguments);
@@ -396,7 +434,7 @@ var getDomains = /*#__PURE__*/function () {
     var domainsList = [];
     var domains = yield GM.getValue('GMSavedDomains');
     if (domains) {
-      domainsList = domains.split(',');
+      domainsList = domains.replace(' ', '').split(',');
     }
     return {
       domainsList,
@@ -432,6 +470,7 @@ $(document).ready( /*#__PURE__*/_asyncToGenerator(function* () {
       var {
         domainsList
       } = yield getDomains();
+      addCounter();
       yield checkRequests(domainsList);
     }));
   }
