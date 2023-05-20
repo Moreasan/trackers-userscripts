@@ -108,7 +108,7 @@ const getDomains = async () => {
 $(document).ready(async () => {
 
   const path = window.location.pathname
-  let {domainsList, domains} = await getDomains();
+  let {domains} = await getDomains();
 
 // Check and run different parts of the script on appropriate pages
 
@@ -124,18 +124,11 @@ $(document).ready(async () => {
         '<tr><td style="padding-bottom:20px;" class="Flabel"><label for="domainOptions">Search string:</label></td>' +
         '<td class="Ffield"><input style="margin-right: 20px;margin-left: 15px;" id="domainOptions" type="text" value="" name="domainOptions" size="95">' +
         '<span class="search-form__footer__buttons">' +
-        '<input id="setdomainOptions" value="Set" type="button" role="button"></input></span>' +
-        '<td>' +
-        '<span class="search-form__footer__buttons">' +
-        '<input id="filter-purchasable" value="Filter" type="button" role="button"></input></span>' +
+        '<input id="filter-purchasable" value="Filter" type="button" role="button" /></span>' +
         '<td>' +
         '</tr><br>');
 
     $('#domainOptions').val(domains);
-
-    $('#setdomainOptions').click(async () => {
-      await saveDomains();
-    });
 
     $('#filter-purchasable').click(async () => {
       await saveDomains()

@@ -448,7 +448,6 @@ var getDomains = /*#__PURE__*/function () {
 $(document).ready( /*#__PURE__*/_asyncToGenerator(function* () {
   var path = window.location.pathname;
   var {
-    domainsList,
     domains
   } = yield getDomains();
 
@@ -460,11 +459,8 @@ $(document).ready( /*#__PURE__*/_asyncToGenerator(function* () {
     var searchForm = $('form[id="request-search-form"]');
 
     // Input field for users libraries
-    $(searchForm).prepend('<tr><td style="padding-bottom:20px;" class="Flabel"><label for="domainOptions">Search string:</label></td>' + '<td class="Ffield"><input style="margin-right: 20px;margin-left: 15px;" id="domainOptions" type="text" value="" name="domainOptions" size="95">' + '<span class="search-form__footer__buttons">' + '<input id="setdomainOptions" value="Set" type="button" role="button"></input></span>' + '<td>' + '<span class="search-form__footer__buttons">' + '<input id="filter-purchasable" value="Filter" type="button" role="button"></input></span>' + '<td>' + '</tr><br>');
+    $(searchForm).prepend('<tr><td style="padding-bottom:20px;" class="Flabel"><label for="domainOptions">Search string:</label></td>' + '<td class="Ffield"><input style="margin-right: 20px;margin-left: 15px;" id="domainOptions" type="text" value="" name="domainOptions" size="95">' + '<span class="search-form__footer__buttons">' + '<input id="filter-purchasable" value="Filter" type="button" role="button" /></span>' + '<td>' + '</tr><br>');
     $('#domainOptions').val(domains);
-    $('#setdomainOptions').click( /*#__PURE__*/_asyncToGenerator(function* () {
-      yield saveDomains();
-    }));
     $('#filter-purchasable').click( /*#__PURE__*/_asyncToGenerator(function* () {
       yield saveDomains();
       var {
