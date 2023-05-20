@@ -9,7 +9,6 @@
 // @match https://passthepopcorn.me/torrents.php*
 // @match https://passthepopcorn.me/torrents.php?type=seeding
 // @match https://beyond-hd.me/library/movies*
-// @match https://beyond-hd.me/meta*
 // @match https://cinemaz.to/movies*
 // @match https://avistaz.to/movies*
 // @match https://blutopia.xyz/torrents*
@@ -281,6 +280,8 @@ class BHD {
     })();
   }
   insertTrackersSelect(select) {
+    select.classList.add("beta-form-main");
+    select.style.width = "170px";
     common__WEBPACK_IMPORTED_MODULE_0__["default"].dom.insertBefore(select, document.querySelector('.button-center'));
   }
 }

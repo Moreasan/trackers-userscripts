@@ -34,7 +34,6 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://passthepopcorn.me/torrents.php*",
       "https://passthepopcorn.me/torrents.php?type=seeding",
       "https://beyond-hd.me/library/movies*",
-      "https://beyond-hd.me/meta*",
       "https://cinemaz.to/movies*",
       "https://avistaz.to/movies*",
       "https://blutopia.xyz/torrents*",

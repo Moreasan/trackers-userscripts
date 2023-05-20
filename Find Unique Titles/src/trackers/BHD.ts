@@ -53,6 +53,8 @@ export default class BHD implements tracker {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
+    select.classList.add("beta-form-main")
+    select.style.width = "170px"
     tracker_tools.dom.insertBefore(select, document.querySelector('.button-center') as HTMLElement)
   }
 }
