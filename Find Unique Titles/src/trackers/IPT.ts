@@ -1,5 +1,5 @@
 import tracker_tools from "common";
-import {parseImdbIdFromLink, parseSize} from "../utils/utils";
+import {parseImdbIdFromLink} from "../utils/utils";
 import {tracker, Request} from "./tracker";
 
 export default class CG implements tracker {
