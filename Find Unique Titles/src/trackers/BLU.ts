@@ -12,7 +12,7 @@ export default class BHD implements tracker {
   }
 
   canRun(url: string): boolean {
-    return url.includes("blutopia.xyz");
+    return url.includes("blutopia.xyz") || url.includes("blutopia.cc");
   }
 
   async getSearchRequest(): Promise<Array<Request>> {

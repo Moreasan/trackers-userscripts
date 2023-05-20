@@ -13,6 +13,7 @@
 // @match https://cinemaz.to/movies*
 // @match https://avistaz.to/movies*
 // @match https://blutopia.xyz/torrents*
+// @match https://blutopia.cc/torrents*
 // @match https://www.torrentleech.org/torrents/browse*
 // @match https://secret-cinema.pw/torrents.php*
 // @match https://www.clan-sudamerica.net/invision/*
@@ -321,7 +322,7 @@ class BHD {
     return true;
   }
   canRun(url) {
-    return url.includes("blutopia.xyz");
+    return url.includes("blutopia.xyz") || url.includes("blutopia.cc");
   }
   getSearchRequest() {
     return _asyncToGenerator(function* () {
@@ -1265,7 +1266,6 @@ var addStyle = messageBox => {
   messageBox.style.cursor = 'pointer';
   messageBox.style.border = '2px solid #111';
   messageBox.style.zIndex = '4591363';
-  messageBox.style.maxWidth = '300px';
 };
 var showWaitingMessage = () => {
   var messageBox = createMessageBox();

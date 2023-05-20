@@ -45,7 +45,6 @@ const addStyle = (messageBox: HTMLElement) => {
   messageBox.style.cursor = 'pointer';
   messageBox.style.border = '2px solid #111';
   messageBox.style.zIndex = '4591363';
-  messageBox.style.maxWidth = '300px'
 }
 
 export const showWaitingMessage = () => {
