@@ -46,6 +46,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://btarg.com.ar/tracker/browse.php*",
       "https://filelist.io/browse.php*",
       "https://hd-torrents.org/torrents.php*",
+      "https://iptorrents.com/movies*",
     ],
     require: [
       `https://cdn.jsdelivr.net/npm/jquery@${pkg.dependencies.jquery}/dist/jquery.min.js`,
