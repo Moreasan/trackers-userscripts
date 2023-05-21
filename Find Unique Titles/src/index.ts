@@ -1,7 +1,7 @@
-import {existsInCache, addToCache} from "./utils/cache";
+import {existsInCache, addToCache} from './utils/cache';
 
-import * as trackers from "./trackers";
-import {tracker} from "./trackers/tracker";
+import * as trackers from './trackers';
+import {tracker} from './trackers/tracker';
 import {
   addCounter, showWaitingMessage,
   createTrackersSelect,
@@ -9,10 +9,10 @@ import {
   updateNewContent,
   updateTotalCount, hideMessageBox
 } from './utils/dom';
-import tracker_tools from "common";
+import tracker_tools from 'common';
 
 const main = async function () {
-  "use strict";
+  'use strict';
 
   console.log('Init User script')
   /******************************************************************************/
@@ -21,7 +21,7 @@ const main = async function () {
   let better_constant = 1.15; // you can change this too.. wouldn't recommend going below 1.05
 
   /******************************************************************************/
-
+  if (document.getElementById('tracker-select')) return
   const url = window.location.href;
   let sourceTracker: tracker | null = null;
   let targetTrackers: Array<tracker> = [];
@@ -36,8 +36,8 @@ const main = async function () {
   });
   if (sourceTracker == null) return
   const select = createTrackersSelect(targetTrackers.map((tracker) => tracker.name()));
-  select.addEventListener("change", async () => {
-    let answer = confirm("Start searching new content for:  " + select.value);
+  select.addEventListener('change', async () => {
+    let answer = confirm('Start searching new content for:  ' + select.value);
     if (answer) {
       const targetTracker = targetTrackers.find(
         (tracker) => tracker.name() === select.value
@@ -52,7 +52,7 @@ const main = async function () {
       for await (const request of searchRequest) {
         updateCount(i++)
         if (request.imdbId && existsInCache(targetTracker.name(), request.imdbId)) {
-          request.dom.style.display = "none";
+          request.dom.style.display = 'none';
           continue
         }
         const response = await targetTracker.canUpload(request);
@@ -60,7 +60,7 @@ const main = async function () {
           if (request.imdbId) {
             await addToCache(targetTracker.name(), request.imdbId)
           }
-          request.dom.style.display = "none";
+          request.dom.style.display = 'none';
         } else {
           newContent++
           updateNewContent(newContent)
@@ -72,7 +72,9 @@ const main = async function () {
 };
 
 tracker_tools.dom.appendErrorMessage()
-window.addEventListener('error', (event) => { tracker_tools.dom.showError(event.message) })
+window.addEventListener('error', (event) => {
+  tracker_tools.dom.showError(event.message)
+})
 window.onunhandledrejection = event => {
   console.trace(event.reason)
   tracker_tools.dom.showError(event.reason);
@@ -81,3 +83,17 @@ main()
   .catch((e) => {
     tracker_tools.dom.showError(e.message)
   });
+
+let currentUrl = document.location.href;
+const observer = new MutationObserver(async () => {
+  if (document.location.href !== currentUrl) {
+    await main()
+  }
+});
+
+const config = {subtree: true, childList: true};
+observer.observe(document, config);
+
+window.addEventListener('beforeunload', function (event) {
+  observer.disconnect();
+});

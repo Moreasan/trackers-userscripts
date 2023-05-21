@@ -58,7 +58,7 @@ function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r
 
 var main = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(function* () {
-    "use strict";
+    'use strict';
 
     console.log('Init User script');
     /******************************************************************************/
@@ -67,7 +67,7 @@ var main = /*#__PURE__*/function () {
     var better_constant = 1.15; // you can change this too.. wouldn't recommend going below 1.05
 
     /******************************************************************************/
-
+    if (document.getElementById('tracker-select')) return;
     var url = window.location.href;
     var sourceTracker = null;
     var targetTrackers = [];
@@ -82,8 +82,8 @@ var main = /*#__PURE__*/function () {
     });
     if (sourceTracker == null) return;
     var select = (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.createTrackersSelect)(targetTrackers.map(tracker => tracker.name()));
-    select.addEventListener("change", /*#__PURE__*/_asyncToGenerator(function* () {
-      var answer = confirm("Start searching new content for:  " + select.value);
+    select.addEventListener('change', /*#__PURE__*/_asyncToGenerator(function* () {
+      var answer = confirm('Start searching new content for:  ' + select.value);
       if (answer) {
         var targetTracker = targetTrackers.find(tracker => tracker.name() === select.value);
         var i = 1;
@@ -102,7 +102,7 @@ var main = /*#__PURE__*/function () {
             {
               (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
               if (request.imdbId && (0,_utils_cache__WEBPACK_IMPORTED_MODULE_0__.existsInCache)(targetTracker.name(), request.imdbId)) {
-                request.dom.style.display = "none";
+                request.dom.style.display = 'none';
                 continue;
               }
               var response = yield targetTracker.canUpload(request);
@@ -110,7 +110,7 @@ var main = /*#__PURE__*/function () {
                 if (request.imdbId) {
                   yield (0,_utils_cache__WEBPACK_IMPORTED_MODULE_0__.addToCache)(targetTracker.name(), request.imdbId);
                 }
-                request.dom.style.display = "none";
+                request.dom.style.display = 'none';
               } else {
                 newContent++;
                 (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateNewContent)(newContent);
@@ -149,6 +149,20 @@ window.onunhandledrejection = event => {
 };
 main().catch(e => {
   common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.showError(e.message);
+});
+var currentUrl = document.location.href;
+var observer = new MutationObserver( /*#__PURE__*/_asyncToGenerator(function* () {
+  if (document.location.href !== currentUrl) {
+    yield main();
+  }
+}));
+var config = {
+  subtree: true,
+  childList: true
+};
+observer.observe(document, config);
+window.addEventListener('beforeunload', function (event) {
+  observer.disconnect();
 });
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
@@ -1513,6 +1527,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 var createTrackersSelect = trackers => {
   var select_dom = document.createElement('select');
+  select_dom.id = "tracker-select";
   select_dom.style.margin = '0 5px';
   var opt = document.createElement('option');
   opt.disabled = true;

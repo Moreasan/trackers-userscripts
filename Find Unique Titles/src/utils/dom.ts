@@ -1,5 +1,6 @@
 export const createTrackersSelect = (trackers: Array<string>) => {
   let select_dom = document.createElement('select');
+  select_dom.id = "tracker-select"
   select_dom.style.margin = '0 5px';
   const opt = document.createElement('option');
   opt.disabled = true;
