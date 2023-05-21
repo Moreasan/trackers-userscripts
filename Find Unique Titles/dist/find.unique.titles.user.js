@@ -19,6 +19,7 @@
 // @match https://newinsane.info/browse.php*
 // @match https://btarg.com.ar/tracker/browse.php*
 // @match https://filelist.io/browse.php*
+// @match https://jptv.club/torrents*
 // @match https://hd-torrents.org/torrents.php*
 // @match https://iptorrents.com/movies*
 // @grant GM.xmlHttpRequest
@@ -929,6 +930,71 @@ class CG {
 
 /***/ }),
 
+/***/ "./src/trackers/JPTV.ts":
+/*!******************************!*\
+  !*** ./src/trackers/JPTV.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ JPTV)
+/* harmony export */ });
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+class JPTV {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return false;
+  }
+  canRun(url) {
+    return url.includes("jptv.club");
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      var nodes = document.querySelectorAll('.view-torrent');
+      for (var element of nodes) {
+        var response = yield common__WEBPACK_IMPORTED_MODULE_0__["default"].http.fetchAndParseHtml(element.href);
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(document.querySelector('.view-torrent').parentElement.parentElement.children[7].textContent.trim());
+        var request = {
+          data: {
+            format: null,
+            resolution: null,
+            size,
+            tags: null
+          },
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      }
+      return requests;
+    })();
+  }
+  name() {
+    return "JPTV";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      return false;
+    })();
+  }
+  insertTrackersSelect(select) {
+    common__WEBPACK_IMPORTED_MODULE_0__["default"].dom.addChild(document.querySelector('.form-torrent-search'), select);
+  }
+}
+
+/***/ }),
+
 /***/ "./src/trackers/KG.ts":
 /*!****************************!*\
   !*** ./src/trackers/KG.ts ***!
@@ -1264,14 +1330,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "CLANSUD": () => (/* reexport safe */ _CLAN_SUD__WEBPACK_IMPORTED_MODULE_2__["default"]),
 /* harmony export */   "CinemaZ": () => (/* reexport safe */ _CinemaZ__WEBPACK_IMPORTED_MODULE_9__["default"]),
 /* harmony export */   "FL": () => (/* reexport safe */ _FL__WEBPACK_IMPORTED_MODULE_11__["default"]),
-/* harmony export */   "HDB": () => (/* reexport safe */ _HDB__WEBPACK_IMPORTED_MODULE_12__["default"]),
-/* harmony export */   "HDT": () => (/* reexport safe */ _HDT__WEBPACK_IMPORTED_MODULE_14__["default"]),
-/* harmony export */   "IPT": () => (/* reexport safe */ _IPT__WEBPACK_IMPORTED_MODULE_15__["default"]),
+/* harmony export */   "HDB": () => (/* reexport safe */ _HDB__WEBPACK_IMPORTED_MODULE_13__["default"]),
+/* harmony export */   "HDT": () => (/* reexport safe */ _HDT__WEBPACK_IMPORTED_MODULE_15__["default"]),
+/* harmony export */   "IPT": () => (/* reexport safe */ _IPT__WEBPACK_IMPORTED_MODULE_16__["default"]),
+/* harmony export */   "JPTV": () => (/* reexport safe */ _JPTV__WEBPACK_IMPORTED_MODULE_12__["default"]),
 /* harmony export */   "KG": () => (/* reexport safe */ _KG__WEBPACK_IMPORTED_MODULE_3__["default"]),
 /* harmony export */   "NewInsane": () => (/* reexport safe */ _NewInsane__WEBPACK_IMPORTED_MODULE_7__["default"]),
 /* harmony export */   "PTP": () => (/* reexport safe */ _PTP__WEBPACK_IMPORTED_MODULE_0__["default"]),
 /* harmony export */   "SC": () => (/* reexport safe */ _SC__WEBPACK_IMPORTED_MODULE_1__["default"]),
-/* harmony export */   "TL": () => (/* reexport safe */ _TL__WEBPACK_IMPORTED_MODULE_13__["default"])
+/* harmony export */   "TL": () => (/* reexport safe */ _TL__WEBPACK_IMPORTED_MODULE_14__["default"])
 /* harmony export */ });
 /* harmony import */ var _PTP__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PTP */ "./src/trackers/PTP.ts");
 /* harmony import */ var _SC__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SC */ "./src/trackers/SC.ts");
@@ -1285,10 +1352,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _CinemaZ__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./CinemaZ */ "./src/trackers/CinemaZ.ts");
 /* harmony import */ var _AvistaZ__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./AvistaZ */ "./src/trackers/AvistaZ.ts");
 /* harmony import */ var _FL__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./FL */ "./src/trackers/FL.ts");
-/* harmony import */ var _HDB__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./HDB */ "./src/trackers/HDB.ts");
-/* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
-/* harmony import */ var _HDT__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./HDT */ "./src/trackers/HDT.ts");
-/* harmony import */ var _IPT__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./IPT */ "./src/trackers/IPT.ts");
+/* harmony import */ var _JPTV__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./JPTV */ "./src/trackers/JPTV.ts");
+/* harmony import */ var _HDB__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./HDB */ "./src/trackers/HDB.ts");
+/* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
+/* harmony import */ var _HDT__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./HDT */ "./src/trackers/HDT.ts");
+/* harmony import */ var _IPT__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./IPT */ "./src/trackers/IPT.ts");
+
 
 
 

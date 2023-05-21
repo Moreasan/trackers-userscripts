@@ -44,6 +44,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://newinsane.info/browse.php*",
       "https://btarg.com.ar/tracker/browse.php*",
       "https://filelist.io/browse.php*",
+      "https://jptv.club/torrents*",
       "https://hd-torrents.org/torrents.php*",
       "https://iptorrents.com/movies*",
     ],
