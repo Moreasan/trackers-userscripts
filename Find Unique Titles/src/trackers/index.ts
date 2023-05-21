@@ -15,8 +15,9 @@ import HDB from './HDB';
 import TL from './TL';
 import HDT from "./HDT";
 import IPT from "./IPT";
+import Aither from "./Aither";
 
 export {
   PTP, SC, CLANSUD, KG, CG, HDT, IPT, BHD, BLU,
-  NewInsane, BTarg, CinemaZ, AvistaZ, JPTV, FL, HDB, TL
+  NewInsane, BTarg, CinemaZ, AvistaZ, JPTV, FL, HDB, TL, Aither
 };

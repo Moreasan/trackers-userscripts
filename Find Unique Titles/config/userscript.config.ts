@@ -38,6 +38,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://avistaz.to/movies*",
       "https://blutopia.xyz/torrents*",
       "https://blutopia.cc/torrents*",
+      "https://aither.cc/torrents*",
       "https://www.torrentleech.org/torrents/browse*",
       "https://secret-cinema.pw/torrents.php*",
       "https://www.clan-sudamerica.net/invision/*",

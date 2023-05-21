@@ -13,6 +13,7 @@
 // @match https://avistaz.to/movies*
 // @match https://blutopia.xyz/torrents*
 // @match https://blutopia.cc/torrents*
+// @match https://aither.cc/torrents*
 // @match https://www.torrentleech.org/torrents/browse*
 // @match https://secret-cinema.pw/torrents.php*
 // @match https://www.clan-sudamerica.net/invision/*
@@ -151,6 +152,79 @@ main().catch(e => {
 });
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
+/***/ "./src/trackers/Aither.ts":
+/*!********************************!*\
+  !*** ./src/trackers/Aither.ts ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ BHD)
+/* harmony export */ });
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+class BHD {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return true;
+  }
+  canRun(url) {
+    return url.includes("aither.cc");
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      document.querySelectorAll('.panelV2 tbody tr').forEach(element => {
+        var _element$querySelecto;
+        var imdbId = (_element$querySelecto = element.querySelector('#imdb_id')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent.trim();
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[5].textContent);
+        var request = {
+          data: {
+            format: null,
+            resolution: null,
+            size,
+            tags: null
+          },
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      });
+      return requests;
+    })();
+  }
+  name() {
+    return "Aither";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      if (!request.imdbId) return true;
+      var queryUrl = 'https://aither.xyz/torrents?perPage=25&imdbId=' + request.imdbId + '&sortField=size';
+      var result = yield common__WEBPACK_IMPORTED_MODULE_0__["default"].http.fetchAndParseHtml(queryUrl);
+      return result.textContent.includes('There is no result in database for query');
+    })();
+  }
+  insertTrackersSelect(select) {
+    var parent = document.querySelector('.panelV2 .panel__header');
+    var div = document.createElement('div');
+    select.style.width = '170px';
+    div.classList.add("form__group");
+    select.classList.add('form__select');
+    common__WEBPACK_IMPORTED_MODULE_0__["default"].dom.addChild(div, select);
+    common__WEBPACK_IMPORTED_MODULE_0__["default"].dom.insertAfter(div, parent.querySelector('h2'));
+  }
+}
 
 /***/ }),
 
@@ -1322,6 +1396,7 @@ class TL {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Aither": () => (/* reexport safe */ _Aither__WEBPACK_IMPORTED_MODULE_17__["default"]),
 /* harmony export */   "AvistaZ": () => (/* reexport safe */ _AvistaZ__WEBPACK_IMPORTED_MODULE_10__["default"]),
 /* harmony export */   "BHD": () => (/* reexport safe */ _BHD__WEBPACK_IMPORTED_MODULE_5__["default"]),
 /* harmony export */   "BLU": () => (/* reexport safe */ _BLU__WEBPACK_IMPORTED_MODULE_6__["default"]),
@@ -1357,6 +1432,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
 /* harmony import */ var _HDT__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./HDT */ "./src/trackers/HDT.ts");
 /* harmony import */ var _IPT__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./IPT */ "./src/trackers/IPT.ts");
+/* harmony import */ var _Aither__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./Aither */ "./src/trackers/Aither.ts");
+
 
 
 
