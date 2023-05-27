@@ -19,6 +19,7 @@ const main = async function () {
 
   let only_show_unique_titles = true; // change to true if you wish
   let better_constant = 1.15; // you can change this too.. wouldn't recommend going below 1.05
+  let useCache = false
 
   /******************************************************************************/
   if (document.getElementById('tracker-select')) return
@@ -51,7 +52,7 @@ const main = async function () {
       updateTotalCount(searchRequest.length)
       for await (const request of searchRequest) {
         updateCount(i++)
-        if (request.imdbId && existsInCache(targetTracker.name(), request.imdbId)) {
+        if (useCache && request.imdbId && existsInCache(targetTracker.name(), request.imdbId)) {
           request.dom.style.display = 'none';
           continue
         }
@@ -94,6 +95,6 @@ const observer = new MutationObserver(async () => {
 const config = {subtree: true, childList: true};
 observer.observe(document, config);
 
-window.addEventListener('beforeunload', function (event) {
+window.addEventListener('beforeunload', function () {
   observer.disconnect();
 });

@@ -1,12 +1,24 @@
+export interface Torrent {
+  container: string | null;
+  size: number | null;
+  tags: Array<string> | null;
+  format: string | null;
+  resolution: string | null;
+  dom: HTMLElement | null
+}
+
+export enum category {
+  TV,
+  MOVIE,
+  MUSIC,
+  BOOK,
+  AUDIOBOOK
+}
+
 export interface Request {
   imdbId: string | null;
   query: string;
-  data: {
-    size: number | null;
-    tags: Array<string> | null;
-    format: string | null;
-    resolution: string | null;
-  };
+  torrents: Array<Torrent>
   dom: HTMLElement;
 }
 

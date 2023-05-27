@@ -65,6 +65,7 @@ var main = /*#__PURE__*/function () {
 
     var only_show_unique_titles = true; // change to true if you wish
     var better_constant = 1.15; // you can change this too.. wouldn't recommend going below 1.05
+    var useCache = false;
 
     /******************************************************************************/
     if (document.getElementById('tracker-select')) return;
@@ -101,7 +102,7 @@ var main = /*#__PURE__*/function () {
             var request = _step.value;
             {
               (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
-              if (request.imdbId && (0,_utils_cache__WEBPACK_IMPORTED_MODULE_0__.existsInCache)(targetTracker.name(), request.imdbId)) {
+              if (useCache && request.imdbId && (0,_utils_cache__WEBPACK_IMPORTED_MODULE_0__.existsInCache)(targetTracker.name(), request.imdbId)) {
                 request.dom.style.display = 'none';
                 continue;
               }
@@ -338,16 +339,31 @@ class BHD {
   getSearchRequest() {
     return _asyncToGenerator(function* () {
       var requests = [];
+      var parseTorrents = element => {
+        var torrents = [];
+        element.querySelectorAll('tr[id^="resulttorrent"]').forEach(line => {
+          var data = line.children[0].textContent.trim().split('/');
+          var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(line.children[4].textContent.trim());
+          var tags = [];
+          if (line.textContent.includes('Remux')) {
+            tags.push('Remux');
+          }
+          var torrent = {
+            container: data[0].trim(),
+            format: data[1].trim(),
+            resolution: data[3].trim(),
+            tags: tags,
+            size,
+            dom: line
+          };
+          torrents.push(torrent);
+        });
+        return torrents;
+      };
       document.querySelectorAll('.bhd-meta-box').forEach(element => {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
-        var size = get_beyond_size(element);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: parseTorrents(element),
           dom: element,
           imdbId,
           query: ""
@@ -1227,8 +1243,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ PTP)
 /* harmony export */ });
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 
 class PTP {
   canBeUsedAsSource() {
@@ -1253,7 +1271,18 @@ class PTP {
       if (!request.imdbId) return true;
       var query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
       var result = yield common__WEBPACK_IMPORTED_MODULE_0__["default"].http.fetchAndParseHtml(query_url);
-      return result.querySelector("#no_results_message") !== null;
+      var notFound = result.querySelector("#no_results_message") !== null;
+      if (notFound) {
+        return true;
+      }
+      var torrents = parseAvailableTorrents(result);
+      for (var torrent of request.torrents) {
+        if (canUploadTorrent(torrent, torrents)) {
+          torrent.dom.style.border = "2px solid red";
+          notFound = true;
+        }
+      }
+      return notFound;
     })();
   }
   insertTrackersSelect(select) {
@@ -1262,6 +1291,44 @@ class PTP {
     common__WEBPACK_IMPORTED_MODULE_0__["default"].dom.insertBefore(select, element);
   }
 }
+var parseAvailableTorrents = result => {
+  var torrents = [];
+  result.querySelectorAll('#torrent-table tr[id^="group_torrent_header_"]').forEach(line => {
+    var data = line.children[0].textContent.trim().split('/');
+    var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(line.children[1].textContent.trim());
+    var tags = [];
+    if (line.textContent.includes('Remux')) {
+      tags.push('Remux');
+    }
+    var torrent = {
+      container: data[0].split(']')[1].trim(),
+      format: data[1].trim(),
+      resolution: data[3].trim(),
+      tags: tags,
+      size,
+      dom: line
+    };
+    torrents.push(torrent);
+  });
+  return torrents;
+};
+function sameContainer(first, second) {
+  return first === second || first === "H.264" && second === "x264" || first === "x264" && second === "H.264" || first === "H.265" && second === "x265" || first === "x265" && second === "H.265" || first === "UHD100" && second === "BD100" || first === "BD100" && second === "UHD100" || first === "UHD66" && second === "BD66" || first === "BD66" && second === "UHD66";
+}
+var canUploadTorrent = (torrent, availableTorrents) => {
+  var similarTorrents = availableTorrents.filter(e => {
+    return e.resolution === torrent.resolution && sameContainer(e.container, torrent.container) && (!torrent.tags.includes('Remux') || e.tags.includes('Remux'));
+  });
+  if (similarTorrents.length == 0) {
+    return true;
+  }
+  if (similarTorrents.length == 1) {
+    if (torrent.size > similarTorrents[0].size * 1.5 || similarTorrents[0].size > torrent.size * 1.5) {
+      return true;
+    }
+  }
+  return false;
+};
 
 /***/ }),
 

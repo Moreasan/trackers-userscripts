@@ -1,78 +1,76 @@
 import tracker_tools from "common";
 import {parseImdbIdFromLink, parseSize} from "../utils/utils";
-import {Request, tracker} from "./tracker";
+import {Request, Torrent, tracker} from "./tracker";
 
 export default class BHD implements tracker {
-  canBeUsedAsSource(): boolean {
-    return true;
-  }
+    canBeUsedAsSource(): boolean {
+        return true;
+    }
 
-  canBeUsedAsTarget(): boolean {
-    return true;
-  }
+    canBeUsedAsTarget(): boolean {
+        return true;
+    }
 
-  canRun(url: string): boolean {
-    return url.includes("beyond-hd.me");
-  }
+    canRun(url: string): boolean {
+        return url.includes("beyond-hd.me");
+    }
 
-  async getSearchRequest(): Promise<Array<Request>> {
-    const requests: Array<Request> = [];
-    document.querySelectorAll('.bhd-meta-box')
-      .forEach((element) => {
-         let imdbId = parseImdbIdFromLink(element as HTMLElement)
+    async getSearchRequest(): Promise<Array<Request>> {
+        const requests: Array<Request> = [];
 
-        let size = get_beyond_size(element as HTMLElement)
-        const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
-          dom: element as HTMLElement,
-          imdbId,
-          query: "",
-        };
-        requests.push(request);
-      });
+        const parseTorrents = (element: HTMLElement): Array<Torrent> => {
+            const torrents = []
+            element.querySelectorAll('tr[id^="resulttorrent"]').forEach(line => {
+                const data = line.children[0].textContent.trim().split('/')
+                const size = parseSize(line.children[4].textContent.trim())
+                const tags = []
+                if (line.textContent.includes('Remux')) {
+                    tags.push('Remux')
+                }
+                const torrent: Torrent = {
+                    container: data[0].trim(),
+                    format: data[1].trim(),
+                    resolution: data[3].trim(),
+                    tags: tags,
+                    size,
+                    dom: line as HTMLElement
+                }
+                torrents.push(torrent)
+            })
+            return torrents
+        }
 
-    return requests;
-  }
+        document.querySelectorAll('.bhd-meta-box')
+            .forEach((element) => {
+                let imdbId = parseImdbIdFromLink(element as HTMLElement)
 
-  name(): string {
-    return "BHD";
-  }
+                const request: Request = {
+                    torrents: parseTorrents(element as HTMLElement),
+                    dom: element as HTMLElement,
+                    imdbId,
+                    query: "",
+                };
+                requests.push(request);
+            });
+        return requests;
+    }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true
-    const queryUrl = 'https://beyond-hd.me/library/movies?activity=&q=' + request.imdbId
+    name(): string {
+        return "BHD";
+    }
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl)
+    async canUpload(request: Request) {
+        if (!request.imdbId) return true
+        const queryUrl = 'https://beyond-hd.me/library/movies?activity=&q=' + request.imdbId
 
-    return result.querySelectorAll('.bhd-meta-box').length === 0
-  }
+        const result = await tracker_tools.http.fetchAndParseHtml(queryUrl)
 
-  insertTrackersSelect(select: HTMLElement): void {
-    select.classList.add("beta-form-main")
-    select.style.width = "170px"
-    tracker_tools.dom.insertBefore(select, document.querySelector('.button-center') as HTMLElement)
-  }
-}
+        return result.querySelectorAll('.bhd-meta-box').length === 0
+    }
 
-const get_beyond_size = (element: HTMLElement) => {
-
-  return [...element.querySelectorAll('tr.bhd-sub-header-compact')].map((tr) => {
-    let lines = [...tr.querySelectorAll('td')];
-    if (lines.length === 1) return '0 MiB'
-    else return lines.find(e => e.textContent?.includes(' GiB') || e.textContent?.includes(' MiB'))?.textContent
-
-  }).map((element) => {
-    if (!element) return 9999999
-    return parseSize(element)
-
-  })
-    .filter(e => e !== null)
-    .sort((a, b) => a!! < b!! ? 1 : -1)[0]
-
-
+    insertTrackersSelect(select: HTMLElement): void {
+        select.classList.add("beta-form-main")
+        select.style.width = "170px"
+        tracker_tools.dom.insertBefore(select, document.querySelector('.button-center') as HTMLElement)
+    }
 }
