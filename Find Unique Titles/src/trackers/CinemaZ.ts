@@ -23,12 +23,7 @@ export default class CinemaZ implements tracker {
         const imdbId = parseImdbIdFromLink(element as HTMLElement)
 
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size: null,
-            tags: null,
-          },
+          torrents: [],
           dom: element as HTMLElement,
           imdbId,
           query: "",

@@ -162,7 +162,7 @@ var config = {
   childList: true
 };
 observer.observe(document, config);
-window.addEventListener('beforeunload', function (event) {
+window.addEventListener('beforeunload', function () {
   observer.disconnect();
 });
 __webpack_async_result__();
@@ -204,12 +204,7 @@ class BHD {
         var imdbId = (_element$querySelecto = element.querySelector('#imdb_id')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent.trim();
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[5].textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -276,12 +271,7 @@ class AvistaZ {
       (_document$querySelect = document.querySelectorAll('#content-area > div.block > .row')) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.forEach(element => {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size: null,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -390,19 +380,6 @@ class BHD {
     common__WEBPACK_IMPORTED_MODULE_0__["default"].dom.insertBefore(select, document.querySelector('.button-center'));
   }
 }
-var get_beyond_size = element => {
-  return [...element.querySelectorAll('tr.bhd-sub-header-compact')].map(tr => {
-    var _lines$find;
-    var lines = [...tr.querySelectorAll('td')];
-    if (lines.length === 1) return '0 MiB';else return (_lines$find = lines.find(e => {
-      var _e$textContent, _e$textContent2;
-      return ((_e$textContent = e.textContent) === null || _e$textContent === void 0 ? void 0 : _e$textContent.includes(' GiB')) || ((_e$textContent2 = e.textContent) === null || _e$textContent2 === void 0 ? void 0 : _e$textContent2.includes(' MiB'));
-    })) === null || _lines$find === void 0 ? void 0 : _lines$find.textContent;
-  }).map(element => {
-    if (!element) return 9999999;
-    return (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element);
-  }).filter(e => e !== null).sort((a, b) => a < b ? 1 : -1)[0];
-};
 
 /***/ }),
 
@@ -439,12 +416,7 @@ class BHD {
         var imdbId = 'tt' + element.getAttribute('data-imdb-id');
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector('.torrent-search--list__size').textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -514,12 +486,7 @@ class BTarg {
         var response = yield common__WEBPACK_IMPORTED_MODULE_0__["default"].http.fetchAndParseHtml(link.href);
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbId)(response.textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size: null,
-            tags: null
-          },
+          torrents: [],
           dom: row,
           imdbId,
           query: ""
@@ -579,12 +546,7 @@ class CG {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('td:nth-child(5)')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -657,12 +619,7 @@ class CLANSUD {
         var response = yield common__WEBPACK_IMPORTED_MODULE_0__["default"].http.fetchAndParseHtml(link);
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size: null,
-            tags: null
-          },
+          torrents: [],
           dom: topic,
           imdbId,
           query: ""
@@ -720,12 +677,7 @@ class CinemaZ {
       (_document$querySelect = document.querySelectorAll('#content-area > div.block > .row')) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.forEach(element => {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size: null,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -799,12 +751,7 @@ class FL {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('.torrenttable:nth-child(7)')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -867,12 +814,7 @@ class HDB {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('td:nth-child(6)')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -937,12 +879,7 @@ class CG {
         var line = element.closest('tr');
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_line$children$ = line.children[7]) === null || _line$children$ === void 0 ? void 0 : _line$children$.textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: line,
           imdbId,
           query: ""
@@ -1002,12 +939,7 @@ class CG {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = null;
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element.parentElement,
           imdbId,
           query: ""
@@ -1069,12 +1001,7 @@ class JPTV {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(document.querySelector('.view-torrent').parentElement.parentElement.children[7].textContent.trim());
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -1136,12 +1063,7 @@ class KG {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(linksContainer);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('td:nth-child(11)')) === null || _element$querySelecto === void 0 ? void 0 : (_element$querySelecto2 = _element$querySelecto.textContent) === null || _element$querySelecto2 === void 0 ? void 0 : _element$querySelecto2.replace(',', ''));
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -1202,12 +1124,7 @@ class NewInsane {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = null;
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""
@@ -1368,12 +1285,7 @@ class SC {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(links_container);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector(".torrent_info .activity_info").querySelectorAll("div")[1].textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: dom,
           imdbId,
           query: ""
@@ -1436,12 +1348,7 @@ class TL {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('.td-size')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: ""

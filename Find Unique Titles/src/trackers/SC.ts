@@ -32,12 +32,7 @@ export default class SC implements tracker {
         );
 
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
+          torrents: [],
           dom: dom as HTMLElement,
           imdbId,
           query: "",

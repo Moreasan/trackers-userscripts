@@ -24,12 +24,7 @@ export default class JPTV implements tracker {
       const size = parseSize(document.querySelector('.view-torrent').parentElement.parentElement.children[7].textContent.trim()  as string)
 
       const request: Request = {
-        data: {
-          format: null,
-          resolution: null,
-          size,
-          tags: null,
-        },
+        torrents: [],
         dom: element as HTMLElement,
         imdbId,
         query: "",

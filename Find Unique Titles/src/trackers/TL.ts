@@ -24,12 +24,7 @@ export default class TL implements tracker {
         const size = parseSize(element.querySelector('.td-size')?.textContent as string)
 
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
+          torrents: [],
           dom: element as HTMLElement,
           imdbId,
           query: "",

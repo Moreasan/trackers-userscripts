@@ -33,12 +33,7 @@ export default class CLANSUD implements tracker {
       let response = await tracker_tools.http.fetchAndParseHtml(link)
       const imdbId = parseImdbIdFromLink(response)
       const request: Request = {
-        data: {
-          format: null,
-          resolution: null,
-          size: null,
-          tags: null,
-        },
+        torrents: [],
         dom: topic as HTMLElement,
         imdbId,
         query: "",

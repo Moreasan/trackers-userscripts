@@ -22,12 +22,7 @@ export default class NewInsane implements tracker {
         const imdbId = parseImdbIdFromLink(element as HTMLElement)
         const size = null
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
+          torrents: [],
           dom: element as HTMLElement,
           imdbId,
           query: "",

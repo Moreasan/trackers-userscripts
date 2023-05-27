@@ -29,12 +29,7 @@ export default class BTarg implements tracker {
       let response = await tracker_tools.http.fetchAndParseHtml((link as HTMLAnchorElement).href)
       const imdbId = parseImdbId(response.textContent as string)
       const request: Request = {
-        data: {
-          format: null,
-          resolution: null,
-          size: null,
-          tags: null,
-        },
+        torrents: [],
         dom: row as HTMLElement,
         imdbId,
         query: "",

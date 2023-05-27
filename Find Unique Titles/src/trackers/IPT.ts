@@ -24,12 +24,7 @@ export default class CG implements tracker {
         const size = null
 
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
+          torrents: [],
           dom: element.parentElement,
           imdbId,
           query: "",

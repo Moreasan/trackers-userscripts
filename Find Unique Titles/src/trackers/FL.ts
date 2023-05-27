@@ -32,12 +32,7 @@ export default class FL implements tracker {
       const size = parseSize(element.querySelector('.torrenttable:nth-child(7)')?.textContent as string)
 
       const request: Request = {
-        data: {
-          format: null,
-          resolution: null,
-          size,
-          tags: null,
-        },
+        torrents: [],
         dom: element as HTMLElement,
         imdbId,
         query: "",

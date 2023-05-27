@@ -27,12 +27,7 @@ export default class KG implements tracker {
         const size = parseSize(element.querySelector('td:nth-child(11)')?.textContent?.replace(',', '') as string)
 
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
+          torrents: [],
           dom: element,
           imdbId,
           query: "",

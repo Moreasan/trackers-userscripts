@@ -25,12 +25,7 @@ export default class CG implements tracker {
         const size = parseSize(line.children[7]?.textContent as string)
 
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
+          torrents: [],
           dom: line as HTMLElement,
           imdbId,
           query: "",

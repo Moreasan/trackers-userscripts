@@ -23,12 +23,7 @@ export default class BHD implements tracker {
 
         let size = parseSize(element.querySelector('.torrent-search--list__size')!.textContent!)
         const request: Request = {
-          data: {
-            format: null,
-            resolution: null,
-            size,
-            tags: null,
-          },
+          torrents: [],
           dom: element as HTMLElement,
           imdbId,
           query: "",
