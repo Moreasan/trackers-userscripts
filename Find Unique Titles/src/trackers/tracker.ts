@@ -7,7 +7,7 @@ export interface Torrent {
   dom: HTMLElement | null
 }
 
-export enum category {
+export enum Category {
   TV,
   MOVIE,
   MUSIC,
@@ -20,6 +20,7 @@ export interface Request {
   query: string;
   torrents: Array<Torrent>
   dom: HTMLElement;
+  category?: Category
 }
 
 export interface Result {

@@ -56,6 +56,22 @@ function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r
 
 
 
+var deduplicateRequests = searchRequests => {
+  var map = new Map();
+  var requests = [];
+  for (var request of searchRequests) {
+    if (!request.imdbId) requests.push(request);
+    if (map[request.imdbId]) {
+      for (var torrent of request.torrents) {
+        map[request.imdbId].torrents.push(torrent);
+      }
+    } else {
+      map[request.imdbId] = request;
+      requests.push(request);
+    }
+  }
+  return requests;
+};
 var main = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(function* () {
     'use strict';
@@ -90,15 +106,16 @@ var main = /*#__PURE__*/function () {
         var i = 1;
         var newContent = 0;
         (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.showWaitingMessage)();
-        var searchRequest = yield sourceTracker.getSearchRequest();
+        var searchRequests = yield sourceTracker.getSearchRequest();
+        searchRequests = deduplicateRequests(searchRequests);
         (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.hideMessageBox)();
         (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.addCounter)();
-        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(searchRequest.length);
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(searchRequests.length);
         var _iteratorAbruptCompletion = false;
         var _didIteratorError = false;
         var _iteratorError;
         try {
-          for (var _iterator = _asyncIterator(searchRequest), _step; _iteratorAbruptCompletion = !(_step = yield _iterator.next()).done; _iteratorAbruptCompletion = false) {
+          for (var _iterator = _asyncIterator(searchRequests), _step; _iteratorAbruptCompletion = !(_step = yield _iterator.next()).done; _iteratorAbruptCompletion = false) {
             var request = _step.value;
             {
               (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
@@ -112,6 +129,9 @@ var main = /*#__PURE__*/function () {
                   yield (0,_utils_cache__WEBPACK_IMPORTED_MODULE_0__.addToCache)(targetTracker.name(), request.imdbId);
                 }
                 request.dom.style.display = 'none';
+                for (var torrent of request.torrents) {
+                  torrent.dom.style.display = 'none';
+                }
               } else {
                 newContent++;
                 (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateNewContent)(newContent);
@@ -1038,10 +1058,46 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var _tracker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tracker */ "./src/trackers/tracker.ts");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
+
+var parseCategory = element => {
+  var category = _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE;
+  var img = element.querySelectorAll('td img')[0];
+  var imageSrc = img.attributes['src'].value;
+  if (imageSrc.includes('40.jpg')) return _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.AUDIOBOOK;
+  if (imageSrc.includes('41.jpg')) return _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.BOOK;
+  if (img.attributes['title'].value.includes('Music')) return _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MUSIC;
+  return category;
+};
+var parseTorrent = element => {
+  var _element$querySelecto, _element$querySelecto2;
+  var torrents = [];
+  var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('td:nth-child(11)')) === null || _element$querySelecto === void 0 ? void 0 : (_element$querySelecto2 = _element$querySelecto.textContent) === null || _element$querySelecto2 === void 0 ? void 0 : _element$querySelecto2.replace(',', ''));
+  var resolution = "SD";
+  var container = undefined;
+  if (element.querySelector('td img[src*="hdrip1080.png"]')) {
+    resolution = "1080p";
+  } else if (element.querySelector('td img[src*="hdrip720.png"]')) {
+    resolution = "720p";
+  } else if (element.querySelector('td img[src*="dvdr.png"]')) {
+    container = "VOB IFO";
+  } else if (element.querySelector('td img[src*="bluray.png"]')) {
+    container = "m2ts";
+  }
+  torrents.push({
+    size,
+    container: container,
+    format: undefined,
+    tags: [],
+    resolution,
+    dom: element
+  });
+  return torrents;
+};
 class KG {
   canBeUsedAsSource() {
     return true;
@@ -1054,19 +1110,18 @@ class KG {
   }
   getSearchRequest() {
     return _asyncToGenerator(function* () {
-      var _document$querySelect;
       var requests = [];
-      (_document$querySelect = document.querySelector('#browse > tbody')) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.querySelectorAll('tr').forEach(element => {
-        var _element$querySelecto, _element$querySelecto2;
+      document.querySelectorAll('#browse > tbody tr').forEach(element => {
         var linksContainer = element.querySelector('td:nth-child(2) > div > span:nth-child(1)');
         if (linksContainer === null) return;
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(linksContainer);
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('td:nth-child(11)')) === null || _element$querySelecto === void 0 ? void 0 : (_element$querySelecto2 = _element$querySelecto.textContent) === null || _element$querySelecto2 === void 0 ? void 0 : _element$querySelecto2.replace(',', ''));
+        var torrents = parseTorrent(element);
         var request = {
-          torrents: [],
+          torrents,
           dom: element,
           imdbId,
-          query: ""
+          query: "",
+          category: parseCategory(element)
         };
         requests.push(request);
       });
@@ -1159,10 +1214,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ PTP)
 /* harmony export */ });
-/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
-/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tracker */ "./src/trackers/tracker.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 
 
 class PTP {
@@ -1185,9 +1242,10 @@ class PTP {
   }
   canUpload(request) {
     return _asyncToGenerator(function* () {
+      if (request.category !== _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) return false;
       if (!request.imdbId) return true;
       var query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
-      var result = yield common__WEBPACK_IMPORTED_MODULE_0__["default"].http.fetchAndParseHtml(query_url);
+      var result = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(query_url);
       var notFound = result.querySelector("#no_results_message") !== null;
       if (notFound) {
         return true;
@@ -1205,14 +1263,14 @@ class PTP {
   insertTrackersSelect(select) {
     var element = document.querySelector(".search-form__footer__buttons");
     if (!element) return;
-    common__WEBPACK_IMPORTED_MODULE_0__["default"].dom.insertBefore(select, element);
+    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.insertBefore(select, element);
   }
 }
 var parseAvailableTorrents = result => {
   var torrents = [];
   result.querySelectorAll('#torrent-table tr[id^="group_torrent_header_"]').forEach(line => {
     var data = line.children[0].textContent.trim().split('/');
-    var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(line.children[1].textContent.trim());
+    var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(line.children[1].textContent.trim());
     var tags = [];
     if (line.textContent.includes('Remux')) {
       tags.push('Remux');
@@ -1234,7 +1292,7 @@ function sameContainer(first, second) {
 }
 var canUploadTorrent = (torrent, availableTorrents) => {
   var similarTorrents = availableTorrents.filter(e => {
-    return e.resolution === torrent.resolution && sameContainer(e.container, torrent.container) && (!torrent.tags.includes('Remux') || e.tags.includes('Remux'));
+    return (torrent.resolution === "SD" || e.resolution === torrent.resolution) && (torrent.container === undefined || sameContainer(e.container, torrent.container)) && (!torrent.tags.includes('Remux') || e.tags.includes('Remux'));
   });
   if (similarTorrents.length == 0) {
     return true;
@@ -1440,6 +1498,27 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+/***/ }),
+
+/***/ "./src/trackers/tracker.ts":
+/*!*********************************!*\
+  !*** ./src/trackers/tracker.ts ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Category": () => (/* binding */ Category)
+/* harmony export */ });
+var Category = /*#__PURE__*/function (Category) {
+  Category[Category["TV"] = 0] = "TV";
+  Category[Category["MOVIE"] = 1] = "MOVIE";
+  Category[Category["MUSIC"] = 2] = "MUSIC";
+  Category[Category["BOOK"] = 3] = "BOOK";
+  Category[Category["AUDIOBOOK"] = 4] = "AUDIOBOOK";
+  return Category;
+}({});
 
 /***/ }),
 

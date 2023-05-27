@@ -1,7 +1,7 @@
 import {existsInCache, addToCache} from './utils/cache';
 
 import * as trackers from './trackers';
-import {tracker} from './trackers/tracker';
+import {tracker, Request} from './trackers/tracker';
 import {
   addCounter, showWaitingMessage,
   createTrackersSelect,
@@ -10,6 +10,23 @@ import {
   updateTotalCount, hideMessageBox
 } from './utils/dom';
 import tracker_tools from 'common';
+
+const deduplicateRequests = (searchRequests: Array<Request>) => {
+  const map: Map<string, Request> = new Map<string, Request>()
+  const requests = []
+  for (let request of searchRequests) {
+    if (!request.imdbId) requests.push(request)
+    if (map[request.imdbId]) {
+      for (let torrent of request.torrents) {
+        map[request.imdbId].torrents.push(torrent)
+      }
+    } else {
+      map[request.imdbId] = request
+      requests.push(request)
+    }
+  }
+  return requests;
+}
 
 const main = async function () {
   'use strict';
@@ -46,11 +63,12 @@ const main = async function () {
       let i = 1
       let newContent = 0
       showWaitingMessage()
-      let searchRequest = await (sourceTracker as tracker).getSearchRequest();
+      let searchRequests = await (sourceTracker as tracker).getSearchRequest();
+      searchRequests = deduplicateRequests(searchRequests)
       hideMessageBox()
       addCounter();
-      updateTotalCount(searchRequest.length)
-      for await (const request of searchRequest) {
+      updateTotalCount(searchRequests.length)
+      for await (const request of searchRequests) {
         updateCount(i++)
         if (useCache && request.imdbId && existsInCache(targetTracker.name(), request.imdbId)) {
           request.dom.style.display = 'none';
@@ -62,6 +80,9 @@ const main = async function () {
             await addToCache(targetTracker.name(), request.imdbId)
           }
           request.dom.style.display = 'none';
+          for (let torrent of request.torrents) {
+            torrent.dom.style.display = 'none';
+          }
         } else {
           newContent++
           updateNewContent(newContent)
