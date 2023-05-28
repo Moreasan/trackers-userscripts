@@ -1,6 +1,42 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { Category, Request, tracker } from "./tracker";
 import tracker_tools from "common";
+
+const parseCategory = (element: HTMLElement) => {
+  const text = element.textContent.toLowerCase();
+  if (text.includes("ebook")) {
+    return Category.BOOK;
+  }
+
+  return Category.MOVIE;
+};
+
+function parseTorrents(element: HTMLElement) {
+  const size = parseSize(
+    element.querySelector("td:nth-child(5)")?.textContent as string
+  );
+  let container = undefined;
+  let format = undefined;
+  let resolution = "SD";
+  const text = element.textContent.toLowerCase();
+  if (text.includes("1080p")) {
+    resolution = "1080p";
+  } else if (text.includes("720p")) {
+    resolution = "720p";
+  } else if (text.includes("dvd-r")) {
+    format = "VOB IFO";
+  }
+  return [
+    {
+      size,
+      tags: [],
+      dom: element,
+      resolution,
+      container,
+      format,
+    },
+  ];
+}
 
 export default class CG implements tracker {
   canBeUsedAsSource(): boolean {
@@ -21,21 +57,14 @@ export default class CG implements tracker {
       .querySelectorAll("table.torrenttable tbody tr")
       ?.forEach((element: HTMLElement) => {
         const imdbId = parseImdbIdFromLink(element);
-        const size = parseSize(
-          element.querySelector("td:nth-child(5)")?.textContent as string
-        );
+        const category = parseCategory(element);
 
         const request: Request = {
-          torrents: [
-            {
-              size,
-              tags: [],
-              dom: element,
-            },
-          ],
+          torrents: parseTorrents(element),
           dom: element,
           imdbId,
           query: "",
+          category,
         };
         requests.push(request);
       });

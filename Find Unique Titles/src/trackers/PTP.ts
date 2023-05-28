@@ -24,7 +24,7 @@ export default class PTP implements tracker {
   }
 
   async canUpload(request: Request): Promise<boolean> {
-    if (request.category !== Category.MOVIE) return false;
+    if (request.category && request.category !== Category.MOVIE) return false;
     if (!request.imdbId) return true;
     const query_url =
       "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
@@ -38,6 +38,8 @@ export default class PTP implements tracker {
       if (canUploadTorrent(torrent, torrents)) {
         torrent.dom.style.border = "2px solid red";
         notFound = true;
+      } else {
+        torrent.dom.style.display = "none";
       }
     }
     return notFound;
@@ -88,19 +90,36 @@ function sameContainer(first: string, second: string) {
   );
 }
 
+function isSD(resolution: string) {
+  const sdResolutions = ["SD", "PAL", "NTSC"];
+  if (sdResolutions.indexOf(resolution.toUpperCase())) return true;
+  let height = resolution.replace("p", "");
+  if (resolution.includes("x")) {
+    height = resolution.split("x")[1];
+  }
+  if (parseInt(height) && parseInt(height) < 720) return true;
+}
+
+function sameResolution(first: Torrent, second: Torrent) {
+  if (!first.resolution || !second.resolution) return true;
+  if (first.resolution === second.resolution) return true;
+  if (first.resolution === "SD") return isSD(second.resolution);
+  if (second.resolution === "SD") return isSD(first.resolution);
+}
+
 const canUploadTorrent = (
   torrent: Torrent,
   availableTorrents: Array<Torrent>
 ) => {
   const similarTorrents = availableTorrents.filter((e) => {
     return (
-      (torrent.resolution === "SD" || e.resolution === torrent.resolution) &&
+      sameResolution(torrent, e) &&
       (torrent.container === undefined ||
         sameContainer(e.container, torrent.container)) &&
       (!torrent.tags.includes("Remux") || e.tags.includes("Remux"))
     );
   });
-  if (similarTorrents.length == 0) {
+  if (similarTorrents.length == 0 && torrent.resolution && torrent.container) {
     return true;
   }
   if (similarTorrents.length == 1) {

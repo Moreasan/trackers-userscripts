@@ -550,11 +550,43 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ CG)
 /* harmony export */ });
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tracker */ "./src/trackers/tracker.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
+
+var parseCategory = element => {
+  var text = element.textContent.toLowerCase();
+  if (text.includes("ebook")) {
+    return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.BOOK;
+  }
+  return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE;
+};
+function parseTorrents(element) {
+  var _element$querySelecto;
+  var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$querySelecto = element.querySelector("td:nth-child(5)")) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
+  var container = undefined;
+  var format = undefined;
+  var resolution = "SD";
+  var text = element.textContent.toLowerCase();
+  if (text.includes("1080p")) {
+    resolution = "1080p";
+  } else if (text.includes("720p")) {
+    resolution = "720p";
+  } else if (text.includes("dvd-r")) {
+    format = "VOB IFO";
+  }
+  return [{
+    size,
+    tags: [],
+    dom: element,
+    resolution,
+    container,
+    format
+  }];
+}
 class CG {
   canBeUsedAsSource() {
     return true;
@@ -570,18 +602,14 @@ class CG {
       var _document$querySelect;
       var requests = [];
       (_document$querySelect = document.querySelectorAll("table.torrenttable tbody tr")) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.forEach(element => {
-        var _element$querySelecto;
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$querySelecto = element.querySelector("td:nth-child(5)")) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
+        var category = parseCategory(element);
         var request = {
-          torrents: [{
-            size,
-            tags: [],
-            dom: element
-          }],
+          torrents: parseTorrents(element),
           dom: element,
           imdbId,
-          query: ""
+          query: "",
+          category
         };
         requests.push(request);
       });
@@ -596,12 +624,12 @@ class CG {
       var _result$textContent;
       if (!request.imdbId) return true;
       var queryUrl = "https://cinemageddon.net/browse.php?search=" + request.imdbId + "&orderby=size&dir=DESC";
-      var result = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(queryUrl);
+      var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(queryUrl);
       return (_result$textContent = result.textContent) === null || _result$textContent === void 0 ? void 0 : _result$textContent.includes("Nothing found!");
     })();
   }
   insertTrackersSelect(select) {
-    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(document.querySelector(".embedded > p"), select);
+    common__WEBPACK_IMPORTED_MODULE_2__["default"].dom.addChild(document.querySelector(".embedded > p"), select);
   }
 }
 
@@ -1268,7 +1296,7 @@ class PTP {
   }
   canUpload(request) {
     return _asyncToGenerator(function* () {
-      if (request.category !== _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE) return false;
+      if (request.category && request.category !== _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE) return false;
       if (!request.imdbId) return true;
       var query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
       var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(query_url);
@@ -1281,6 +1309,8 @@ class PTP {
         if (canUploadTorrent(torrent, torrents)) {
           torrent.dom.style.border = "2px solid red";
           notFound = true;
+        } else {
+          torrent.dom.style.display = "none";
         }
       }
       return notFound;
@@ -1316,11 +1346,26 @@ var parseAvailableTorrents = result => {
 function sameContainer(first, second) {
   return first === second || first === "H.264" && second === "x264" || first === "x264" && second === "H.264" || first === "H.265" && second === "x265" || first === "x265" && second === "H.265" || first === "UHD100" && second === "BD100" || first === "BD100" && second === "UHD100" || first === "UHD66" && second === "BD66" || first === "BD66" && second === "UHD66";
 }
+function isSD(resolution) {
+  var sdResolutions = ["SD", "PAL", "NTSC"];
+  if (sdResolutions.indexOf(resolution.toUpperCase())) return true;
+  var height = resolution.replace("p", "");
+  if (resolution.includes("x")) {
+    height = resolution.split("x")[1];
+  }
+  if (parseInt(height) && parseInt(height) < 720) return true;
+}
+function sameResolution(first, second) {
+  if (!first.resolution || !second.resolution) return true;
+  if (first.resolution === second.resolution) return true;
+  if (first.resolution === "SD") return isSD(second.resolution);
+  if (second.resolution === "SD") return isSD(first.resolution);
+}
 var canUploadTorrent = (torrent, availableTorrents) => {
   var similarTorrents = availableTorrents.filter(e => {
-    return (torrent.resolution === "SD" || e.resolution === torrent.resolution) && (torrent.container === undefined || sameContainer(e.container, torrent.container)) && (!torrent.tags.includes("Remux") || e.tags.includes("Remux"));
+    return sameResolution(torrent, e) && (torrent.container === undefined || sameContainer(e.container, torrent.container)) && (!torrent.tags.includes("Remux") || e.tags.includes("Remux"));
   });
-  if (similarTorrents.length == 0) {
+  if (similarTorrents.length == 0 && torrent.resolution && torrent.container) {
     return true;
   }
   if (similarTorrents.length == 1) {
