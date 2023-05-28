@@ -4,7 +4,7 @@ export interface Torrent {
   tags: Array<string> | null;
   format?: string | null;
   resolution?: string | null;
-  dom: HTMLElement | null
+  dom: HTMLElement | null;
 }
 
 export enum Category {
@@ -12,15 +12,15 @@ export enum Category {
   MOVIE,
   MUSIC,
   BOOK,
-  AUDIOBOOK
+  AUDIOBOOK,
 }
 
 export interface Request {
   imdbId: string | null;
   query: string;
-  torrents: Array<Torrent>
+  torrents: Array<Torrent>;
   dom: Element;
-  category?: Category
+  category?: Category;
 }
 
 export interface Result {

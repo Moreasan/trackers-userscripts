@@ -1,6 +1,6 @@
+import { parseImdbId } from "../utils/utils";
+import { Request, tracker } from "./tracker";
 import tracker_tools from "common";
-import {parseImdbId} from "../utils/utils";
-import {Request, tracker} from "./tracker";
 
 export default class BTarg implements tracker {
   canBeUsedAsSource(): boolean {
@@ -17,17 +17,21 @@ export default class BTarg implements tracker {
 
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
-    const rows = document.querySelectorAll('tr.browsetable')
+    const rows = document.querySelectorAll("tr.browsetable");
     for (const row of rows) {
-      const link: HTMLAnchorElement | null = row.querySelector('a[href*="details.php?id"]')
+      const link: HTMLAnchorElement | null = row.querySelector(
+        'a[href*="details.php?id"]'
+      );
       if (!link) {
-        continue
+        continue;
       }
       if (link.href.includes("#")) {
-        continue
+        continue;
       }
-      let response = await tracker_tools.http.fetchAndParseHtml((link as HTMLAnchorElement).href)
-      const imdbId = parseImdbId(response.textContent as string)
+      let response = await tracker_tools.http.fetchAndParseHtml(
+        (link as HTMLAnchorElement).href
+      );
+      const imdbId = parseImdbId(response.textContent as string);
       const request: Request = {
         torrents: [],
         dom: row as HTMLElement,
@@ -45,10 +49,13 @@ export default class BTarg implements tracker {
   }
 
   async canUpload(request: Request) {
-    return false
+    return false;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.insertAfter(select, document.querySelector('select[name="inclfree"]') as HTMLElement)
+    tracker_tools.dom.insertAfter(
+      select,
+      document.querySelector('select[name="inclfree"]') as HTMLElement
+    );
   }
 }

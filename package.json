@@ -1,5 +1,8 @@
 {
   "name": "trackers-userscripts",
+  "scripts": {
+    "format": "prettier -w **/src/*"
+  },
   "workspaces": [
     "common",
     "Find Unique Titles",
@@ -7,6 +10,7 @@
     "PurchasableChecker"
   ],
   "devDependencies": {
-    "@types/jquery": "^3.5.16"
+    "@types/jquery": "^3.5.16",
+    "prettier": "2.8.8"
   }
 }

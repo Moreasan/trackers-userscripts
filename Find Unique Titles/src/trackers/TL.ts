@@ -1,6 +1,6 @@
+import { parseImdbIdFromLink, parseSize } from "../utils/utils";
+import { tracker, Request } from "./tracker";
 import tracker_tools from "common";
-import {parseImdbIdFromLink, parseSize} from "../utils/utils";
-import {tracker, Request} from "./tracker";
 
 export default class TL implements tracker {
   canBeUsedAsSource(): boolean {
@@ -17,24 +17,26 @@ export default class TL implements tracker {
 
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
-    document.querySelectorAll('.torrent')
-      ?.forEach((element: HTMLElement) => {
+    document.querySelectorAll(".torrent")?.forEach((element: HTMLElement) => {
+      const imdbId = parseImdbIdFromLink(element);
+      const size = parseSize(
+        element.querySelector(".td-size")?.textContent as string
+      );
 
-        const imdbId = parseImdbIdFromLink(element)
-        const size = parseSize(element.querySelector('.td-size')?.textContent as string)
-
-        const request: Request = {
-          torrents: [{
+      const request: Request = {
+        torrents: [
+          {
             size,
             tags: [],
-            dom: element
-          }],
-          dom: element,
-          imdbId,
-          query: "",
-        };
-        requests.push(request);
-      });
+            dom: element,
+          },
+        ],
+        dom: element,
+        imdbId,
+        query: "",
+      };
+      requests.push(request);
+    });
 
     return requests;
   }
@@ -44,13 +46,16 @@ export default class TL implements tracker {
   }
 
   async canUpload(request: Request) {
-    return false
+    return false;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    select.style.margin = "20px 0"
-    select.style.padding = "2px 2px 3px 2px"
-    select.style.color = "#111"
-    tracker_tools.dom.addChild(document.querySelector('.sub-navbar') as HTMLElement, select)
+    select.style.margin = "20px 0";
+    select.style.padding = "2px 2px 3px 2px";
+    select.style.color = "#111";
+    tracker_tools.dom.addChild(
+      document.querySelector(".sub-navbar") as HTMLElement,
+      select
+    );
   }
 }

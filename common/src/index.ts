@@ -1,9 +1,9 @@
-import * as http from "./http";
 import * as dom from "./dom";
+import * as http from "./http";
 
 const tracker_tools = {
   http,
-  dom
-}
+  dom,
+};
 
-export default tracker_tools
+export default tracker_tools;

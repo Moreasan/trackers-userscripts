@@ -1,6 +1,6 @@
-import tracker_tools from "common";
-import {parseImdbIdFromLink} from "../utils/utils";
+import { parseImdbIdFromLink } from "../utils/utils";
 import { tracker, Request } from "./tracker";
+import tracker_tools from "common";
 
 export default class NewInsane implements tracker {
   canBeUsedAsSource(): boolean {
@@ -17,9 +17,10 @@ export default class NewInsane implements tracker {
 
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
-    document.querySelectorAll('table.torrenttable tr.torrentrow')
+    document
+      .querySelectorAll("table.torrenttable tr.torrentrow")
       .forEach((element: HTMLElement) => {
-        const imdbId = parseImdbIdFromLink(element)
+        const imdbId = parseImdbIdFromLink(element);
         const request: Request = {
           torrents: [],
           dom: element as HTMLElement,
@@ -38,10 +39,12 @@ export default class NewInsane implements tracker {
 
   async canUpload(request: Request) {
     return !request.imdbId;
-
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.addChild(document.querySelector('.searchbuttons.actiontitle') as HTMLElement, select)
+    tracker_tools.dom.addChild(
+      document.querySelector(".searchbuttons.actiontitle") as HTMLElement,
+      select
+    );
   }
 }

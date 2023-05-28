@@ -17,25 +17,25 @@ export const addChild = (parent: HTMLElement, child: HTMLElement) => {
 };
 
 export const appendErrorMessage = () => {
-  const div = document.createElement('div')
-  div.innerHTML = '<span style="margin-left:15px;color:white;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;\n" onclick="this.parentElement.style.display=\'none\';">&times;</span>' +
-    '<span id="message"></span>'
-  div.style.position = 'fixed'
-  div.style.bottom = "50px"
-  div.style.left = "50%"
-  div.style.display = "none"
-  div.style.width = "50%"
-  div.style.padding = "20px"
-  div.style.transform = "translate(-50%, 0)"
-  div.style.backgroundColor = "#f44336"
+  const div = document.createElement("div");
+  div.innerHTML =
+    '<span style="margin-left:15px;color:white;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;\n" onclick="this.parentElement.style.display=\'none\';">&times;</span>' +
+    '<span id="message"></span>';
+  div.style.position = "fixed";
+  div.style.bottom = "50px";
+  div.style.left = "50%";
+  div.style.display = "none";
+  div.style.width = "50%";
+  div.style.padding = "20px";
+  div.style.transform = "translate(-50%, 0)";
+  div.style.backgroundColor = "#f44336";
   div.style.color = "white";
 
-  addChild(document.body, div)
+  addChild(document.body, div);
 };
 
 export const showError = (message: string) => {
-  const element = document.querySelector('#message')! as HTMLElement;
-  element.innerHTML = "Error occurred in Fin Unique titles script: " + message
-  element.parentElement!.style.display = "block"
-
-}
+  const element = document.querySelector("#message")! as HTMLElement;
+  element.innerHTML = "Error occurred in Fin Unique titles script: " + message;
+  element.parentElement!.style.display = "block";
+};
