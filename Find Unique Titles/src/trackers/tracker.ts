@@ -1,9 +1,9 @@
 export interface Torrent {
-  container: string | null;
+  container?: string | null;
   size: number | null;
   tags: Array<string> | null;
-  format: string | null;
-  resolution: string | null;
+  format?: string | null;
+  resolution?: string | null;
   dom: HTMLElement | null
 }
 
@@ -19,7 +19,7 @@ export interface Request {
   imdbId: string | null;
   query: string;
   torrents: Array<Torrent>
-  dom: HTMLElement;
+  dom: Element;
   category?: Category
 }
 

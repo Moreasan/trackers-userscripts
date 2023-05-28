@@ -18,13 +18,17 @@ export default class HDB implements tracker {
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
     document.querySelectorAll('#torrent-list > tbody tr')
-      ?.forEach((element) => {
+      ?.forEach((element: HTMLElement) => {
 
         const imdbId = parseImdbIdFromLink(element as HTMLElement)
         const size = parseSize(element.querySelector('td:nth-child(6)')?.textContent as string)
 
         const request: Request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: element as HTMLElement,
           imdbId,
           query: "",
@@ -47,9 +51,6 @@ export default class HDB implements tracker {
     const result = await tracker_tools.http.fetchAndParseHtml(queryUrl)
 
     return result.querySelector('#resultsarea').textContent.includes('Nothing here!');
-
-
-
   }
 
   insertTrackersSelect(select: HTMLElement): void {

@@ -21,8 +21,6 @@ export default class CG implements tracker {
       ?.forEach((element) => {
 
         const imdbId = parseImdbIdFromLink(element as HTMLElement)
-        const size = null
-
         const request: Request = {
           torrents: [],
           dom: element.parentElement,

@@ -18,13 +18,17 @@ export default class BHD implements tracker {
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
     document.querySelectorAll('.torrent-search--list__results tbody tr')
-      .forEach((element) => {
+      .forEach((element: HTMLElement) => {
          let imdbId = 'tt' + element.getAttribute('data-imdb-id')
 
         let size = parseSize(element.querySelector('.torrent-search--list__size')!.textContent!)
         const request: Request = {
-          torrents: [],
-          dom: element as HTMLElement,
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
           imdbId,
           query: "",
         };

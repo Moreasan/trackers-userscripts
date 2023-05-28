@@ -17,13 +17,13 @@ export default class AvistaZ implements tracker {
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
     document.querySelectorAll('#content-area > div.block > .row')
-      ?.forEach((element) => {
+      ?.forEach((element: HTMLElement) => {
 
-        const imdbId = parseImdbIdFromLink(element as HTMLElement)
+        const imdbId = parseImdbIdFromLink(element)
 
         const request: Request = {
           torrents: [],
-          dom: element as HTMLElement,
+          dom: element,
           imdbId,
           query: "",
         };

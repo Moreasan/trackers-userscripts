@@ -18,14 +18,18 @@ export default class TL implements tracker {
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
     document.querySelectorAll('.torrent')
-      ?.forEach((element) => {
+      ?.forEach((element: HTMLElement) => {
 
-        const imdbId = parseImdbIdFromLink(element as HTMLElement)
+        const imdbId = parseImdbIdFromLink(element)
         const size = parseSize(element.querySelector('.td-size')?.textContent as string)
 
         const request: Request = {
-          torrents: [],
-          dom: element as HTMLElement,
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
           imdbId,
           query: "",
         };

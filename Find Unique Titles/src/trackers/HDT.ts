@@ -18,15 +18,19 @@ export default class CG implements tracker {
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
     document.querySelectorAll('table.mainblockcontenttt tr a[href^="details.php?id="]')
-      ?.forEach((element) => {
+      ?.forEach((element: HTMLElement) => {
 
-        const imdbId = parseImdbIdFromLink(element.closest('td') as HTMLElement)
+        const imdbId = parseImdbIdFromLink(element.closest('td'))
         let line = element.closest('tr');
         const size = parseSize(line.children[7]?.textContent as string)
 
         const request: Request = {
-          torrents: [],
-          dom: line as HTMLElement,
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: line,
           imdbId,
           query: "",
         };

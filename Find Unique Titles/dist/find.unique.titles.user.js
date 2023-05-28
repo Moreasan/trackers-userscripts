@@ -224,7 +224,11 @@ class BHD {
         var imdbId = (_element$querySelecto = element.querySelector('#imdb_id')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent.trim();
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[5].textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: element,
           imdbId,
           query: ""
@@ -436,7 +440,11 @@ class BHD {
         var imdbId = 'tt' + element.getAttribute('data-imdb-id');
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector('.torrent-search--list__size').textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: element,
           imdbId,
           query: ""
@@ -566,7 +574,11 @@ class CG {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('td:nth-child(5)')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: element,
           imdbId,
           query: ""
@@ -771,7 +783,11 @@ class FL {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('.torrenttable:nth-child(7)')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: element,
           imdbId,
           query: ""
@@ -834,7 +850,11 @@ class HDB {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('td:nth-child(6)')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: element,
           imdbId,
           query: ""
@@ -899,7 +919,11 @@ class CG {
         var line = element.closest('tr');
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_line$children$ = line.children[7]) === null || _line$children$ === void 0 ? void 0 : _line$children$.textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: line,
           imdbId,
           query: ""
@@ -1343,7 +1367,11 @@ class SC {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(links_container);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector(".torrent_info .activity_info").querySelectorAll("div")[1].textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: dom,
           imdbId,
           query: ""
@@ -1406,7 +1434,11 @@ class TL {
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)((_element$querySelecto = element.querySelector('.td-size')) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
         var request = {
-          torrents: [],
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
           dom: element,
           imdbId,
           query: ""

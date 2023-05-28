@@ -18,9 +18,8 @@ export default class NewInsane implements tracker {
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
     document.querySelectorAll('table.torrenttable tr.torrentrow')
-      .forEach((element) => {
-        const imdbId = parseImdbIdFromLink(element as HTMLElement)
-        const size = null
+      .forEach((element: HTMLElement) => {
+        const imdbId = parseImdbIdFromLink(element)
         const request: Request = {
           torrents: [],
           dom: element as HTMLElement,

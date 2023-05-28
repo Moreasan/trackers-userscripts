@@ -82,8 +82,6 @@ export default class KG implements tracker {
         const result = await tracker_tools.http.fetchAndParseHtml(queryUrl)
 
         return result.querySelector('tr.oddrow') === null;
-
-
     }
 
     insertTrackersSelect(select: HTMLElement): void {

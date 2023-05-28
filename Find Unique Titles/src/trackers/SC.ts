@@ -19,7 +19,7 @@ export default class SC implements tracker {
     const requests: Array<Request> = [];
     document
       .querySelectorAll(".torrent_card")
-      .forEach((element: Element) => {
+      .forEach((element: HTMLElement) => {
         let dom: Element = element;
         let links_container: HTMLElement | null = element.querySelector(".torrent_tags");
 
@@ -32,8 +32,12 @@ export default class SC implements tracker {
         );
 
         const request: Request = {
-          torrents: [],
-          dom: dom as HTMLElement,
+            torrents: [{
+                size,
+                tags: [],
+                dom: element
+            }],
+          dom: dom,
           imdbId,
           query: "",
         };
