@@ -60,7 +60,10 @@ var deduplicateRequests = searchRequests => {
   var map = new Map();
   var requests = [];
   for (var request of searchRequests) {
-    if (!request.imdbId) requests.push(request);
+    if (!request.imdbId) {
+      requests.push(request);
+      continue;
+    }
     if (map[request.imdbId]) {
       for (var torrent of request.torrents) {
         map[request.imdbId].torrents.push(torrent);
@@ -1133,20 +1136,19 @@ var parseTorrent = element => {
   var torrents = [];
   var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$querySelecto = element.querySelector("td:nth-child(11)")) === null || _element$querySelecto === void 0 ? void 0 : (_element$querySelecto2 = _element$querySelecto.textContent) === null || _element$querySelecto2 === void 0 ? void 0 : _element$querySelecto2.replace(",", ""));
   var resolution = "SD";
-  var container = undefined;
+  var format = undefined;
   if (element.querySelector('td img[src*="hdrip1080.png"]')) {
     resolution = "1080p";
   } else if (element.querySelector('td img[src*="hdrip720.png"]')) {
     resolution = "720p";
   } else if (element.querySelector('td img[src*="dvdr.png"]')) {
-    container = "VOB IFO";
+    format = "VOB IFO";
   } else if (element.querySelector('td img[src*="bluray.png"]')) {
-    container = "m2ts";
+    format = "m2ts";
   }
   torrents.push({
     size,
-    container: container,
-    format: undefined,
+    format,
     tags: [],
     resolution,
     dom: element
@@ -1389,11 +1391,44 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ SC)
 /* harmony export */ });
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tracker */ "./src/trackers/tracker.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
+
+function parseTorrent(element) {
+  var infos = element.querySelector(".torrent_info .activity_info").querySelectorAll("div");
+  var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(infos[1].textContent);
+  var resolution = infos[0].textContent.trim();
+  if (resolution == "CD" || resolution == "WEB") {
+    resolution = undefined;
+  }
+  var format = undefined;
+  if (resolution === "DVD-R") {
+    resolution = "SD";
+    format = "VOB IFO";
+  }
+  return {
+    size,
+    tags: [],
+    dom: element,
+    resolution,
+    format
+  };
+}
+function parseCategory(element) {
+  var category = _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE;
+  var infos = element.querySelector(".torrent_info .activity_info").querySelectorAll("div");
+  var info = infos[0].textContent;
+  if (info == "CD" || info === "WEB") {
+    category = _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MUSIC;
+  } else if ((0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(infos[0].textContent)) {
+    category = _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.BOOK;
+  }
+  return category;
+}
 class SC {
   canBeUsedAsSource() {
     return true;
@@ -1402,7 +1437,7 @@ class SC {
     return true;
   }
   canRun(url) {
-    return url.includes("secret-cinema.pw");
+    return url.includes("secret-cinema.pw") && !url.includes("torrents.php?id");
   }
   getSearchRequest() {
     return _asyncToGenerator(function* () {
@@ -1412,16 +1447,12 @@ class SC {
         var links_container = element.querySelector(".torrent_tags");
         if (links_container === null) return;
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(links_container);
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector(".torrent_info .activity_info").querySelectorAll("div")[1].textContent);
         var request = {
-          torrents: [{
-            size,
-            tags: [],
-            dom: element
-          }],
+          torrents: [parseTorrent(element)],
           dom: dom,
           imdbId,
-          query: ""
+          query: "",
+          category: parseCategory(element)
         };
         requests.push(request);
       });
@@ -1435,12 +1466,12 @@ class SC {
     return _asyncToGenerator(function* () {
       if (!request.imdbId) return true;
       var queryUrl = "https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&filter_cat=1&cataloguenumber=".concat(request.imdbId, "&order_by=time&order_way=desc&tags_type=0");
-      var result = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(queryUrl);
+      var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(queryUrl);
       return result.querySelector(".torrent_card_container") === null;
     })();
   }
   insertTrackersSelect(select) {
-    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(document.querySelector("#ft_container p"), select);
+    common__WEBPACK_IMPORTED_MODULE_2__["default"].dom.addChild(document.querySelector("#ft_container p"), select);
   }
 }
 

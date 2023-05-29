@@ -19,20 +19,19 @@ const parseTorrent = (element: HTMLElement): Array<Torrent> => {
       ?.textContent?.replace(",", "") as string
   );
   let resolution = "SD";
-  let container = undefined;
+  let format = undefined;
   if (element.querySelector('td img[src*="hdrip1080.png"]')) {
     resolution = "1080p";
   } else if (element.querySelector('td img[src*="hdrip720.png"]')) {
     resolution = "720p";
   } else if (element.querySelector('td img[src*="dvdr.png"]')) {
-    container = "VOB IFO";
+    format = "VOB IFO";
   } else if (element.querySelector('td img[src*="bluray.png"]')) {
-    container = "m2ts";
+    format = "m2ts";
   }
   torrents.push({
     size,
-    container: container,
-    format: undefined,
+    format,
     tags: [],
     resolution,
     dom: element,

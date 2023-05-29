@@ -16,7 +16,10 @@ const deduplicateRequests = (searchRequests: Array<Request>) => {
   const map: Map<string, Request> = new Map<string, Request>();
   const requests = [];
   for (let request of searchRequests) {
-    if (!request.imdbId) requests.push(request);
+    if (!request.imdbId) {
+      requests.push(request);
+      continue
+    }
     if (map[request.imdbId]) {
       for (let torrent of request.torrents) {
         map[request.imdbId].torrents.push(torrent);

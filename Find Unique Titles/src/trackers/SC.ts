@@ -1,6 +1,43 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { Category, Request, tracker } from "./tracker";
 import tracker_tools from "common";
+
+function parseTorrent(element: HTMLElement) {
+  let infos = element
+    .querySelector(".torrent_info .activity_info")!!
+    .querySelectorAll("div");
+  let size = parseSize(infos[1].textContent as string);
+  let resolution = infos[0].textContent.trim();
+  if (resolution == "CD" || resolution == "WEB") {
+    resolution = undefined;
+  }
+  let format = undefined;
+  if (resolution === "DVD-R") {
+    resolution = "SD";
+    format = "VOB IFO";
+  }
+  return {
+    size,
+    tags: [],
+    dom: element,
+    resolution,
+    format,
+  };
+}
+
+function parseCategory(element: HTMLElement) {
+  let category = Category.MOVIE;
+  let infos = element
+    .querySelector(".torrent_info .activity_info")!!
+    .querySelectorAll("div");
+  let info = infos[0].textContent;
+  if (info == "CD" || info === "WEB") {
+    category = Category.MUSIC;
+  } else if (parseSize(infos[0].textContent as string)) {
+    category = Category.BOOK;
+  }
+  return category;
+}
 
 export default class SC implements tracker {
   canBeUsedAsSource(): boolean {
@@ -12,7 +49,7 @@ export default class SC implements tracker {
   }
 
   canRun(url: string): boolean {
-    return url.includes("secret-cinema.pw");
+    return url.includes("secret-cinema.pw") && !url.includes("torrents.php?id");
   }
 
   async getSearchRequest(): Promise<Array<Request>> {
@@ -27,23 +64,12 @@ export default class SC implements tracker {
         if (links_container === null) return;
         let imdbId = parseImdbIdFromLink(links_container);
 
-        let size = parseSize(
-          element
-            .querySelector(".torrent_info .activity_info")!!
-            .querySelectorAll("div")[1].textContent as string
-        );
-
         const request: Request = {
-          torrents: [
-            {
-              size,
-              tags: [],
-              dom: element,
-            },
-          ],
+          torrents: [parseTorrent(element)],
           dom: dom,
           imdbId,
           query: "",
+          category: parseCategory(element),
         };
         requests.push(request);
       });
