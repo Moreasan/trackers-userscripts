@@ -17,6 +17,7 @@ import PTP from "./PTP";
 import SC from "./SC";
 import TL from "./TL";
 import MTeam from "./MTeam";
+import nCore from "./nCore";
 
 export {
   PTP,
@@ -37,5 +38,6 @@ export {
   HDB,
   TL,
   Aither,
-  MTeam
+  MTeam,
+  nCore
 };

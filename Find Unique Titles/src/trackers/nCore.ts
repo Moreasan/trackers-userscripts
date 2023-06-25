@@ -12,20 +12,15 @@ export default class MTeam implements tracker {
   }
 
   canRun(url: string): boolean {
-    return (
-      url.includes("https://kp.m-team.cc") &&
-      (url.includes("torrents.php") || url.includes("movie.php"))
-    );
+    return url.includes("https://ncore.pro");
   }
 
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
-    for (const element of document.querySelectorAll('.torrents')[0].children[0].children) {
-      if (!element.querySelector(".torrentname")) {
-        continue;
-      }
-      const imdbId = parseImdbIdFromLink(element.querySelector(".torrentname"));
-      const size = parseSize(element.children[6]?.textContent as string);
+    for (const element of document.querySelectorAll(".box_torrent")) {
+
+      const imdbId = parseImdbIdFromLink(element);
+      const size = parseSize(element.children[1].children[4].textContent as string);
 
       const request: Request = {
         torrents: [
@@ -46,7 +41,7 @@ export default class MTeam implements tracker {
   }
 
   name(): string {
-    return "M-Team";
+    return "nCore";
   }
 
   async canUpload(request: Request) {
@@ -54,9 +49,7 @@ export default class MTeam implements tracker {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    const element = document
-      .querySelector(".searchbox")
-      .children[2].querySelector("td td.rowfollow tr");
+    const element = document.querySelector("#keresoresz tr");
     tracker_tools.dom.addChild(element as HTMLElement, select);
   }
 }

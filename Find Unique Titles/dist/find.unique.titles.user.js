@@ -24,6 +24,7 @@
 // @match https://hd-torrents.org/torrents.php*
 // @match https://iptorrents.com/movies*
 // @match https://kp.m-team.cc/*
+// @match https://ncore.pro/torrents.php*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -1264,7 +1265,6 @@ class MTeam {
     })();
   }
   insertTrackersSelect(select) {
-    var searchBox = document.querySelector(".searchbox");
     var element = document.querySelector(".searchbox").children[2].querySelector("td td.rowfollow tr");
     common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(element, select);
   }
@@ -1639,7 +1639,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "NewInsane": () => (/* reexport safe */ _NewInsane__WEBPACK_IMPORTED_MODULE_14__["default"]),
 /* harmony export */   "PTP": () => (/* reexport safe */ _PTP__WEBPACK_IMPORTED_MODULE_15__["default"]),
 /* harmony export */   "SC": () => (/* reexport safe */ _SC__WEBPACK_IMPORTED_MODULE_16__["default"]),
-/* harmony export */   "TL": () => (/* reexport safe */ _TL__WEBPACK_IMPORTED_MODULE_17__["default"])
+/* harmony export */   "TL": () => (/* reexport safe */ _TL__WEBPACK_IMPORTED_MODULE_17__["default"]),
+/* harmony export */   "nCore": () => (/* reexport safe */ _nCore__WEBPACK_IMPORTED_MODULE_19__["default"])
 /* harmony export */ });
 /* harmony import */ var _Aither__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Aither */ "./src/trackers/Aither.ts");
 /* harmony import */ var _AvistaZ__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AvistaZ */ "./src/trackers/AvistaZ.ts");
@@ -1660,6 +1661,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _SC__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./SC */ "./src/trackers/SC.ts");
 /* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
 /* harmony import */ var _MTeam__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./MTeam */ "./src/trackers/MTeam.ts");
+/* harmony import */ var _nCore__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./nCore */ "./src/trackers/nCore.ts");
 
 
 
@@ -1680,6 +1682,70 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
+
+/***/ }),
+
+/***/ "./src/trackers/nCore.ts":
+/*!*******************************!*\
+  !*** ./src/trackers/nCore.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MTeam)
+/* harmony export */ });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+class MTeam {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return false;
+  }
+  canRun(url) {
+    return url.includes("https://ncore.pro");
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      for (var element of document.querySelectorAll(".box_torrent")) {
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[1].children[4].textContent);
+        var request = {
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      }
+      return requests;
+    })();
+  }
+  name() {
+    return "nCore";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      return false;
+    })();
+  }
+  insertTrackersSelect(select) {
+    var element = document.querySelector("#keresoresz tr");
+    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(element, select);
+  }
+}
 
 /***/ }),
 
