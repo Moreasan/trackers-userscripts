@@ -16,6 +16,7 @@ import NewInsane from "./NewInsane";
 import PTP from "./PTP";
 import SC from "./SC";
 import TL from "./TL";
+import MTeam from "./MTeam";
 
 export {
   PTP,
@@ -36,4 +37,5 @@ export {
   HDB,
   TL,
   Aither,
+  MTeam
 };

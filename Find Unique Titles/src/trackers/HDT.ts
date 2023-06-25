@@ -2,7 +2,7 @@ import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request } from "./tracker";
 import tracker_tools from "common";
 
-export default class CG implements tracker {
+export default class HDT implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

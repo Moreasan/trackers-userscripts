@@ -23,6 +23,7 @@
 // @match https://jptv.club/torrents*
 // @match https://hd-torrents.org/torrents.php*
 // @match https://iptorrents.com/movies*
+// @match https://kp.m-team.cc/*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -922,7 +923,7 @@ class HDB {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ CG)
+/* harmony export */   "default": () => (/* binding */ HDT)
 /* harmony export */ });
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
@@ -930,7 +931,7 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
-class CG {
+class HDT {
   canBeUsedAsSource() {
     return true;
   }
@@ -1198,6 +1199,74 @@ class KG {
   }
   insertTrackersSelect(select) {
     common__WEBPACK_IMPORTED_MODULE_2__["default"].dom.insertBefore(select, document.getElementById("showdead"));
+  }
+}
+
+/***/ }),
+
+/***/ "./src/trackers/MTeam.ts":
+/*!*******************************!*\
+  !*** ./src/trackers/MTeam.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ MTeam)
+/* harmony export */ });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+class MTeam {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return false;
+  }
+  canRun(url) {
+    return url.includes("https://kp.m-team.cc") && (url.includes("torrents.php") || url.includes("movie.php"));
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      for (var element of document.querySelectorAll('.torrents')[0].children[0].children) {
+        var _element$children$;
+        if (!element.querySelector(".torrentname")) {
+          continue;
+        }
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element.querySelector(".torrentname"));
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$children$ = element.children[6]) === null || _element$children$ === void 0 ? void 0 : _element$children$.textContent);
+        var request = {
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      }
+      return requests;
+    })();
+  }
+  name() {
+    return "M-Team";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      return false;
+    })();
+  }
+  insertTrackersSelect(select) {
+    var searchBox = document.querySelector(".searchbox");
+    var element = document.querySelector(".searchbox").children[2].querySelector("td td.rowfollow tr");
+    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(element, select);
   }
 }
 
@@ -1566,6 +1635,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "IPT": () => (/* reexport safe */ _IPT__WEBPACK_IMPORTED_MODULE_11__["default"]),
 /* harmony export */   "JPTV": () => (/* reexport safe */ _JPTV__WEBPACK_IMPORTED_MODULE_12__["default"]),
 /* harmony export */   "KG": () => (/* reexport safe */ _KG__WEBPACK_IMPORTED_MODULE_13__["default"]),
+/* harmony export */   "MTeam": () => (/* reexport safe */ _MTeam__WEBPACK_IMPORTED_MODULE_18__["default"]),
 /* harmony export */   "NewInsane": () => (/* reexport safe */ _NewInsane__WEBPACK_IMPORTED_MODULE_14__["default"]),
 /* harmony export */   "PTP": () => (/* reexport safe */ _PTP__WEBPACK_IMPORTED_MODULE_15__["default"]),
 /* harmony export */   "SC": () => (/* reexport safe */ _SC__WEBPACK_IMPORTED_MODULE_16__["default"]),
@@ -1589,6 +1659,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _PTP__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./PTP */ "./src/trackers/PTP.ts");
 /* harmony import */ var _SC__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./SC */ "./src/trackers/SC.ts");
 /* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
+/* harmony import */ var _MTeam__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./MTeam */ "./src/trackers/MTeam.ts");
+
 
 
 
