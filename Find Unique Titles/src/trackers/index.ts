@@ -18,6 +18,9 @@ import SC from "./SC";
 import TL from "./TL";
 import MTeam from "./MTeam";
 import nCore from "./nCore";
+import CHD from "./CHD";
+import HDSky from "./HDSky";
+
 
 export {
   PTP,
@@ -39,5 +42,8 @@ export {
   TL,
   Aither,
   MTeam,
-  nCore
+  nCore,
+  CHD,
+  HDSky,
+  
 };

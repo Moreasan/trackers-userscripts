@@ -31,7 +31,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://cinemageddon.net/browse.php*",
       "https://karagarga.in/browse.php*",
       "https://hdbits.org/browse.php*",
-      "https://passthepopcorn.me/torrents.php*",
+      "https://passthepopcorn.me/torrents.php",
       "https://passthepopcorn.me/torrents.php?type=seeding",
       "https://beyond-hd.me/library/movies*",
       "https://cinemaz.to/movies*",
@@ -49,7 +49,10 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://hd-torrents.org/torrents.php*",
       "https://iptorrents.com/movies*",
       "https://kp.m-team.cc/*",
-      "https://ncore.pro/torrents.php*"
+      "https://ncore.pro/torrents.php*",
+      "https://chdbits.co/torrents.php*",
+      "https://hdsky.me/torrents.php*",
+     
     ],
     require: [
       `https://cdn.jsdelivr.net/npm/jquery@${pkg.dependencies.jquery}/dist/jquery.min.js`,
