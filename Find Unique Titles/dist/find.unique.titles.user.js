@@ -6,7 +6,7 @@
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
 // @match https://hdbits.org/browse.php*
-// @match https://passthepopcorn.me/torrents.php*
+// @match https://passthepopcorn.me/torrents.php
 // @match https://passthepopcorn.me/torrents.php?type=seeding
 // @match https://beyond-hd.me/library/movies*
 // @match https://cinemaz.to/movies*
@@ -25,6 +25,9 @@
 // @match https://iptorrents.com/movies*
 // @match https://kp.m-team.cc/*
 // @match https://ncore.pro/torrents.php*
+// @match https://chdbits.co/torrents.php*
+// @match https://hdsky.me/torrents.php*
+// @match http://hdroute.org/browse.php*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -640,6 +643,78 @@ class CG {
 
 /***/ }),
 
+/***/ "./src/trackers/CHD.ts":
+/*!*****************************!*\
+  !*** ./src/trackers/CHD.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ CHD)
+/* harmony export */ });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+class CHD {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return false;
+  }
+  canRun(url) {
+    return url.includes("chdbits.co");
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      for (var element of document.querySelectorAll('.torrents')[0].children[0].children) {
+        var _element$children$;
+        if (!element.querySelector(".torrentname")) {
+          continue;
+        }
+        var link = element.querySelector('a[href*="details.php?id"]');
+        if (!link) {
+          continue;
+        }
+        var response = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(link.href);
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(response);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$children$ = element.children[6]) === null || _element$children$ === void 0 ? void 0 : _element$children$.textContent);
+        var request = {
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      }
+      return requests;
+    })();
+  }
+  name() {
+    return "CHD";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      return false;
+    })();
+  }
+  insertTrackersSelect(select) {
+    var element = document.querySelector(".searchbox").children[2].querySelector("td td.rowfollow tr");
+    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(element, select);
+  }
+}
+
+/***/ }),
+
 /***/ "./src/trackers/CLAN-SUD.ts":
 /*!**********************************!*\
   !*** ./src/trackers/CLAN-SUD.ts ***!
@@ -911,6 +986,143 @@ class HDB {
   insertTrackersSelect(select) {
     document.querySelector("#moresearch3 > td:nth-child(2)").innerHTML += "<br><br>Find unique for:<br>";
     common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(document.querySelector("#moresearch3 > td:nth-child(2)"), select);
+  }
+}
+
+/***/ }),
+
+/***/ "./src/trackers/HDR.ts":
+/*!*****************************!*\
+  !*** ./src/trackers/HDR.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ HDR)
+/* harmony export */ });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+class HDR {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return true;
+  }
+  canRun(url) {
+    return url.includes("hdroute.org");
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      for (var element of document.querySelectorAll('.torrents')[0].children[0].children) {
+        var _element$children$;
+        if (!element.querySelector(".torrentname")) {
+          continue;
+        }
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element.querySelector(".torrentname"));
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$children$ = element.children[6]) === null || _element$children$ === void 0 ? void 0 : _element$children$.textContent);
+        var request = {
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      }
+      return requests;
+    })();
+  }
+  name() {
+    return "HDR";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      if (!request.imdbId) return true;
+      var queryUrl = "http://hdroute.org/browse.php?dp=0&add=0&action=s&m1=1&or=1&imdb=" + request.imdbId.replace('tt', '');
+      var result = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(queryUrl);
+      return result.querySelector(".torrent-content") === null;
+    })();
+  }
+  insertTrackersSelect(select) {
+    var element = document.querySelector(".search_middle_right");
+    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(element, select);
+  }
+}
+
+/***/ }),
+
+/***/ "./src/trackers/HDSky.ts":
+/*!*******************************!*\
+  !*** ./src/trackers/HDSky.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ HDSky)
+/* harmony export */ });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+class HDSky {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return false;
+  }
+  canRun(url) {
+    return url.includes("hdsky.me");
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      for (var element of document.querySelectorAll('.torrents')[0].children[0].children) {
+        var _element$children$;
+        if (!element.querySelector(".torrentname")) {
+          continue;
+        }
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element.querySelector(".torrentname"));
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$children$ = element.children[6]) === null || _element$children$ === void 0 ? void 0 : _element$children$.textContent);
+        var request = {
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      }
+      return requests;
+    })();
+  }
+  name() {
+    return "HDSky";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      return false;
+    })();
+  }
+  insertTrackersSelect(select) {
+    var element = document.querySelector(".searchbox").children[2].querySelector("td td.rowfollow tr");
+    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(element, select);
   }
 }
 
@@ -1627,10 +1839,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "BLU": () => (/* reexport safe */ _BLU__WEBPACK_IMPORTED_MODULE_3__["default"]),
 /* harmony export */   "BTarg": () => (/* reexport safe */ _BTarg__WEBPACK_IMPORTED_MODULE_4__["default"]),
 /* harmony export */   "CG": () => (/* reexport safe */ _CG__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   "CHD": () => (/* reexport safe */ _CHD__WEBPACK_IMPORTED_MODULE_20__["default"]),
 /* harmony export */   "CLANSUD": () => (/* reexport safe */ _CLAN_SUD__WEBPACK_IMPORTED_MODULE_6__["default"]),
 /* harmony export */   "CinemaZ": () => (/* reexport safe */ _CinemaZ__WEBPACK_IMPORTED_MODULE_7__["default"]),
 /* harmony export */   "FL": () => (/* reexport safe */ _FL__WEBPACK_IMPORTED_MODULE_8__["default"]),
 /* harmony export */   "HDB": () => (/* reexport safe */ _HDB__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "HDR": () => (/* reexport safe */ _HDR__WEBPACK_IMPORTED_MODULE_22__["default"]),
+/* harmony export */   "HDSky": () => (/* reexport safe */ _HDSky__WEBPACK_IMPORTED_MODULE_21__["default"]),
 /* harmony export */   "HDT": () => (/* reexport safe */ _HDT__WEBPACK_IMPORTED_MODULE_10__["default"]),
 /* harmony export */   "IPT": () => (/* reexport safe */ _IPT__WEBPACK_IMPORTED_MODULE_11__["default"]),
 /* harmony export */   "JPTV": () => (/* reexport safe */ _JPTV__WEBPACK_IMPORTED_MODULE_12__["default"]),
@@ -1662,6 +1877,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
 /* harmony import */ var _MTeam__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./MTeam */ "./src/trackers/MTeam.ts");
 /* harmony import */ var _nCore__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./nCore */ "./src/trackers/nCore.ts");
+/* harmony import */ var _CHD__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./CHD */ "./src/trackers/CHD.ts");
+/* harmony import */ var _HDSky__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./HDSky */ "./src/trackers/HDSky.ts");
+/* harmony import */ var _HDR__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./HDR */ "./src/trackers/HDR.ts");
+
+
+
 
 
 
@@ -1941,26 +2162,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @trim21/gm-fetch */ "../node_modules/@trim21/gm-fetch/dist/index.mjs");
 
 
-const parser = new DOMParser();
-const fetchUrl = async (url, wait = 1000) => {
-    await sleep(wait);
-    const res = await (0,_trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__["default"])(url);
-    return await res.text();
-};
-const fetchAndParseHtml = async (query_url) => {
-    const response = await fetchUrl(query_url);
-    return parser.parseFromString(response, "text/html").body;
-};
-const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
-
-var http = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    fetchAndParseHtml: fetchAndParseHtml,
-    fetchUrl: fetchUrl
-});
-
 const insertBefore = (newNode, existingNode) => {
     existingNode.parentNode.insertBefore(newNode, existingNode);
 };
@@ -1971,10 +2172,11 @@ const addChild = (parent, child) => {
     parent.appendChild(child);
 };
 const appendErrorMessage = () => {
-    const div = document.createElement('div');
-    div.innerHTML = '<span style="margin-left:15px;color:white;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;\n" onclick="this.parentElement.style.display=\'none\';">&times;</span>' +
-        '<span id="message"></span>';
-    div.style.position = 'fixed';
+    const div = document.createElement("div");
+    div.innerHTML =
+        '<span style="margin-left:15px;color:white;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;\n" onclick="this.parentElement.style.display=\'none\';">&times;</span>' +
+            '<span id="message"></span>';
+    div.style.position = "fixed";
     div.style.bottom = "50px";
     div.style.left = "50%";
     div.style.display = "none";
@@ -1986,7 +2188,7 @@ const appendErrorMessage = () => {
     addChild(document.body, div);
 };
 const showError = (message) => {
-    const element = document.querySelector('#message');
+    const element = document.querySelector("#message");
     element.innerHTML = "Error occurred in Fin Unique titles script: " + message;
     element.parentElement.style.display = "block";
 };
@@ -2000,9 +2202,29 @@ var dom = /*#__PURE__*/Object.freeze({
     showError: showError
 });
 
+const parser = new DOMParser();
+const fetchUrl = async (url, wait = 1000) => {
+    await sleep(wait);
+    const res = await (0,_trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__["default"])(url);
+    return await res.text();
+};
+const fetchAndParseHtml = async (query_url) => {
+    const response = await fetchUrl(query_url);
+    return parser.parseFromString(response, "text/html").body;
+};
+const sleep = (ms) => {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+var http = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    fetchAndParseHtml: fetchAndParseHtml,
+    fetchUrl: fetchUrl
+});
+
 const tracker_tools = {
     http,
-    dom
+    dom,
 };
 
 
