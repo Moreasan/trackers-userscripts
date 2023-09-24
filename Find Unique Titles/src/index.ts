@@ -84,7 +84,7 @@ const main = async function () {
           request.dom.style.display = "none";
           continue;
         }
-        const response = await targetTracker.canUpload(request);
+        const response = await targetTracker.canUpload(request, only_show_unique_titles);
         if (!response) {
           if (request.imdbId) {
             await addToCache(targetTracker.name(), request.imdbId);

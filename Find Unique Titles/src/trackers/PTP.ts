@@ -23,7 +23,7 @@ export default class PTP implements tracker {
     return "PTP";
   }
 
-  async canUpload(request: Request): Promise<boolean> {
+  async canUpload(request: Request, onlyNew: boolean): Promise<boolean> {
     if (request.category && request.category !== Category.MOVIE) return false;
     if (!request.imdbId) return true;
     const query_url =
@@ -34,6 +34,9 @@ export default class PTP implements tracker {
       return true;
     }
     const torrents = parseAvailableTorrents(result);
+    if (onlyNew) {
+      return torrents.length === 0;
+    }
     for (let torrent of request.torrents) {
       if (canUploadTorrent(torrent, torrents)) {
         torrent.dom.style.border = "2px solid red";

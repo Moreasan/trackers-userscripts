@@ -34,7 +34,7 @@ export interface Response {
 export interface tracker {
   canRun(url: string): boolean;
 
-  canUpload(request: Request): Promise<boolean>;
+  canUpload(request: Request, onlyNewTitle: boolean): Promise<boolean>;
 
   canBeUsedAsSource(): boolean;
 

@@ -128,7 +128,7 @@ var main = /*#__PURE__*/function () {
                 request.dom.style.display = "none";
                 continue;
               }
-              var response = yield targetTracker.canUpload(request);
+              var response = yield targetTracker.canUpload(request, only_show_unique_titles);
               if (!response) {
                 if (request.imdbId) {
                   yield (0,_utils_cache__WEBPACK_IMPORTED_MODULE_1__.addToCache)(targetTracker.name(), request.imdbId);
@@ -1365,7 +1365,7 @@ class PTP {
   name() {
     return "PTP";
   }
-  canUpload(request) {
+  canUpload(request, onlyNew) {
     return _asyncToGenerator(function* () {
       if (request.category && request.category !== _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE) return false;
       if (!request.imdbId) return true;
@@ -1376,6 +1376,9 @@ class PTP {
         return true;
       }
       var torrents = parseAvailableTorrents(result);
+      if (onlyNew) {
+        return torrents.length === 0;
+      }
       for (var torrent of request.torrents) {
         if (canUploadTorrent(torrent, torrents)) {
           torrent.dom.style.border = "2px solid red";
