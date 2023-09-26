@@ -103,7 +103,7 @@ await (async function () {
             );
 
             if (result.querySelector(".media_index_thumb_list") !== null) {
-              resolve(await insertCoverAlternative());
+              resolve(await insertCoverAlternative(imdbId));
             }
             let imageElement = result
               .querySelector(".subpage_title_block")
@@ -172,11 +172,8 @@ await (async function () {
     });
   };
 
-  const insertCoverAlternative = async () => {
-    let value = document.querySelector("#imdb").value;
-    if (value.startsWith("http"))
-      value = "tt" + value.split("/tt")[1].split("/")[0];
-    let url = "https://www.imdb.com/title/" + value + "/mediaindex";
+  const insertCoverAlternative = async (imdbId) => {
+    let url = "https://www.imdb.com/title/" + imdbId + "/mediaindex";
     return new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
         url: url,
@@ -300,13 +297,13 @@ await (async function () {
   document.querySelector("#autofill").addEventListener("click", async () => {
     try {
       let apiToken = await getPtpImgApiKey();
-      let value = document.querySelector("#imdb").value;
-      if (value.startsWith("http"))
-        value = "tt" + value.split("/tt")[1].split("/")[0];
-      let url = await fetchCover(value);
+      let imdbId = document.querySelector("#imdb").value;
+      if (imdbId.startsWith("http"))
+        imdbId = "tt" + imdbId.split("/tt")[1].split("/")[0];
+      let url = await fetchCover(imdbId);
       console.log(url);
       if (!url || (await isSmall(url))) {
-        url = await fetchCoverFromMainPage(value);
+        url = await fetchCoverFromMainPage(imdbId);
       }
       coverInput.value = await uploadToPtpimg(url, apiToken);
       coverInput.dispatchEvent(new Event("change"));
