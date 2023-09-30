@@ -2,7 +2,7 @@ import { parseSize } from "../utils/utils";
 import { Request, tracker } from "./tracker";
 import tracker_tools from "common";
 
-export default class BHD implements tracker {
+export default class Aither implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
   }
