@@ -1367,7 +1367,7 @@ class PTP {
   }
   canUpload(request, onlyNew) {
     return _asyncToGenerator(function* () {
-      if (request.category && request.category !== _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE) return false;
+      if (request.category != undefined && request.category !== _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE) return false;
       if (!request.imdbId) return true;
       var query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
       var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(query_url);

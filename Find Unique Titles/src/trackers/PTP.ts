@@ -24,7 +24,7 @@ export default class PTP implements tracker {
   }
 
   async canUpload(request: Request, onlyNew: boolean): Promise<boolean> {
-    if (request.category && request.category !== Category.MOVIE) return false;
+    if (request.category != undefined && request.category !== Category.MOVIE) return false;
     if (!request.imdbId) return true;
     const query_url =
       "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
