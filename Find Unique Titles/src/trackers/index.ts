@@ -7,6 +7,7 @@ import CG from "./CG";
 import CLANSUD from "./CLAN-SUD";
 import CinemaZ from "./CinemaZ";
 import FL from "./FL";
+import GPW from "./GPW";
 import HDB from "./HDB";
 import HDT from "./HDT";
 import IPT from "./IPT";
@@ -35,6 +36,7 @@ export {
   AvistaZ,
   JPTV,
   FL,
+  GPW,
   HDB,
   TL,
   Aither,
