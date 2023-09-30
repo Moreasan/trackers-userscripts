@@ -67,8 +67,9 @@ var deduplicateRequests = searchRequests => {
       continue;
     }
     if (map[request.imdbId]) {
+      var existingRequest = map[request.imdbId];
       for (var torrent of request.torrents) {
-        map[request.imdbId].torrents.push(torrent);
+        existingRequest.torrents.push(torrent);
       }
     } else {
       map[request.imdbId] = request;
@@ -77,6 +78,12 @@ var deduplicateRequests = searchRequests => {
   }
   return requests;
 };
+function hideTorrents(request) {
+  request.dom.style.display = "none";
+  for (var torrent of request.torrents) {
+    torrent.dom.style.display = "none";
+  }
+}
 var main = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator(function* () {
     "use strict";
@@ -125,7 +132,7 @@ var main = /*#__PURE__*/function () {
             {
               (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
               if (useCache && request.imdbId && (0,_utils_cache__WEBPACK_IMPORTED_MODULE_1__.existsInCache)(targetTracker.name(), request.imdbId)) {
-                request.dom.style.display = "none";
+                hideTorrents(request);
                 continue;
               }
               var response = yield targetTracker.canUpload(request, only_show_unique_titles);
@@ -133,10 +140,7 @@ var main = /*#__PURE__*/function () {
                 if (request.imdbId) {
                   yield (0,_utils_cache__WEBPACK_IMPORTED_MODULE_1__.addToCache)(targetTracker.name(), request.imdbId);
                 }
-                request.dom.style.display = "none";
-                for (var torrent of request.torrents) {
-                  torrent.dom.style.display = "none";
-                }
+                hideTorrents(request);
               } else {
                 newContent++;
                 (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateNewContent)(newContent);

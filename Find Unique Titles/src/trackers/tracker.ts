@@ -19,7 +19,7 @@ export interface Request {
   imdbId: string | null;
   query: string;
   torrents: Array<Torrent>;
-  dom: Element;
+  dom: HTMLElement;
   category?: Category;
 }
 

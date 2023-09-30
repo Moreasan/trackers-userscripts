@@ -18,11 +18,12 @@ const deduplicateRequests = (searchRequests: Array<Request>) => {
   for (let request of searchRequests) {
     if (!request.imdbId) {
       requests.push(request);
-      continue
+      continue;
     }
     if (map[request.imdbId]) {
+      const existingRequest = map[request.imdbId];
       for (let torrent of request.torrents) {
-        map[request.imdbId].torrents.push(torrent);
+        existingRequest.torrents.push(torrent);
       }
     } else {
       map[request.imdbId] = request;
@@ -31,6 +32,13 @@ const deduplicateRequests = (searchRequests: Array<Request>) => {
   }
   return requests;
 };
+
+function hideTorrents(request: Request) {
+    request.dom.style.display = "none";
+  for (let torrent of request.torrents) {
+    torrent.dom.style.display = "none";
+  }
+}
 
 const main = async function () {
   "use strict";
@@ -81,18 +89,18 @@ const main = async function () {
           request.imdbId &&
           existsInCache(targetTracker.name(), request.imdbId)
         ) {
-          request.dom.style.display = "none";
+          hideTorrents(request);
           continue;
         }
-        const response = await targetTracker.canUpload(request, only_show_unique_titles);
+        const response = await targetTracker.canUpload(
+          request,
+          only_show_unique_titles
+        );
         if (!response) {
           if (request.imdbId) {
             await addToCache(targetTracker.name(), request.imdbId);
           }
-          request.dom.style.display = "none";
-          for (let torrent of request.torrents) {
-            torrent.dom.style.display = "none";
-          }
+          hideTorrents(request);
         } else {
           newContent++;
           updateNewContent(newContent);
