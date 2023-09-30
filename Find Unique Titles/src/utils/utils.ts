@@ -31,3 +31,12 @@ export const parseImdbId = (text: string) => {
   }
   return results[0];
 };
+
+export const parseResolution = (text: string) => {
+  const resolutions = ["720p", "1080p", "2160p"];
+  if (!text) return null;
+  for (let resolution of resolutions) {
+    if (text.includes(resolution)) return resolution;
+  }
+  return null;
+};

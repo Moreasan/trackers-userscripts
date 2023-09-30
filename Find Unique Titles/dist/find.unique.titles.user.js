@@ -9,6 +9,7 @@
 // @match https://passthepopcorn.me/torrents.php*
 // @match https://passthepopcorn.me/torrents.php?type=seeding
 // @match https://beyond-hd.me/library/movies*
+// @match https://beyond-hd.me/torrents*
 // @match https://cinemaz.to/movies*
 // @match https://avistaz.to/movies*
 // @match https://blutopia.xyz/torrents*
@@ -344,11 +345,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ BHD)
 /* harmony export */ });
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tracker */ "./src/trackers/tracker.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 
+
+var parseTorrents = element => {
+  var torrents = [];
+  element.querySelectorAll('tr[id^="resulttorrent"]').forEach(torrentElement => {
+    var data = torrentElement.children[0].textContent.trim().split("/");
+    var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(torrentElement.children[4].textContent.trim());
+    var tags = [];
+    if (torrentElement.textContent.includes("Remux")) {
+      tags.push("Remux");
+    }
+    var torrent = {
+      container: data[0].trim(),
+      format: data[1].trim(),
+      resolution: data[3].trim(),
+      tags: tags,
+      size,
+      dom: torrentElement
+    };
+    torrents.push(torrent);
+  });
+  return torrents;
+};
+var parseCategory = element => {
+  var html = element.children[0].innerHTML;
+  if (html.includes("categories/tv")) return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.TV;else if (html.includes("categories/movies")) return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE;
+  return undefined;
+};
+var parseTorrentsFromTorrentsPage = () => {
+  var requests = [];
+  document.querySelectorAll('tr[id^="torrentposter"]').forEach(element => {
+    var imdbId = null;
+    var libraryId = element.getAttribute("library");
+    if (libraryId) {
+      var imdbElement = document.querySelector("#librarydiv".concat(libraryId));
+      if (imdbElement) {
+        imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(imdbElement);
+      }
+    }
+    var tags = [];
+    var torrentName = element.children[1].querySelector('a[id^="torrent"]').textContent;
+    if (torrentName.toUpperCase().includes("REMUX")) {
+      tags.push("Remux");
+    }
+    var torrent = {
+      dom: element,
+      size: (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[5].textContent),
+      tags: tags,
+      resolution: (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(torrentName)
+    };
+    var torrents = [torrent];
+    var request = {
+      torrents: torrents,
+      dom: element,
+      imdbId,
+      query: "",
+      category: parseCategory(element)
+    };
+    requests.push(request);
+  });
+  return requests;
+};
+var parseTorrentsFromMoviesPage = () => {
+  var requests = [];
+  document.querySelectorAll(".bhd-meta-box").forEach(element => {
+    var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
+    var request = {
+      torrents: parseTorrents(element),
+      dom: element,
+      imdbId,
+      query: ""
+    };
+    requests.push(request);
+  });
+  return requests;
+};
+var isMoviesPage = () => {
+  return window.location.href.includes("/movies");
+};
+var isTorrentsPage = () => {
+  return window.location.href.includes("/torrents");
+};
 class BHD {
   canBeUsedAsSource() {
     return true;
@@ -362,37 +445,11 @@ class BHD {
   getSearchRequest() {
     return _asyncToGenerator(function* () {
       var requests = [];
-      var parseTorrents = element => {
-        var torrents = [];
-        element.querySelectorAll('tr[id^="resulttorrent"]').forEach(line => {
-          var data = line.children[0].textContent.trim().split("/");
-          var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(line.children[4].textContent.trim());
-          var tags = [];
-          if (line.textContent.includes("Remux")) {
-            tags.push("Remux");
-          }
-          var torrent = {
-            container: data[0].trim(),
-            format: data[1].trim(),
-            resolution: data[3].trim(),
-            tags: tags,
-            size,
-            dom: line
-          };
-          torrents.push(torrent);
-        });
-        return torrents;
-      };
-      document.querySelectorAll(".bhd-meta-box").forEach(element => {
-        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
-        var request = {
-          torrents: parseTorrents(element),
-          dom: element,
-          imdbId,
-          query: ""
-        };
-        requests.push(request);
-      });
+      if (isMoviesPage()) {
+        requests = parseTorrentsFromMoviesPage();
+      } else if (isTorrentsPage()) {
+        requests = parseTorrentsFromTorrentsPage();
+      }
       return requests;
     })();
   }
@@ -403,14 +460,14 @@ class BHD {
     return _asyncToGenerator(function* () {
       if (!request.imdbId) return true;
       var queryUrl = "https://beyond-hd.me/library/movies?activity=&q=" + request.imdbId;
-      var result = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(queryUrl);
+      var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(queryUrl);
       return result.querySelectorAll(".bhd-meta-box").length === 0;
     })();
   }
   insertTrackersSelect(select) {
     select.classList.add("beta-form-main");
     select.style.width = "170px";
-    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.insertBefore(select, document.querySelector(".button-center"));
+    common__WEBPACK_IMPORTED_MODULE_2__["default"].dom.insertBefore(select, document.querySelector(".button-center"));
   }
 }
 
@@ -1908,6 +1965,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "parseImdbId": () => (/* binding */ parseImdbId),
 /* harmony export */   "parseImdbIdFromLink": () => (/* binding */ parseImdbIdFromLink),
+/* harmony export */   "parseResolution": () => (/* binding */ parseResolution),
 /* harmony export */   "parseSize": () => (/* binding */ parseSize)
 /* harmony export */ });
 var parseSize = text => {
@@ -1931,6 +1989,14 @@ var parseImdbId = text => {
     return null;
   }
   return results[0];
+};
+var parseResolution = text => {
+  var resolutions = ["720p", "1080p", "2160p"];
+  if (!text) return null;
+  for (var resolution of resolutions) {
+    if (text.includes(resolution)) return resolution;
+  }
+  return null;
 };
 
 /***/ }),
