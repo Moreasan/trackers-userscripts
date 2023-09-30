@@ -1524,10 +1524,10 @@ class PTP {
       if (notFound) {
         return true;
       }
-      var torrents = parseAvailableTorrents(result);
       if (onlyNew) {
-        return torrents.length === 0;
+        return false;
       }
+      var torrents = parseAvailableTorrents(result);
       for (var torrent of request.torrents) {
         if (canUploadTorrent(torrent, torrents)) {
           torrent.dom.style.border = "2px solid red";

@@ -33,10 +33,10 @@ export default class PTP implements tracker {
     if (notFound) {
       return true;
     }
-    const torrents = parseAvailableTorrents(result);
     if (onlyNew) {
-      return torrents.length === 0;
+      return false;
     }
+    const torrents = parseAvailableTorrents(result);
     for (let torrent of request.torrents) {
       if (canUploadTorrent(torrent, torrents)) {
         torrent.dom.style.border = "2px solid red";
