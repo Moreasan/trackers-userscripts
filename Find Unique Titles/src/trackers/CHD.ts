@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request } from "./tracker";
 import tracker_tools from "common";
+import { updateCount, updateTotalCount } from "../utils/dom";
 
 export default class CHD implements tracker {
   canBeUsedAsSource(): boolean {
@@ -10,18 +11,20 @@ export default class CHD implements tracker {
   canBeUsedAsTarget(): boolean {
     return false;
   }
-
+  
   canRun(url: string): boolean {
-    return url.includes("chdbits.co");
+    return url.includes("ptchdbits.co");
   }
-  lst=[1,2,1,2,]
   async getSearchRequest(): Promise<Array<Request>> {
     const requests: Array<Request> = [];
-    for (const element of document.querySelectorAll('.torrents')[0].children[0].children) {
+    let nodes =document.querySelectorAll('.torrents')[0].children[0].children;
+    updateTotalCount(nodes.length);
+    let i = 1;
+    for (const element of nodes) {
+      updateCount(i++);
       if (!element.querySelector(".torrentname")) {
         continue;
       }
-
       const link: HTMLAnchorElement | null = element.querySelector(
         'a[href*="details.php?id"]'
       );
@@ -33,8 +36,8 @@ export default class CHD implements tracker {
       );
       const imdbId = parseImdbIdFromLink(response as HTMLElement);
 
-      const size = parseSize(element.children[6]?.textContent as string);
-
+      const size = parseSize(element.querySelector('.rowfollow:nth-child(5)').innerText);
+      console.log("size:",size);
       const request: Request = {
         torrents: [
           {

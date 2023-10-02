@@ -27,7 +27,7 @@
 // @match https://kp.m-team.cc/*
 // @match https://ncore.pro/torrents.php*
 // @match https://greatposterwall.com/torrents.php*
-// @match https://chdbits.co/torrents.php*
+// @match https://ptchdbits.co/torrents.php*
 // @match https://hdsky.me/torrents.php*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
@@ -716,17 +716,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/dom */ "./src/utils/dom.ts");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
-function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
 
 
 class CHD {
-  constructor() {
-    _defineProperty(this, "lst", [1, 2, 1, 2]);
-  }
   canBeUsedAsSource() {
     return true;
   }
@@ -734,13 +730,16 @@ class CHD {
     return false;
   }
   canRun(url) {
-    return url.includes("chdbits.co");
+    return url.includes("ptchdbits.co");
   }
   getSearchRequest() {
     return _asyncToGenerator(function* () {
       var requests = [];
-      for (var element of document.querySelectorAll('.torrents')[0].children[0].children) {
-        var _element$children$;
+      var nodes = document.querySelectorAll('.torrents')[0].children[0].children;
+      (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(nodes.length);
+      var i = 1;
+      for (var element of nodes) {
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
         if (!element.querySelector(".torrentname")) {
           continue;
         }
@@ -750,7 +749,8 @@ class CHD {
         }
         var response = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(link.href);
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(response);
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$children$ = element.children[6]) === null || _element$children$ === void 0 ? void 0 : _element$children$.textContent);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector('.rowfollow:nth-child(5)').innerText);
+        console.log("size:", size);
         var request = {
           torrents: [{
             size,

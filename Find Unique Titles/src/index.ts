@@ -46,7 +46,7 @@ const main = async function () {
   console.log("Init User script");
   /******************************************************************************/
 
-  let only_show_unique_titles = true; // change to true if you wish
+  let only_show_unique_titles = false; // change to true if you wish
   let better_constant = 1.15; // you can change this too.. wouldn't recommend going below 1.05
   let useCache = false;
 
