@@ -25,7 +25,7 @@
 // @match https://iptorrents.com/movies*
 // @match https://kp.m-team.cc/*
 // @match https://ncore.pro/torrents.php*
-// @match https://chdbits.co/torrents.php*
+// @match https://ptchdbits.co/torrents.php*
 // @match https://hdsky.me/torrents.php*
 // @match http://hdroute.org/browse.php*
 // @grant GM.xmlHttpRequest
@@ -655,8 +655,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/dom */ "./src/utils/dom.ts");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 
 
 class CHD {
@@ -667,13 +669,16 @@ class CHD {
     return false;
   }
   canRun(url) {
-    return url.includes("chdbits.co");
+    return url.includes("ptchdbits.co");
   }
   getSearchRequest() {
     return _asyncToGenerator(function* () {
       var requests = [];
-      for (var element of document.querySelectorAll('.torrents')[0].children[0].children) {
-        var _element$children$;
+      var nodes = document.querySelectorAll('.torrents')[0].children[0].children;
+      (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(nodes.length);
+      var i = 1;
+      for (var element of nodes) {
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
         if (!element.querySelector(".torrentname")) {
           continue;
         }
@@ -683,7 +688,8 @@ class CHD {
         }
         var response = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(link.href);
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(response);
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$children$ = element.children[6]) === null || _element$children$ === void 0 ? void 0 : _element$children$.textContent);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector('.rowfollow:nth-child(5)').innerText);
+        console.log("size:", size);
         var request = {
           torrents: [{
             size,
@@ -953,10 +959,12 @@ class HDB {
     return _asyncToGenerator(function* () {
       var _document$querySelect;
       var requests = [];
+      console.log('cscscscscs');
       (_document$querySelect = document.querySelectorAll("#torrent-list > tbody tr")) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.forEach(element => {
         var _element$querySelecto;
         var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
         var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$querySelecto = element.querySelector("td:nth-child(6)")) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
+        console.log(element, "imdb & size:", imdbId, size);
         var request = {
           torrents: [{
             size,
@@ -1020,13 +1028,14 @@ class HDR {
   getSearchRequest() {
     return _asyncToGenerator(function* () {
       var requests = [];
-      for (var element of document.querySelectorAll('.torrents')[0].children[0].children) {
-        var _element$children$;
-        if (!element.querySelector(".torrentname")) {
+      console.log('测测测试');
+      for (var element of document.querySelectorAll('#torrent-list')[0].children[3].children) {
+        if (!element.querySelector(".title_eng")) {
           continue;
         }
-        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element.querySelector(".torrentname"));
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$children$ = element.children[6]) === null || _element$children$ === void 0 ? void 0 : _element$children$.textContent);
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector(".torrent_size").textContent);
+        console.log("imdb & size:", imdbId, size);
         var request = {
           torrents: [{
             size,
@@ -1050,13 +1059,62 @@ class HDR {
       if (!request.imdbId) return true;
       var queryUrl = "http://hdroute.org/browse.php?dp=0&add=0&action=s&m1=1&or=1&imdb=" + request.imdbId.replace('tt', '');
       var result = yield common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(queryUrl);
-      return result.querySelector(".torrent-content") === null;
+      var notFound = result.querySelector(".torrent-content") === null;
+      if (notFound) {
+        return true;
+      }
+      var torrents = parseAvailableTorrents(result);
+      for (var torrent of request.torrents) {
+        if (canUploadTorrent(torrent, torrents)) {
+          torrent.dom.style.border = "2px solid red";
+          notFound = true;
+        } else {
+          torrent.dom.style.display = "none";
+        }
+      }
+      return notFound;
     })();
   }
   insertTrackersSelect(select) {
     var element = document.querySelector(".search_middle_right");
     common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.addChild(element, select);
   }
+}
+var parseAvailableTorrents = result => {
+  var torrents = [];
+  result.querySelectorAll('dl[id^="dl_torrent"]').forEach(line => {
+    var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(line.querySelector('.fl.torrent_size').innerText);
+    var torrent = {
+      size,
+      dom: line
+    };
+    torrents.push(torrent);
+  });
+  return torrents;
+};
+/** 如果要用filelist，要先在console加这段代码
+let rows = document.querySelectorAll('.torrentrow');
+rows.forEach(row => {
+    let title = row.querySelector('a[title]').getAttribute('title');
+    if (title.includes('Remux')||title.includes('REMUX')) {
+        row.remove();
+    }
+}); 
+*/
+var canUploadTorrent = (torrent, availableTorrents) => {
+  var similarTorrents = availableTorrents.filter(e => {
+    console.log(torrent.size, e.size);
+    return sameSize(torrent, e, 0.1);
+  });
+  if (similarTorrents.length === 0) {
+    return true;
+  }
+  return false;
+};
+function sameSize(t1, t2, ratio) {
+  var sizeDiff = Math.abs(t1.size - t2.size);
+  var largerSize = Math.max(t1.size, t2.size);
+  return sizeDiff < largerSize * ratio;
 }
 
 /***/ }),

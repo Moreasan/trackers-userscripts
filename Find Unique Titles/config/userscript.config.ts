@@ -50,7 +50,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://iptorrents.com/movies*",
       "https://kp.m-team.cc/*",
       "https://ncore.pro/torrents.php*",
-      "https://chdbits.co/torrents.php*",
+      "https://ptchdbits.co/torrents.php*",
       "https://hdsky.me/torrents.php*",
       "http://hdroute.org/browse.php*",
     ],
