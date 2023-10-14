@@ -16,6 +16,7 @@ import KG from "./KG";
 import NewInsane from "./NewInsane";
 import PTP from "./PTP";
 import SC from "./SC";
+import TiK from "./TiK";
 import TL from "./TL";
 import MTeam from "./MTeam";
 import nCore from "./nCore";
@@ -47,5 +48,5 @@ export {
   nCore,
   CHD,
   HDSky,
-  
+  TiK,
 };

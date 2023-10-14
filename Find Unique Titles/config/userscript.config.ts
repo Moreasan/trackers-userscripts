@@ -54,6 +54,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://greatposterwall.com/torrents.php*",
       "https://ptchdbits.co/torrents.php*",
       "https://hdsky.me/torrents.php*",
+      "https://www.cinematik.net/browse.php*"
     ],
     require: [
       `https://cdn.jsdelivr.net/npm/jquery@${pkg.dependencies.jquery}/dist/jquery.min.js`,
