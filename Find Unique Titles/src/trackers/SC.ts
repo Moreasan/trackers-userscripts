@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, Request, tracker } from "./tracker";
+import { Category, Request, toGenerator, tracker } from "./tracker";
 import tracker_tools from "common";
 
 function parseTorrent(element: HTMLElement) {
@@ -52,7 +52,7 @@ export default class SC implements tracker {
     return url.includes("secret-cinema.pw") && !url.includes("torrents.php?id");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll(".torrent_card")
@@ -74,8 +74,9 @@ export default class SC implements tracker {
         requests.push(request);
       });
 
-    return requests;
-  }
+  yield* toGenerator(requests)
+
+}
 
   name(): string {
     return "SC";

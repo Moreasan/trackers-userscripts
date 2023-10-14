@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Request, Torrent, tracker } from "./tracker";
+import { Request, toGenerator, Torrent, tracker } from "./tracker";
 import tracker_tools from "common";
 
 export default class GPW implements tracker {
@@ -15,7 +15,7 @@ export default class GPW implements tracker {
     return url.includes("greatposterwall.com");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("#torrent_table tr.TableTorrent-rowMovieInfo")
@@ -66,7 +66,7 @@ export default class GPW implements tracker {
         requests.push(request);
       });
 
-    return requests;
+    yield* toGenerator(requests)
   }
 
   name(): string {

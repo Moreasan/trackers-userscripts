@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { tracker, Request, toGenerator, MetaData } from "./tracker";
 import tracker_tools from "common";
 
 export default class CLANSUD implements tracker {
@@ -18,11 +18,14 @@ export default class CLANSUD implements tracker {
     );
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     const topics = document.querySelectorAll(
       'div[data-tableid="topics"] table'
     );
+    yield {
+      total: topics.length,
+    };
     for (const topic of topics) {
       if (
         topic.getAttribute("bgColor") != null &&
@@ -46,10 +49,8 @@ export default class CLANSUD implements tracker {
         imdbId,
         query: "",
       };
-      requests.push(request);
+      yield request;
     }
-
-    return requests;
   }
 
   name(): string {

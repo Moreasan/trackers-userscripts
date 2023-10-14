@@ -1,5 +1,10 @@
+import {
+  addToCache,
+  addToMemoryCache,
+  getFromMemoryCache,
+} from "../utils/cache";
 import { parseSize } from "../utils/utils";
-import { Category, Request, Torrent, tracker } from "./tracker";
+import { Category, MetaData, Request, Torrent, tracker } from "./tracker";
 import tracker_tools from "common";
 
 export default class PTP implements tracker {
@@ -15,8 +20,10 @@ export default class PTP implements tracker {
     return url.includes("passthepopcorn.me");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
-    return [];
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+    yield {
+      total: 0,
+    };
   }
 
   name(): string {
@@ -24,19 +31,24 @@ export default class PTP implements tracker {
   }
 
   async canUpload(request: Request, onlyNew: boolean): Promise<boolean> {
-    if (request.category != undefined && request.category !== Category.MOVIE) return false;
+    if (request.category != undefined && request.category !== Category.MOVIE)
+      return false;
     if (!request.imdbId) return true;
-    const query_url =
-      "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
-    const result = await tracker_tools.http.fetchAndParseHtml(query_url);
-    let notFound = result.querySelector("#no_results_message") !== null;
+    let torrents = getFromMemoryCache(request.imdbId);
+    if (!torrents) {
+      const query_url =
+        "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
+      const result = await tracker_tools.http.fetchAndParseHtml(query_url);
+      torrents = parseAvailableTorrents(result);
+      addToMemoryCache(request.imdbId, torrents);
+    }
+    let notFound = !torrents.length;
     if (notFound) {
       return true;
     }
     if (onlyNew) {
       return false;
     }
-    const torrents = parseAvailableTorrents(result);
     for (let torrent of request.torrents) {
       if (canUploadTorrent(torrent, torrents)) {
         torrent.dom.style.border = "2px solid red";

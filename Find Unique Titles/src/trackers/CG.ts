@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, Request, tracker } from "./tracker";
+import { Category, MetaData, Request, toGenerator, tracker } from "./tracker";
 import tracker_tools from "common";
 
 const parseCategory = (element: HTMLElement) => {
@@ -51,7 +51,7 @@ export default class CG implements tracker {
     return url.includes("cinemageddon.net");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("table.torrenttable tbody tr")
@@ -69,7 +69,7 @@ export default class CG implements tracker {
         requests.push(request);
       });
 
-    return requests;
+    yield* toGenerator(requests)
   }
 
   name(): string {

@@ -23,6 +23,10 @@ export interface Request {
   category?: Category;
 }
 
+export interface MetaData {
+  total: number;
+}
+
 export interface Result {
   size: number;
 }
@@ -40,9 +44,20 @@ export interface tracker {
 
   canBeUsedAsTarget(): boolean;
 
-  getSearchRequest(): Promise<Array<Request>>;
+  getSearchRequest(): AsyncGenerator<MetaData | Request, void, void>;
 
   name(): string;
 
   insertTrackersSelect(select: HTMLSelectElement): void;
 }
+
+export const toGenerator = async function* (
+  requests: Array<Request>
+): AsyncGenerator<MetaData | Request, void, void> {
+  yield {
+    total: requests.length,
+  };
+  for (const request of requests) {
+    yield request;
+  }
+};

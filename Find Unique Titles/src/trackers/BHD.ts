@@ -1,5 +1,5 @@
 import { parseImdbId, parseImdbIdFromLink, parseResolution, parseSize } from "../utils/utils";
-import { Category, Request, Torrent, tracker } from "./tracker";
+import { Category, MetaData, Request, toGenerator, Torrent, tracker } from "./tracker";
 import tracker_tools from "common";
 
 const parseTorrents = (element: HTMLElement): Array<Torrent> => {
@@ -104,14 +104,14 @@ export default class BHD implements tracker {
     return url.includes("beyond-hd.me");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     let requests: Array<Request> = [];
     if (isMoviesPage()) {
       requests = parseTorrentsFromMoviesPage();
     } else if (isTorrentsPage()) {
       requests = parseTorrentsFromTorrentsPage();
     }
-    return requests;
+    yield* toGenerator(requests);
   }
 
   name(): string {

@@ -1,5 +1,5 @@
 import { parseSize } from "../utils/utils";
-import { Request, tracker } from "./tracker";
+import { MetaData, Request, toGenerator, tracker } from "./tracker";
 import tracker_tools from "common";
 
 export default class Aither implements tracker {
@@ -15,7 +15,7 @@ export default class Aither implements tracker {
     return url.includes("aither.cc");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll(".panelV2 tbody tr")
@@ -38,7 +38,7 @@ export default class Aither implements tracker {
         requests.push(request);
       });
 
-    return requests;
+    yield* toGenerator(requests);
   }
 
   name(): string {

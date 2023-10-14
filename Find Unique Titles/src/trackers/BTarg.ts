@@ -1,5 +1,5 @@
 import { parseImdbId } from "../utils/utils";
-import { Request, tracker } from "./tracker";
+import { MetaData, Request, tracker } from "./tracker";
 import tracker_tools from "common";
 
 export default class BTarg implements tracker {
@@ -15,9 +15,11 @@ export default class BTarg implements tracker {
     return url.includes("https://btarg.com.ar");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
-    const requests: Array<Request> = [];
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const rows = document.querySelectorAll("tr.browsetable");
+    yield {
+      total: rows.length,
+    };
     for (const row of rows) {
       const link: HTMLAnchorElement | null = row.querySelector(
         'a[href*="details.php?id"]'
@@ -38,10 +40,8 @@ export default class BTarg implements tracker {
         imdbId,
         query: "",
       };
-      requests.push(request);
+      yield request;
     }
-
-    return requests;
   }
 
   name(): string {

@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, Request, Torrent, tracker } from "./tracker";
+import { Category, Request, toGenerator, Torrent, tracker } from "./tracker";
 import tracker_tools from "common";
 
 const parseCategory = (element: HTMLElement): Category => {
@@ -52,7 +52,7 @@ export default class KG implements tracker {
     return url.includes("karagarga.in");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document.querySelectorAll("#browse > tbody tr").forEach((element) => {
       let linksContainer = element.querySelector(
@@ -72,7 +72,7 @@ export default class KG implements tracker {
       requests.push(request);
     });
 
-    return requests;
+    yield* toGenerator(requests);
   }
 
   name(): string {

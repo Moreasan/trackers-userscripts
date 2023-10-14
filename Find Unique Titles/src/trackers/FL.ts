@@ -1,6 +1,5 @@
-import { updateCount, updateTotalCount } from "../utils/dom";
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { tracker, Request, MetaData } from "./tracker";
 import tracker_tools from "common";
 
 export default class FL implements tracker {
@@ -16,13 +15,14 @@ export default class FL implements tracker {
     return url.includes("filelist.io");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     let nodes = document.querySelectorAll(".torrentrow");
-    updateTotalCount(nodes.length);
+    yield {
+      total: nodes.length
+    }
     let i = 1;
     for (const element of nodes) {
-      updateCount(i++);
       const link: HTMLAnchorElement | null = element.querySelector(
         'a[href*="details.php?id"]'
       );
@@ -50,10 +50,8 @@ export default class FL implements tracker {
         imdbId,
         query: "",
       };
-      requests.push(request);
+      yield request
     }
-
-    return requests;
   }
 
   name(): string {

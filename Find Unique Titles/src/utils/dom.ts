@@ -47,14 +47,6 @@ const addStyle = (messageBox: HTMLElement) => {
   messageBox.style.border = "2px solid #111";
   messageBox.style.zIndex = "4591363";
 };
-
-export const showWaitingMessage = () => {
-  let messageBox = createMessageBox();
-  messageBox.innerHTML =
-    'Getting search list: <span class="checked_count">0</span>/<span class="total_torrents_count">0</span>';
-  messageBox.style.display = "block";
-};
-
 export const hideMessageBox = () => {
   document.getElementById("message-box").style.display = "none";
 };

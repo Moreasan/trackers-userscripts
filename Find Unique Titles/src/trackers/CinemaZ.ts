@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { tracker, Request, toGenerator, MetaData } from "./tracker";
 import tracker_tools from "common";
 
 export default class CinemaZ implements tracker {
@@ -15,7 +15,7 @@ export default class CinemaZ implements tracker {
     return url.includes("cinemaz.to");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("#content-area > div.block > .row")
@@ -31,8 +31,8 @@ export default class CinemaZ implements tracker {
         requests.push(request);
       });
 
-    return requests;
-  }
+  yield* toGenerator(requests)
+}
 
   name(): string {
     return "CinemaZ";

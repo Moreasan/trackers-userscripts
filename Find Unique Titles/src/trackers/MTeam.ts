@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { tracker, Request, toGenerator, MetaData } from "./tracker";
 import tracker_tools from "common";
 
 export default class MTeam implements tracker {
@@ -18,7 +18,7 @@ export default class MTeam implements tracker {
     );
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     for (const element of document.querySelectorAll('.torrents')[0].children[0].children) {
       if (!element.querySelector(".torrentname")) {
@@ -42,8 +42,8 @@ export default class MTeam implements tracker {
       requests.push(request);
     }
 
-    return requests;
-  }
+  yield* toGenerator(requests)
+}
 
   name(): string {
     return "M-Team";

@@ -1,7 +1,6 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { tracker, Request, MetaData } from "./tracker";
 import tracker_tools from "common";
-import { updateCount, updateTotalCount } from "../utils/dom";
 
 export default class CHD implements tracker {
   canBeUsedAsSource(): boolean {
@@ -15,13 +14,13 @@ export default class CHD implements tracker {
   canRun(url: string): boolean {
     return url.includes("ptchdbits.co");
   }
-  async getSearchRequest(): Promise<Array<Request>> {
-    const requests: Array<Request> = [];
+async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     let nodes =document.querySelectorAll('.torrents')[0].children[0].children;
-    updateTotalCount(nodes.length);
+    yield {
+      total: nodes.length
+    }
     let i = 1;
     for (const element of nodes) {
-      updateCount(i++);
       if (!element.querySelector(".torrentname")) {
         continue;
       }
@@ -50,10 +49,8 @@ export default class CHD implements tracker {
         imdbId,
         query: "",
       };
-      requests.push(request);
+      yield request
     }
-
-    return requests;
   }
   
 

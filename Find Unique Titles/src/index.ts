@@ -1,9 +1,8 @@
 import * as trackers from "./trackers";
-import { tracker, Request } from "./trackers/tracker";
-import { existsInCache, addToCache } from "./utils/cache";
+import { tracker, Request, MetaData } from "./trackers/tracker";
+import { existsInCache, addToCache, clearMemoryCache } from "./utils/cache";
 import {
   addCounter,
-  showWaitingMessage,
   createTrackersSelect,
   updateCount,
   updateNewContent,
@@ -34,7 +33,7 @@ const deduplicateRequests = (searchRequests: Array<Request>) => {
 };
 
 function hideTorrents(request: Request) {
-    request.dom.style.display = "none";
+  request.dom.style.display = "none";
   for (let torrent of request.torrents) {
     torrent.dom.style.display = "none";
   }
@@ -76,26 +75,27 @@ const main = async function () {
       ) as tracker;
       let i = 1;
       let newContent = 0;
-      showWaitingMessage();
-      let searchRequests = await (sourceTracker as tracker).getSearchRequest();
-      searchRequests = deduplicateRequests(searchRequests);
+      let requestGenerator = (sourceTracker as tracker).getSearchRequest();
+      const metadata = (await requestGenerator.next()).value as MetaData;
       hideMessageBox();
       addCounter();
-      updateTotalCount(searchRequests.length);
-      for await (const request of searchRequests) {
-        updateCount(i++);
+      updateTotalCount(metadata.total);
+      for await (const item of requestGenerator) {
+        const request = item as Request;
         if (
           useCache &&
           request.imdbId &&
           existsInCache(targetTracker.name(), request.imdbId)
         ) {
           hideTorrents(request);
+          updateCount(i++);
           continue;
         }
         const response = await targetTracker.canUpload(
           request,
           only_show_unique_titles
         );
+        updateCount(i++);
         if (!response) {
           if (request.imdbId) {
             await addToCache(targetTracker.name(), request.imdbId);
@@ -106,6 +106,7 @@ const main = async function () {
           updateNewContent(newContent);
         }
       }
+      clearMemoryCache();
     }
   });
   (sourceTracker as tracker).insertTrackersSelect(select);

@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request } from "./tracker";
+import { tracker, Request, MetaData, toGenerator } from "./tracker";
 import tracker_tools from "common";
 
 export default class AvistaZ implements tracker {
@@ -15,7 +15,7 @@ export default class AvistaZ implements tracker {
     return url.includes("avistaz.to");
   }
 
-  async getSearchRequest(): Promise<Array<Request>> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("#content-area > div.block > .row")
@@ -31,7 +31,7 @@ export default class AvistaZ implements tracker {
         requests.push(request);
       });
 
-    return requests;
+    yield* toGenerator(requests);
   }
 
   name(): string {
