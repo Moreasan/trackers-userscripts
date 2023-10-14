@@ -29,6 +29,7 @@
 // @match https://greatposterwall.com/torrents.php*
 // @match https://ptchdbits.co/torrents.php*
 // @match https://hdsky.me/torrents.php*
+// @match https://www.cinematik.net/browse.php*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -1912,6 +1913,99 @@ class TL {
 
 /***/ }),
 
+/***/ "./src/trackers/TiK.ts":
+/*!*****************************!*\
+  !*** ./src/trackers/TiK.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ TiK)
+/* harmony export */ });
+/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/dom */ "./src/utils/dom.ts");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
+var findTorrentsTable = () => {
+  var tables = document.querySelectorAll('table');
+  for (var table of tables) {
+    var firstRow = table.querySelector('tr');
+    var cells = firstRow.querySelectorAll('td');
+    if (cells[0] && cells[0].innerText === 'Type' && cells[1] && cells[1].innerText === 'Name' && cells[2] && cells[3].innerText === 'Director') {
+      return table;
+    }
+  }
+  console.log("No torrents table found.");
+  return undefined;
+};
+class TiK {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return false;
+  }
+  canRun(url) {
+    return url.includes("cinematik.net");
+  }
+  getSearchRequest() {
+    return _asyncToGenerator(function* () {
+      var requests = [];
+      var torrentsTable = findTorrentsTable();
+      if (!torrentsTable) {
+        return requests;
+      }
+      var nodes = torrentsTable.querySelectorAll("tr");
+      (0,_utils_dom__WEBPACK_IMPORTED_MODULE_0__.updateTotalCount)(nodes.length - 1);
+      var i = 1;
+      for (var _i = 1; _i < nodes.length; _i++) {
+        var element = nodes[_i];
+        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_0__.updateCount)(_i);
+        var link = element.querySelector('a[href*="details.php?id"]');
+        if (!link) {
+          continue;
+        }
+        var response = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(link.href);
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[6].textContent);
+        var request = {
+          torrents: [{
+            size,
+            tags: [],
+            dom: element
+          }],
+          dom: element,
+          imdbId,
+          query: ""
+        };
+        requests.push(request);
+      }
+      return requests;
+    })();
+  }
+  name() {
+    return "TiK";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      return false;
+    })();
+  }
+  insertTrackersSelect(select) {
+    var stateSelect = document.getElementById("incldead");
+    var td = document.createElement("td");
+    td.appendChild(select);
+    common__WEBPACK_IMPORTED_MODULE_2__["default"].dom.insertBefore(td, stateSelect.parentElement);
+  }
+}
+
+/***/ }),
+
 /***/ "./src/trackers/index.ts":
 /*!*******************************!*\
   !*** ./src/trackers/index.ts ***!
@@ -1926,23 +2020,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "BLU": () => (/* reexport safe */ _BLU__WEBPACK_IMPORTED_MODULE_3__["default"]),
 /* harmony export */   "BTarg": () => (/* reexport safe */ _BTarg__WEBPACK_IMPORTED_MODULE_4__["default"]),
 /* harmony export */   "CG": () => (/* reexport safe */ _CG__WEBPACK_IMPORTED_MODULE_5__["default"]),
-/* harmony export */   "CHD": () => (/* reexport safe */ _CHD__WEBPACK_IMPORTED_MODULE_21__["default"]),
+/* harmony export */   "CHD": () => (/* reexport safe */ _CHD__WEBPACK_IMPORTED_MODULE_22__["default"]),
 /* harmony export */   "CLANSUD": () => (/* reexport safe */ _CLAN_SUD__WEBPACK_IMPORTED_MODULE_6__["default"]),
 /* harmony export */   "CinemaZ": () => (/* reexport safe */ _CinemaZ__WEBPACK_IMPORTED_MODULE_7__["default"]),
 /* harmony export */   "FL": () => (/* reexport safe */ _FL__WEBPACK_IMPORTED_MODULE_8__["default"]),
 /* harmony export */   "GPW": () => (/* reexport safe */ _GPW__WEBPACK_IMPORTED_MODULE_9__["default"]),
 /* harmony export */   "HDB": () => (/* reexport safe */ _HDB__WEBPACK_IMPORTED_MODULE_10__["default"]),
-/* harmony export */   "HDSky": () => (/* reexport safe */ _HDSky__WEBPACK_IMPORTED_MODULE_22__["default"]),
+/* harmony export */   "HDSky": () => (/* reexport safe */ _HDSky__WEBPACK_IMPORTED_MODULE_23__["default"]),
 /* harmony export */   "HDT": () => (/* reexport safe */ _HDT__WEBPACK_IMPORTED_MODULE_11__["default"]),
 /* harmony export */   "IPT": () => (/* reexport safe */ _IPT__WEBPACK_IMPORTED_MODULE_12__["default"]),
 /* harmony export */   "JPTV": () => (/* reexport safe */ _JPTV__WEBPACK_IMPORTED_MODULE_13__["default"]),
 /* harmony export */   "KG": () => (/* reexport safe */ _KG__WEBPACK_IMPORTED_MODULE_14__["default"]),
-/* harmony export */   "MTeam": () => (/* reexport safe */ _MTeam__WEBPACK_IMPORTED_MODULE_19__["default"]),
+/* harmony export */   "MTeam": () => (/* reexport safe */ _MTeam__WEBPACK_IMPORTED_MODULE_20__["default"]),
 /* harmony export */   "NewInsane": () => (/* reexport safe */ _NewInsane__WEBPACK_IMPORTED_MODULE_15__["default"]),
 /* harmony export */   "PTP": () => (/* reexport safe */ _PTP__WEBPACK_IMPORTED_MODULE_16__["default"]),
 /* harmony export */   "SC": () => (/* reexport safe */ _SC__WEBPACK_IMPORTED_MODULE_17__["default"]),
-/* harmony export */   "TL": () => (/* reexport safe */ _TL__WEBPACK_IMPORTED_MODULE_18__["default"]),
-/* harmony export */   "nCore": () => (/* reexport safe */ _nCore__WEBPACK_IMPORTED_MODULE_20__["default"])
+/* harmony export */   "TL": () => (/* reexport safe */ _TL__WEBPACK_IMPORTED_MODULE_19__["default"]),
+/* harmony export */   "TiK": () => (/* reexport safe */ _TiK__WEBPACK_IMPORTED_MODULE_18__["default"]),
+/* harmony export */   "nCore": () => (/* reexport safe */ _nCore__WEBPACK_IMPORTED_MODULE_21__["default"])
 /* harmony export */ });
 /* harmony import */ var _Aither__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Aither */ "./src/trackers/Aither.ts");
 /* harmony import */ var _AvistaZ__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AvistaZ */ "./src/trackers/AvistaZ.ts");
@@ -1962,11 +2057,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _NewInsane__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./NewInsane */ "./src/trackers/NewInsane.ts");
 /* harmony import */ var _PTP__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./PTP */ "./src/trackers/PTP.ts");
 /* harmony import */ var _SC__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./SC */ "./src/trackers/SC.ts");
-/* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
-/* harmony import */ var _MTeam__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./MTeam */ "./src/trackers/MTeam.ts");
-/* harmony import */ var _nCore__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./nCore */ "./src/trackers/nCore.ts");
-/* harmony import */ var _CHD__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./CHD */ "./src/trackers/CHD.ts");
-/* harmony import */ var _HDSky__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./HDSky */ "./src/trackers/HDSky.ts");
+/* harmony import */ var _TiK__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./TiK */ "./src/trackers/TiK.ts");
+/* harmony import */ var _TL__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./TL */ "./src/trackers/TL.ts");
+/* harmony import */ var _MTeam__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./MTeam */ "./src/trackers/MTeam.ts");
+/* harmony import */ var _nCore__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./nCore */ "./src/trackers/nCore.ts");
+/* harmony import */ var _CHD__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./CHD */ "./src/trackers/CHD.ts");
+/* harmony import */ var _HDSky__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./HDSky */ "./src/trackers/HDSky.ts");
+
 
 
 
