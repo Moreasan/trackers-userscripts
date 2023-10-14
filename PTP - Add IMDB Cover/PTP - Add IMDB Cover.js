@@ -2,7 +2,7 @@
 // @name         PTP - Add IMDB Cover
 // @namespace    http://tampermonkey.net/
 // @version      0.3
-// @author       passthepopcorn_cc
+// @author       Mea01
 // @match        https://passthepopcorn.me/upload.php?*
 // @match        https://passthepopcorn.me/upload.php
 // @match        https://passthepopcorn.me/requests.php*

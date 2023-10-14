@@ -2,7 +2,7 @@
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
 // @version 0.0.1
-// @author passthepopcorn_cc
+// @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
 // @match https://hdbits.org/browse.php*

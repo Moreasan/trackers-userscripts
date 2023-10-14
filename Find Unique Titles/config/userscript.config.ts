@@ -26,7 +26,7 @@ export const UserScriptConfig: IWebpackUserScript = {
   scriptHeaders: {
     name: "Find Unique Titles",
     namespace: "http://tampermonkey.net/",
-    author: "passthepopcorn_cc",
+    author: "Mea01",
     match: [
       "https://cinemageddon.net/browse.php*",
       "https://karagarga.in/browse.php*",

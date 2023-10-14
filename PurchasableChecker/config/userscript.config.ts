@@ -26,7 +26,7 @@ export const UserScriptConfig: IWebpackUserScript = {
   scriptHeaders: {
     name: "PurchasableChecker",
     namespace: "http://tampermonkey.net/",
-    author: "passthepopcorn_cc",
+    author: "Mea01",
     include: [
       "https://passthepopcorn.me/requests.php*",
     ],
