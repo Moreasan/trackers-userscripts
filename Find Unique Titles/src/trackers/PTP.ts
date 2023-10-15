@@ -7,6 +7,15 @@ import { parseSize } from "../utils/utils";
 import { Category, MetaData, Request, Torrent, tracker } from "./tracker";
 import tracker_tools from "common";
 
+function isSupportedCategory(category: Category) {
+  return (
+    category === undefined ||
+    category === Category.MOVIE ||
+    category === Category.DOCUMENTARY ||
+    category === Category.LIVE_PERFORMANCE
+  );
+}
+
 export default class PTP implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
@@ -31,8 +40,7 @@ export default class PTP implements tracker {
   }
 
   async canUpload(request: Request, onlyNew: boolean): Promise<boolean> {
-    if (request.category != undefined && request.category !== Category.MOVIE)
-      return false;
+    if (!isSupportedCategory(request.category)) return false;
     if (!request.imdbId) return true;
     let torrents = getFromMemoryCache(request.imdbId);
     if (!torrents) {

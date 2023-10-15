@@ -25,6 +25,7 @@ export const parseImdbIdFromLink = (element: HTMLElement) => {
 };
 
 export const parseImdbId = (text: string) => {
+  if (!text) return null
   const results = text.match(/(tt\d+)/);
   if (!results) {
     return null;

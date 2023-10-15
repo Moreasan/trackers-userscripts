@@ -1170,6 +1170,45 @@ function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r
 
 
 
+var isExclusive = element => {
+  var exclusiveLink = element.querySelector('a[href="/browse.php?exclusive=1"]');
+  return exclusiveLink != null;
+};
+function parseTorrent(element) {
+  var _element$querySelecto;
+  var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$querySelecto = element.querySelector("td:nth-child(6)")) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
+  var title = element.querySelector(".browse_td_name_cell a").textContent.trim();
+  var resolution = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(title);
+  var tags = [];
+  if (element.querySelector("#codec1 .medium5")) {
+    tags.push("Remux");
+  }
+  return {
+    size,
+    tags,
+    dom: element,
+    resolution
+  };
+}
+function parseCategory(element) {
+  var category = element.querySelector(".catcell a").getAttribute("href").replace("?cat=", "");
+  switch (category) {
+    case "1":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE;
+    case "2":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.TV;
+    case "3":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.DOCUMENTARY;
+    case "4":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MUSIC;
+    case "5":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.SPORT;
+    case "6":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MUSIC;
+    case "7":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.XXX;
+  }
+}
 class HDB {
   canBeUsedAsSource() {
     return true;
@@ -1185,18 +1224,18 @@ class HDB {
       var _document$querySelect;
       var requests = [];
       (_document$querySelect = document.querySelectorAll("#torrent-list > tbody tr")) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.forEach(element => {
-        var _element$querySelecto;
-        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)((_element$querySelecto = element.querySelector("td:nth-child(6)")) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent);
+        var _element$querySelecto2;
+        if (isExclusive(element)) {
+          element.style.display = "none";
+          return;
+        }
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbId)((_element$querySelecto2 = element.querySelector("a[data-imdb-link]")) === null || _element$querySelecto2 === void 0 ? void 0 : _element$querySelecto2.getAttribute("data-imdb-link"));
         var request = {
-          torrents: [{
-            size,
-            tags: [],
-            dom: element
-          }],
+          torrents: [parseTorrent(element)],
           dom: element,
           imdbId,
-          query: ""
+          query: "",
+          category: parseCategory(element)
         };
         requests.push(request);
       });
@@ -1798,6 +1837,9 @@ function _OverloadYield(value, kind) { this.v = value, this.k = kind; }
 
 
 
+function isSupportedCategory(category) {
+  return category === undefined || category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE || category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.DOCUMENTARY || category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.LIVE_PERFORMANCE;
+}
 class PTP {
   canBeUsedAsSource() {
     return true;
@@ -1820,7 +1862,7 @@ class PTP {
   }
   canUpload(request, onlyNew) {
     return _asyncToGenerator(function* () {
-      if (request.category != undefined && request.category !== _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE) return false;
+      if (!isSupportedCategory(request.category)) return false;
       if (!request.imdbId) return true;
       var torrents = (0,_utils_cache__WEBPACK_IMPORTED_MODULE_0__.getFromMemoryCache)(request.imdbId);
       if (!torrents) {
@@ -2537,6 +2579,7 @@ var Category = /*#__PURE__*/function (Category) {
   Category[Category["LIVE_PERFORMANCE"] = 8] = "LIVE_PERFORMANCE";
   Category[Category["DOCUMENTARY"] = 9] = "DOCUMENTARY";
   Category[Category["GAME"] = 10] = "GAME";
+  Category[Category["XXX"] = 11] = "XXX";
   return Category;
 }({});
 var toGenerator = /*#__PURE__*/function () {
@@ -2715,6 +2758,7 @@ var parseImdbIdFromLink = element => {
   return null;
 };
 var parseImdbId = text => {
+  if (!text) return null;
   var results = text.match(/(tt\d+)/);
   if (!results) {
     return null;

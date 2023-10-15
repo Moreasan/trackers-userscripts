@@ -1,6 +1,69 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
+import {
+  parseImdbId,
+  parseImdbIdFromLink,
+  parseResolution,
+  parseSize,
+} from "../utils/utils";
+import {
+  tracker,
+  Request,
+  toGenerator,
+  MetaData,
+  Torrent,
+  Category,
+} from "./tracker";
 import tracker_tools from "common";
+
+const isExclusive = (element: HTMLElement) => {
+  const exclusiveLink = element.querySelector(
+    'a[href="/browse.php?exclusive=1"]'
+  );
+  return exclusiveLink != null;
+};
+
+function parseTorrent(element: HTMLElement): Torrent {
+  const size = parseSize(
+    element.querySelector("td:nth-child(6)")?.textContent as string
+  );
+  const title = element
+    .querySelector(".browse_td_name_cell a")
+    .textContent.trim();
+  const resolution = parseResolution(title);
+  const tags = [];
+  if (element.querySelector("#codec1 .medium5")) {
+    tags.push("Remux");
+  }
+
+  return {
+    size,
+    tags,
+    dom: element,
+    resolution,
+  };
+}
+
+function parseCategory(element: HTMLElement) {
+  const category = element
+    .querySelector(".catcell a")
+    .getAttribute("href")
+    .replace("?cat=", "");
+  switch (category) {
+    case "1":
+      return Category.MOVIE;
+    case "2":
+      return Category.TV;
+    case "3":
+      return Category.DOCUMENTARY;
+    case "4":
+      return Category.MUSIC;
+    case "5":
+      return Category.SPORT;
+    case "6":
+      return Category.MUSIC;
+    case "7":
+      return Category.XXX;
+  }
+}
 
 export default class HDB implements tracker {
   canBeUsedAsSource(): boolean {
@@ -15,33 +78,33 @@ export default class HDB implements tracker {
     return url.includes("hdbits.org");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("#torrent-list > tbody tr")
       ?.forEach((element: HTMLElement) => {
-        const imdbId = parseImdbIdFromLink(element as HTMLElement);
-        const size = parseSize(
-          element.querySelector("td:nth-child(6)")?.textContent as string
+        if (isExclusive(element)) {
+          element.style.display = "none";
+          return;
+        }
+        const imdbId = parseImdbId(
+          element
+            .querySelector("a[data-imdb-link]")
+            ?.getAttribute("data-imdb-link")
         );
 
         const request: Request = {
-          torrents: [
-            {
-              size,
-              tags: [],
-              dom: element,
-            },
-          ],
+          torrents: [parseTorrent(element)],
           dom: element as HTMLElement,
           imdbId,
           query: "",
+          category: parseCategory(element),
         };
         requests.push(request);
       });
 
-  yield* toGenerator(requests)
-}
+    yield* toGenerator(requests);
+  }
 
   name(): string {
     return "HDB";

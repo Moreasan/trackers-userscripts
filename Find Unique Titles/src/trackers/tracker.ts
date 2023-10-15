@@ -19,6 +19,7 @@ export enum Category {
   LIVE_PERFORMANCE,
   DOCUMENTARY,
   GAME,
+  XXX,
 }
 
 export interface Request {
