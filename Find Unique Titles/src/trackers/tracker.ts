@@ -13,6 +13,12 @@ export enum Category {
   MUSIC,
   BOOK,
   AUDIOBOOK,
+  SPORT,
+  ANIME,
+  MV,
+  LIVE_PERFORMANCE,
+  DOCUMENTARY,
+  GAME,
 }
 
 export interface Request {
@@ -26,15 +32,6 @@ export interface Request {
 export interface MetaData {
   total: number;
 }
-
-export interface Result {
-  size: number;
-}
-
-export interface Response {
-  results: Array<Result>;
-}
-
 export interface tracker {
   canRun(url: string): boolean;
 

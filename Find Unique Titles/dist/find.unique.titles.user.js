@@ -30,6 +30,7 @@
 // @match https://ptchdbits.co/torrents.php*
 // @match https://hdsky.me/torrents.php*
 // @match https://www.cinematik.net/browse.php*
+// @match https://pterclub.com/torrents.php*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -1910,6 +1911,150 @@ __webpack_async_result__();
 
 /***/ }),
 
+/***/ "./src/trackers/Pter.ts":
+/*!******************************!*\
+  !*** ./src/trackers/Pter.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Pter)
+/* harmony export */ });
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tracker */ "./src/trackers/tracker.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+function _wrapAsyncGenerator(fn) { return function () { return new _AsyncGenerator(fn.apply(this, arguments)); }; }
+function _AsyncGenerator(gen) { var front, back; function resume(key, arg) { try { var result = gen[key](arg), value = result.value, overloaded = value instanceof _OverloadYield; Promise.resolve(overloaded ? value.v : value).then(function (arg) { if (overloaded) { var nextKey = "return" === key ? "return" : "next"; if (!value.k || arg.done) return resume(nextKey, arg); arg = gen[nextKey](arg).value; } settle(result.done ? "return" : "normal", arg); }, function (err) { resume("throw", err); }); } catch (err) { settle("throw", err); } } function settle(type, value) { switch (type) { case "return": front.resolve({ value: value, done: !0 }); break; case "throw": front.reject(value); break; default: front.resolve({ value: value, done: !1 }); } (front = front.next) ? resume(front.key, front.arg) : back = null; } this._invoke = function (key, arg) { return new Promise(function (resolve, reject) { var request = { key: key, arg: arg, resolve: resolve, reject: reject, next: null }; back ? back = back.next = request : (front = back = request, resume(key, arg)); }); }, "function" != typeof gen.return && (this.return = void 0); }
+_AsyncGenerator.prototype["function" == typeof Symbol && Symbol.asyncIterator || "@@asyncIterator"] = function () { return this; }, _AsyncGenerator.prototype.next = function (arg) { return this._invoke("next", arg); }, _AsyncGenerator.prototype.throw = function (arg) { return this._invoke("throw", arg); }, _AsyncGenerator.prototype.return = function (arg) { return this._invoke("return", arg); };
+function _awaitAsyncGenerator(value) { return new _OverloadYield(value, 0); }
+function _asyncGeneratorDelegate(inner) { var iter = {}, waiting = !1; function pump(key, value) { return waiting = !0, value = new Promise(function (resolve) { resolve(inner[key](value)); }), { done: !1, value: new _OverloadYield(value, 1) }; } return iter["undefined" != typeof Symbol && Symbol.iterator || "@@iterator"] = function () { return this; }, iter.next = function (value) { return waiting ? (waiting = !1, value) : pump("next", value); }, "function" == typeof inner.throw && (iter.throw = function (value) { if (waiting) throw waiting = !1, value; return pump("throw", value); }), "function" == typeof inner.return && (iter.return = function (value) { return waiting ? (waiting = !1, value) : pump("return", value); }), iter; }
+function _OverloadYield(value, kind) { this.v = value, this.k = kind; }
+function _asyncIterator(iterable) { var method, async, sync, retry = 2; for ("undefined" != typeof Symbol && (async = Symbol.asyncIterator, sync = Symbol.iterator); retry--;) { if (async && null != (method = iterable[async])) return method.call(iterable); if (sync && null != (method = iterable[sync])) return new AsyncFromSyncIterator(method.call(iterable)); async = "@@asyncIterator", sync = "@@iterator"; } throw new TypeError("Object is not async iterable"); }
+function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r) { if (Object(r) !== r) return Promise.reject(new TypeError(r + " is not an object.")); var done = r.done; return Promise.resolve(r.value).then(function (value) { return { value: value, done: done }; }); } return AsyncFromSyncIterator = function AsyncFromSyncIterator(s) { this.s = s, this.n = s.next; }, AsyncFromSyncIterator.prototype = { s: null, n: null, next: function next() { return AsyncFromSyncIteratorContinuation(this.n.apply(this.s, arguments)); }, return: function _return(value) { var ret = this.s.return; return void 0 === ret ? Promise.resolve({ value: value, done: !0 }) : AsyncFromSyncIteratorContinuation(ret.apply(this.s, arguments)); }, throw: function _throw(value) { var thr = this.s.return; return void 0 === thr ? Promise.reject(value) : AsyncFromSyncIteratorContinuation(thr.apply(this.s, arguments)); } }, new AsyncFromSyncIterator(s); }
+
+
+
+function parseTorrent(element) {
+  var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.childNodes[6].textContent);
+  var title = element.querySelector(".torrentname a").textContent.trim();
+  var resolution = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(title);
+  return {
+    size,
+    tags: [],
+    dom: element,
+    resolution
+  };
+}
+function parseCategory(element) {
+  var linkElement = element.querySelector('a[href^="?cat"]');
+  var hrefValue = linkElement ? linkElement.getAttribute("href").trim() : null;
+  if (hrefValue) {
+    hrefValue = hrefValue.replace("?cat=", "");
+  }
+  switch (hrefValue) {
+    case "401":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE;
+    case "402":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.DOCUMENTARY;
+    case "403":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.ANIME;
+    case "404":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.TV;
+    case "405":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.TV;
+    case "406":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MUSIC;
+    case "407":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.SPORT;
+    case "408":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.BOOK;
+    case "409":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.GAME;
+    case "411":
+      {
+        var source = element.children[0].children[1].querySelector("img").getAttribute("title").toLocaleUpperCase();
+        switch (source) {
+          case "PDF":
+          case "MOBI":
+          case "EPUB":
+            return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.BOOK;
+        }
+        return null;
+      }
+    case "413":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MV;
+    case "418":
+      return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.LIVE_PERFORMANCE;
+  }
+}
+var isExclusive = element => {
+  var torrentName = element.querySelector('.torrentname');
+  var exclusiveLink = torrentName.querySelector('a[href="torrents.php?tag_exclusive=yes"]');
+  return exclusiveLink != null;
+};
+class Pter {
+  canBeUsedAsSource() {
+    return true;
+  }
+  canBeUsedAsTarget() {
+    return true;
+  }
+  canRun(url) {
+    return url.includes("pterclub.com");
+  }
+  getSearchRequest() {
+    return _wrapAsyncGenerator(function* () {
+      var requests = [];
+      var elements = document.querySelectorAll("#torrenttable > tbody > tr");
+      Array.from(elements).slice(1).forEach(element => {
+        if (isExclusive(element)) {
+          element.style.display = 'none';
+          return;
+        }
+        var spanElement = element.querySelector("span[data-imdbid]");
+        var imdbId = spanElement ? spanElement.getAttribute("data-imdbid").trim() : null;
+        if (imdbId) {
+          imdbId = "tt" + imdbId;
+        } else {
+          imdbId = null;
+        }
+        var request = {
+          torrents: [parseTorrent(element)],
+          dom: element,
+          imdbId,
+          query: "",
+          category: parseCategory(element)
+        };
+        requests.push(request);
+      });
+      yield* _asyncGeneratorDelegate(_asyncIterator((0,_tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests)), _awaitAsyncGenerator);
+    })();
+  }
+  name() {
+    return "Pter";
+  }
+  canUpload(request) {
+    return _asyncToGenerator(function* () {
+      if (!request.imdbId) return true;
+      var queryUrl = "https://pterclub.com/torrents.php?search=".concat(request.imdbId);
+      var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(queryUrl);
+      return result.querySelector("#torrenttable") === null;
+    })();
+  }
+  insertTrackersSelect(select) {
+    var targetLine = document.querySelector(".searchbox > tbody:last-child table tr");
+    var td = document.createElement("td");
+    td.classList.add("embedded");
+    td.appendChild(select);
+    common__WEBPACK_IMPORTED_MODULE_2__["default"].dom.addChild(targetLine, td);
+  }
+}
+
+/***/ }),
+
 /***/ "./src/trackers/SC.ts":
 /*!****************************!*\
   !*** ./src/trackers/SC.ts ***!
@@ -2227,6 +2372,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "MTeam": () => (/* reexport safe */ _MTeam__WEBPACK_IMPORTED_MODULE_20__["default"]),
 /* harmony export */   "NewInsane": () => (/* reexport safe */ _NewInsane__WEBPACK_IMPORTED_MODULE_15__["default"]),
 /* harmony export */   "PTP": () => (/* reexport safe */ _PTP__WEBPACK_IMPORTED_MODULE_16__["default"]),
+/* harmony export */   "Pter": () => (/* reexport safe */ _Pter__WEBPACK_IMPORTED_MODULE_24__["default"]),
 /* harmony export */   "SC": () => (/* reexport safe */ _SC__WEBPACK_IMPORTED_MODULE_17__["default"]),
 /* harmony export */   "TL": () => (/* reexport safe */ _TL__WEBPACK_IMPORTED_MODULE_19__["default"]),
 /* harmony export */   "TiK": () => (/* reexport safe */ _TiK__WEBPACK_IMPORTED_MODULE_18__["default"]),
@@ -2256,8 +2402,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _nCore__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./nCore */ "./src/trackers/nCore.ts");
 /* harmony import */ var _CHD__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./CHD */ "./src/trackers/CHD.ts");
 /* harmony import */ var _HDSky__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(/*! ./HDSky */ "./src/trackers/HDSky.ts");
+/* harmony import */ var _Pter__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(/*! ./Pter */ "./src/trackers/Pter.ts");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_PTP__WEBPACK_IMPORTED_MODULE_16__]);
 _PTP__WEBPACK_IMPORTED_MODULE_16__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+
 
 
 
@@ -2383,6 +2531,12 @@ var Category = /*#__PURE__*/function (Category) {
   Category[Category["MUSIC"] = 2] = "MUSIC";
   Category[Category["BOOK"] = 3] = "BOOK";
   Category[Category["AUDIOBOOK"] = 4] = "AUDIOBOOK";
+  Category[Category["SPORT"] = 5] = "SPORT";
+  Category[Category["ANIME"] = 6] = "ANIME";
+  Category[Category["MV"] = 7] = "MV";
+  Category[Category["LIVE_PERFORMANCE"] = 8] = "LIVE_PERFORMANCE";
+  Category[Category["DOCUMENTARY"] = 9] = "DOCUMENTARY";
+  Category[Category["GAME"] = 10] = "GAME";
   return Category;
 }({});
 var toGenerator = /*#__PURE__*/function () {

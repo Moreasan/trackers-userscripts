@@ -22,7 +22,7 @@ import MTeam from "./MTeam";
 import nCore from "./nCore";
 import CHD from "./CHD";
 import HDSky from "./HDSky";
-
+import Pter from "./Pter";
 
 export {
   PTP,
@@ -49,4 +49,5 @@ export {
   CHD,
   HDSky,
   TiK,
+  Pter,
 };
