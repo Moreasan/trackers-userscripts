@@ -63,26 +63,6 @@ function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r
 
 
 
-var deduplicateRequests = searchRequests => {
-  var map = new Map();
-  var requests = [];
-  for (var request of searchRequests) {
-    if (!request.imdbId) {
-      requests.push(request);
-      continue;
-    }
-    if (map[request.imdbId]) {
-      var existingRequest = map[request.imdbId];
-      for (var torrent of request.torrents) {
-        existingRequest.torrents.push(torrent);
-      }
-    } else {
-      map[request.imdbId] = request;
-      requests.push(request);
-    }
-  }
-  return requests;
-};
 function hideTorrents(request) {
   request.dom.style.display = "none";
   for (var torrent of request.torrents) {
@@ -124,7 +104,6 @@ var main = /*#__PURE__*/function () {
         var newContent = 0;
         var requestGenerator = sourceTracker.getSearchRequest();
         var metadata = (yield requestGenerator.next()).value;
-        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.hideMessageBox)();
         (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.addCounter)();
         (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(metadata.total);
         var _iteratorAbruptCompletion = false;

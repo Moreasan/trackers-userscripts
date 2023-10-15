@@ -10,28 +10,6 @@ import {
   hideMessageBox,
 } from "./utils/dom";
 import tracker_tools from "common";
-
-const deduplicateRequests = (searchRequests: Array<Request>) => {
-  const map: Map<string, Request> = new Map<string, Request>();
-  const requests = [];
-  for (let request of searchRequests) {
-    if (!request.imdbId) {
-      requests.push(request);
-      continue;
-    }
-    if (map[request.imdbId]) {
-      const existingRequest = map[request.imdbId];
-      for (let torrent of request.torrents) {
-        existingRequest.torrents.push(torrent);
-      }
-    } else {
-      map[request.imdbId] = request;
-      requests.push(request);
-    }
-  }
-  return requests;
-};
-
 function hideTorrents(request: Request) {
   request.dom.style.display = "none";
   for (let torrent of request.torrents) {
@@ -77,7 +55,6 @@ const main = async function () {
       let newContent = 0;
       let requestGenerator = (sourceTracker as tracker).getSearchRequest();
       const metadata = (await requestGenerator.next()).value as MetaData;
-      hideMessageBox();
       addCounter();
       updateTotalCount(metadata.total);
       for await (const item of requestGenerator) {
