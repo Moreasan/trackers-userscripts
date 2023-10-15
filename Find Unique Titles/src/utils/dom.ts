@@ -48,7 +48,10 @@ const addStyle = (messageBox: HTMLElement) => {
   messageBox.style.zIndex = "4591363";
 };
 export const hideMessageBox = () => {
-  document.getElementById("message-box").style.display = "none";
+  let messageBox = document.getElementById("message-box");
+  if (messageBox) {
+    messageBox.style.display = "none";
+  }
 };
 export const updateCount = (count: number) => {
   document.querySelector(".checked_count")!!.textContent = String(count);

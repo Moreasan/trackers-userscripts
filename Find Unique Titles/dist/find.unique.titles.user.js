@@ -2536,7 +2536,10 @@ var addStyle = messageBox => {
   messageBox.style.zIndex = "4591363";
 };
 var hideMessageBox = () => {
-  document.getElementById("message-box").style.display = "none";
+  var messageBox = document.getElementById("message-box");
+  if (messageBox) {
+    messageBox.style.display = "none";
+  }
 };
 var updateCount = count => {
   document.querySelector(".checked_count").textContent = String(count);

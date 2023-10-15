@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, Request, toGenerator, tracker } from "./tracker";
+import { Category, Request, toGenerator, tracker, MetaData } from "./tracker";
 import tracker_tools from "common";
 
 function parseTorrent(element: HTMLElement) {
