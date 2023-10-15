@@ -1828,11 +1828,14 @@ var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_uti
 _utils_cache__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-function _awaitAsyncGenerator(value) { return new _OverloadYield(value, 0); }
 function _wrapAsyncGenerator(fn) { return function () { return new _AsyncGenerator(fn.apply(this, arguments)); }; }
 function _AsyncGenerator(gen) { var front, back; function resume(key, arg) { try { var result = gen[key](arg), value = result.value, overloaded = value instanceof _OverloadYield; Promise.resolve(overloaded ? value.v : value).then(function (arg) { if (overloaded) { var nextKey = "return" === key ? "return" : "next"; if (!value.k || arg.done) return resume(nextKey, arg); arg = gen[nextKey](arg).value; } settle(result.done ? "return" : "normal", arg); }, function (err) { resume("throw", err); }); } catch (err) { settle("throw", err); } } function settle(type, value) { switch (type) { case "return": front.resolve({ value: value, done: !0 }); break; case "throw": front.reject(value); break; default: front.resolve({ value: value, done: !1 }); } (front = front.next) ? resume(front.key, front.arg) : back = null; } this._invoke = function (key, arg) { return new Promise(function (resolve, reject) { var request = { key: key, arg: arg, resolve: resolve, reject: reject, next: null }; back ? back = back.next = request : (front = back = request, resume(key, arg)); }); }, "function" != typeof gen.return && (this.return = void 0); }
 _AsyncGenerator.prototype["function" == typeof Symbol && Symbol.asyncIterator || "@@asyncIterator"] = function () { return this; }, _AsyncGenerator.prototype.next = function (arg) { return this._invoke("next", arg); }, _AsyncGenerator.prototype.throw = function (arg) { return this._invoke("throw", arg); }, _AsyncGenerator.prototype.return = function (arg) { return this._invoke("return", arg); };
+function _awaitAsyncGenerator(value) { return new _OverloadYield(value, 0); }
+function _asyncGeneratorDelegate(inner) { var iter = {}, waiting = !1; function pump(key, value) { return waiting = !0, value = new Promise(function (resolve) { resolve(inner[key](value)); }), { done: !1, value: new _OverloadYield(value, 1) }; } return iter["undefined" != typeof Symbol && Symbol.iterator || "@@iterator"] = function () { return this; }, iter.next = function (value) { return waiting ? (waiting = !1, value) : pump("next", value); }, "function" == typeof inner.throw && (iter.throw = function (value) { if (waiting) throw waiting = !1, value; return pump("throw", value); }), "function" == typeof inner.return && (iter.return = function (value) { return waiting ? (waiting = !1, value) : pump("return", value); }), iter; }
 function _OverloadYield(value, kind) { this.v = value, this.k = kind; }
+function _asyncIterator(iterable) { var method, async, sync, retry = 2; for ("undefined" != typeof Symbol && (async = Symbol.asyncIterator, sync = Symbol.iterator); retry--;) { if (async && null != (method = iterable[async])) return method.call(iterable); if (sync && null != (method = iterable[sync])) return new AsyncFromSyncIterator(method.call(iterable)); async = "@@asyncIterator", sync = "@@iterator"; } throw new TypeError("Object is not async iterable"); }
+function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r) { if (Object(r) !== r) return Promise.reject(new TypeError(r + " is not an object.")); var done = r.done; return Promise.resolve(r.value).then(function (value) { return { value: value, done: done }; }); } return AsyncFromSyncIterator = function AsyncFromSyncIterator(s) { this.s = s, this.n = s.next; }, AsyncFromSyncIterator.prototype = { s: null, n: null, next: function next() { return AsyncFromSyncIteratorContinuation(this.n.apply(this.s, arguments)); }, return: function _return(value) { var ret = this.s.return; return void 0 === ret ? Promise.resolve({ value: value, done: !0 }) : AsyncFromSyncIteratorContinuation(ret.apply(this.s, arguments)); }, throw: function _throw(value) { var thr = this.s.return; return void 0 === thr ? Promise.reject(value) : AsyncFromSyncIteratorContinuation(thr.apply(this.s, arguments)); } }, new AsyncFromSyncIterator(s); }
 
 
 
@@ -1840,6 +1843,39 @@ function _OverloadYield(value, kind) { this.v = value, this.k = kind; }
 function isSupportedCategory(category) {
   return category === undefined || category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE || category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.DOCUMENTARY || category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.LIVE_PERFORMANCE;
 }
+var parseTorrents = element => {
+  var torrents = [];
+  element.querySelectorAll("tr.basic-movie-list__torrent-row").forEach(element => {
+    if (element.querySelector(".basic-movie-list__torrent-edition")) {
+      return;
+    }
+    var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[2].textContent);
+    var title = element.querySelector(".torrent-info-link").textContent;
+    var resolution = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(title);
+    var tags = [];
+    if (title.includes("Remux")) {
+      tags.push("Remux");
+    }
+    var torrent = {
+      dom: element,
+      size,
+      tags,
+      resolution
+    };
+    torrents.push(torrent);
+  });
+  return torrents;
+};
+var parseCategory = element => {
+  var categoryTitle = element.querySelector(".basic-movie-list__torrent-edition__main").textContent;
+  if (categoryTitle.includes("Stand-up Comedy ")) {
+    return _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.STAND_UP;
+  } else if (categoryTitle.includes("Live Performance ")) {
+    return _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.LIVE_PERFORMANCE;
+  } else {
+    return _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE;
+  }
+};
 class PTP {
   canBeUsedAsSource() {
     return true;
@@ -1852,9 +1888,20 @@ class PTP {
   }
   getSearchRequest() {
     return _wrapAsyncGenerator(function* () {
-      yield {
-        total: 0
-      };
+      var _document$querySelect;
+      var requests = [];
+      (_document$querySelect = document.querySelectorAll("#torrents-movie-view table.torrent_table > tbody")) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.forEach(element => {
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element.querySelector(".basic-movie-list__movie__ratings-and-tags"));
+        var request = {
+          torrents: parseTorrents(element),
+          dom: element,
+          imdbId,
+          query: "",
+          category: parseCategory(element)
+        };
+        requests.push(request);
+      });
+      yield* _asyncGeneratorDelegate(_asyncIterator((0,_tracker__WEBPACK_IMPORTED_MODULE_2__.toGenerator)(requests)), _awaitAsyncGenerator);
     })();
   }
   name() {
@@ -2577,9 +2624,10 @@ var Category = /*#__PURE__*/function (Category) {
   Category[Category["ANIME"] = 6] = "ANIME";
   Category[Category["MV"] = 7] = "MV";
   Category[Category["LIVE_PERFORMANCE"] = 8] = "LIVE_PERFORMANCE";
-  Category[Category["DOCUMENTARY"] = 9] = "DOCUMENTARY";
-  Category[Category["GAME"] = 10] = "GAME";
-  Category[Category["XXX"] = 11] = "XXX";
+  Category[Category["STAND_UP"] = 9] = "STAND_UP";
+  Category[Category["DOCUMENTARY"] = 10] = "DOCUMENTARY";
+  Category[Category["GAME"] = 11] = "GAME";
+  Category[Category["XXX"] = 12] = "XXX";
   return Category;
 }({});
 var toGenerator = /*#__PURE__*/function () {
@@ -2770,6 +2818,11 @@ var parseResolution = text => {
   if (!text) return null;
   for (var resolution of resolutions) {
     if (text.includes(resolution)) return resolution;
+  }
+  var regex = /\b(\d{3})x(\d{3})\b/;
+  var match = text.match(regex);
+  if (match) {
+    return match[0];
   }
   return null;
 };

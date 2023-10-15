@@ -25,7 +25,7 @@ export const parseImdbIdFromLink = (element: HTMLElement) => {
 };
 
 export const parseImdbId = (text: string) => {
-  if (!text) return null
+  if (!text) return null;
   const results = text.match(/(tt\d+)/);
   if (!results) {
     return null;
@@ -38,6 +38,12 @@ export const parseResolution = (text: string) => {
   if (!text) return null;
   for (let resolution of resolutions) {
     if (text.includes(resolution)) return resolution;
+  }
+  const regex = /\b(\d{3})x(\d{3})\b/;
+  const match = text.match(regex);
+
+  if (match) {
+    return match[0];
   }
   return null;
 };

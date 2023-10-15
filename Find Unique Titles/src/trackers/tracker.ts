@@ -17,6 +17,7 @@ export enum Category {
   ANIME,
   MV,
   LIVE_PERFORMANCE,
+  STAND_UP,
   DOCUMENTARY,
   GAME,
   XXX,

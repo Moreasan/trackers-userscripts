@@ -3,8 +3,19 @@ import {
   addToMemoryCache,
   getFromMemoryCache,
 } from "../utils/cache";
-import { parseSize } from "../utils/utils";
-import { Category, MetaData, Request, Torrent, tracker } from "./tracker";
+import {
+  parseImdbIdFromLink,
+  parseResolution,
+  parseSize,
+} from "../utils/utils";
+import {
+  Category,
+  MetaData,
+  Request,
+  toGenerator,
+  Torrent,
+  tracker,
+} from "./tracker";
 import tracker_tools from "common";
 
 function isSupportedCategory(category: Category) {
@@ -15,6 +26,45 @@ function isSupportedCategory(category: Category) {
     category === Category.LIVE_PERFORMANCE
   );
 }
+
+const parseTorrents = (element: HTMLElement) => {
+  const torrents = [];
+  element
+    .querySelectorAll("tr.basic-movie-list__torrent-row")
+    .forEach((element: HTMLElement) => {
+      if (element.querySelector(".basic-movie-list__torrent-edition")) {
+        return;
+      }
+      const size = parseSize(element.children[2].textContent);
+      let title = element.querySelector(".torrent-info-link").textContent;
+      const resolution = parseResolution(title);
+      const tags = [];
+      if (title.includes("Remux")) {
+        tags.push("Remux");
+      }
+      const torrent: Torrent = {
+        dom: element,
+        size,
+        tags,
+        resolution,
+      };
+      torrents.push(torrent);
+    });
+  return torrents;
+};
+
+const parseCategory = (element: HTMLElement): Category => {
+  const categoryTitle = element.querySelector(
+    ".basic-movie-list__torrent-edition__main"
+  ).textContent;
+  if (categoryTitle.includes("Stand-up Comedy ")) {
+    return Category.STAND_UP;
+  } else if (categoryTitle.includes("Live Performance ")) {
+    return Category.LIVE_PERFORMANCE;
+  } else {
+    return Category.MOVIE;
+  }
+};
 
 export default class PTP implements tracker {
   canBeUsedAsSource(): boolean {
@@ -30,9 +80,25 @@ export default class PTP implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    yield {
-      total: 0,
-    };
+    const requests: Array<Request> = [];
+    document
+      .querySelectorAll("#torrents-movie-view table.torrent_table > tbody")
+      ?.forEach((element: HTMLElement) => {
+        const imdbId = parseImdbIdFromLink(
+          element.querySelector(".basic-movie-list__movie__ratings-and-tags")
+        );
+
+        const request: Request = {
+          torrents: parseTorrents(element),
+          dom: element as HTMLElement,
+          imdbId,
+          query: "",
+          category: parseCategory(element),
+        };
+        requests.push(request);
+      });
+
+    yield* toGenerator(requests);
   }
 
   name(): string {

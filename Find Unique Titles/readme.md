@@ -11,6 +11,7 @@ You can generate it by running run `npm run dev`.
 - Fix HDB not working as a source
 - Refactor code to use generator for creating search requests. It is essentially practical when you need to do some fetching to build the request (like fetching another page for IMDB id).
 - Add support for CHD and HDSky (thanks to @gawain12)
+- PTP can be used a source
 
 ## 2023-09-30
 
