@@ -84,7 +84,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
   async canUpload(request: Request) {
     if (!request.imdbId) return true;
-    const queryUrl = `https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&filter_cat=1&cataloguenumber=${request.imdbId}&order_by=time&order_way=desc&tags_type=0`;
+    const queryUrl = `https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&cataloguenumber=${request.imdbId}&order_by=time&order_way=desc&tags_type=0`;
     const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
     return result.querySelector(".torrent_card_container") === null;
   }

@@ -2148,7 +2148,7 @@ class SC {
   canUpload(request) {
     return _asyncToGenerator(function* () {
       if (!request.imdbId) return true;
-      var queryUrl = "https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&filter_cat=1&cataloguenumber=".concat(request.imdbId, "&order_by=time&order_way=desc&tags_type=0");
+      var queryUrl = "https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&cataloguenumber=".concat(request.imdbId, "&order_by=time&order_way=desc&tags_type=0");
       var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(queryUrl);
       return result.querySelector(".torrent_card_container") === null;
     })();
