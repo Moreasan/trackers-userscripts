@@ -90,13 +90,6 @@ const main = async function () {
 };
 
 tracker_tools.dom.appendErrorMessage();
-window.addEventListener("error", (event) => {
-  tracker_tools.dom.showError(event.message);
-});
-window.onunhandledrejection = (event) => {
-  console.trace(event.reason);
-  tracker_tools.dom.showError(event.reason);
-};
 main().catch((e) => {
   tracker_tools.dom.showError(e.message);
 });

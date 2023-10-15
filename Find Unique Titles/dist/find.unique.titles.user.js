@@ -157,13 +157,6 @@ var main = /*#__PURE__*/function () {
   };
 }();
 common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.appendErrorMessage();
-window.addEventListener("error", event => {
-  common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.showError(event.message);
-});
-window.onunhandledrejection = event => {
-  console.trace(event.reason);
-  common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.showError(event.reason);
-};
 main().catch(e => {
   common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.showError(e.message);
 });
