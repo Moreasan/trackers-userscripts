@@ -36,6 +36,7 @@
 // @grant GM.getValue
 // @namespace http://tampermonkey.net/
 // @require https://cdn.jsdelivr.net/npm/jquery@^3.6.4/dist/jquery.min.js
+// @updateURL https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js
 // ==/UserScript==
 
 /******/ (() => { // webpackBootstrap

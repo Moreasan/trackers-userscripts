@@ -61,5 +61,6 @@ export const UserScriptConfig: IWebpackUserScript = {
       `https://cdn.jsdelivr.net/npm/jquery@${pkg.dependencies.jquery}/dist/jquery.min.js`,
     ],
     grant: ["GM.xmlHttpRequest", "GM.setValue", "GM.getValue"],
+    updateURL: 'https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js'
   }
 }
