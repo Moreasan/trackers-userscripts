@@ -1,4 +1,3 @@
-import { updateCount, updateTotalCount } from "../utils/dom";
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, MetaData, toGenerator } from "./tracker";
 import tracker_tools from "common";
@@ -38,20 +37,19 @@ export default class TiK implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
     const torrentsTable = findTorrentsTable();
     if (!torrentsTable) {
       yield {
         total: 0,
       };
-      return
+      return;
     }
     let nodes = torrentsTable.querySelectorAll("tr");
-    updateTotalCount(nodes.length - 1);
-    let i = 1;
+    yield {
+      total: nodes.length - 1,
+    };
     for (let i = 1; i < nodes.length; i++) {
       const element = nodes[i];
-      updateCount(i);
       const link: HTMLAnchorElement | null = element.querySelector(
         'a[href*="details.php?id"]'
       );
@@ -76,10 +74,8 @@ export default class TiK implements tracker {
         imdbId,
         query: "",
       };
-      requests.push(request);
+      yield request
     }
-
-    yield* toGenerator(requests);
   }
 
   name(): string {

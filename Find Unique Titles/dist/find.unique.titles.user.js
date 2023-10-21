@@ -2329,22 +2329,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ TiK)
 /* harmony export */ });
-/* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/dom */ "./src/utils/dom.ts");
-/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-/* harmony import */ var _tracker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./tracker */ "./src/trackers/tracker.ts");
-/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+/* harmony import */ var common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+function _awaitAsyncGenerator(value) { return new _OverloadYield(value, 0); }
 function _wrapAsyncGenerator(fn) { return function () { return new _AsyncGenerator(fn.apply(this, arguments)); }; }
 function _AsyncGenerator(gen) { var front, back; function resume(key, arg) { try { var result = gen[key](arg), value = result.value, overloaded = value instanceof _OverloadYield; Promise.resolve(overloaded ? value.v : value).then(function (arg) { if (overloaded) { var nextKey = "return" === key ? "return" : "next"; if (!value.k || arg.done) return resume(nextKey, arg); arg = gen[nextKey](arg).value; } settle(result.done ? "return" : "normal", arg); }, function (err) { resume("throw", err); }); } catch (err) { settle("throw", err); } } function settle(type, value) { switch (type) { case "return": front.resolve({ value: value, done: !0 }); break; case "throw": front.reject(value); break; default: front.resolve({ value: value, done: !1 }); } (front = front.next) ? resume(front.key, front.arg) : back = null; } this._invoke = function (key, arg) { return new Promise(function (resolve, reject) { var request = { key: key, arg: arg, resolve: resolve, reject: reject, next: null }; back ? back = back.next = request : (front = back = request, resume(key, arg)); }); }, "function" != typeof gen.return && (this.return = void 0); }
 _AsyncGenerator.prototype["function" == typeof Symbol && Symbol.asyncIterator || "@@asyncIterator"] = function () { return this; }, _AsyncGenerator.prototype.next = function (arg) { return this._invoke("next", arg); }, _AsyncGenerator.prototype.throw = function (arg) { return this._invoke("throw", arg); }, _AsyncGenerator.prototype.return = function (arg) { return this._invoke("return", arg); };
-function _awaitAsyncGenerator(value) { return new _OverloadYield(value, 0); }
-function _asyncGeneratorDelegate(inner) { var iter = {}, waiting = !1; function pump(key, value) { return waiting = !0, value = new Promise(function (resolve) { resolve(inner[key](value)); }), { done: !1, value: new _OverloadYield(value, 1) }; } return iter["undefined" != typeof Symbol && Symbol.iterator || "@@iterator"] = function () { return this; }, iter.next = function (value) { return waiting ? (waiting = !1, value) : pump("next", value); }, "function" == typeof inner.throw && (iter.throw = function (value) { if (waiting) throw waiting = !1, value; return pump("throw", value); }), "function" == typeof inner.return && (iter.return = function (value) { return waiting ? (waiting = !1, value) : pump("return", value); }), iter; }
 function _OverloadYield(value, kind) { this.v = value, this.k = kind; }
-function _asyncIterator(iterable) { var method, async, sync, retry = 2; for ("undefined" != typeof Symbol && (async = Symbol.asyncIterator, sync = Symbol.iterator); retry--;) { if (async && null != (method = iterable[async])) return method.call(iterable); if (sync && null != (method = iterable[sync])) return new AsyncFromSyncIterator(method.call(iterable)); async = "@@asyncIterator", sync = "@@iterator"; } throw new TypeError("Object is not async iterable"); }
-function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r) { if (Object(r) !== r) return Promise.reject(new TypeError(r + " is not an object.")); var done = r.done; return Promise.resolve(r.value).then(function (value) { return { value: value, done: done }; }); } return AsyncFromSyncIterator = function AsyncFromSyncIterator(s) { this.s = s, this.n = s.next; }, AsyncFromSyncIterator.prototype = { s: null, n: null, next: function next() { return AsyncFromSyncIteratorContinuation(this.n.apply(this.s, arguments)); }, return: function _return(value) { var ret = this.s.return; return void 0 === ret ? Promise.resolve({ value: value, done: !0 }) : AsyncFromSyncIteratorContinuation(ret.apply(this.s, arguments)); }, throw: function _throw(value) { var thr = this.s.return; return void 0 === thr ? Promise.reject(value) : AsyncFromSyncIteratorContinuation(thr.apply(this.s, arguments)); } }, new AsyncFromSyncIterator(s); }
-
-
 
 
 var findTorrentsTable = () => {
@@ -2371,7 +2364,6 @@ class TiK {
   }
   getSearchRequest() {
     return _wrapAsyncGenerator(function* () {
-      var requests = [];
       var torrentsTable = findTorrentsTable();
       if (!torrentsTable) {
         yield {
@@ -2380,18 +2372,18 @@ class TiK {
         return;
       }
       var nodes = torrentsTable.querySelectorAll("tr");
-      (0,_utils_dom__WEBPACK_IMPORTED_MODULE_0__.updateTotalCount)(nodes.length - 1);
-      var i = 1;
-      for (var _i = 1; _i < nodes.length; _i++) {
-        var element = nodes[_i];
-        (0,_utils_dom__WEBPACK_IMPORTED_MODULE_0__.updateCount)(_i);
+      yield {
+        total: nodes.length - 1
+      };
+      for (var i = 1; i < nodes.length; i++) {
+        var element = nodes[i];
         var link = element.querySelector('a[href*="details.php?id"]');
         if (!link) {
           continue;
         }
-        var response = yield _awaitAsyncGenerator(common__WEBPACK_IMPORTED_MODULE_3__["default"].http.fetchAndParseHtml(link.href));
-        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
-        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[6].textContent);
+        var response = yield _awaitAsyncGenerator(common__WEBPACK_IMPORTED_MODULE_1__["default"].http.fetchAndParseHtml(link.href));
+        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(response);
+        var size = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[6].textContent);
         var request = {
           torrents: [{
             size,
@@ -2402,9 +2394,8 @@ class TiK {
           imdbId,
           query: ""
         };
-        requests.push(request);
+        yield request;
       }
-      yield* _asyncGeneratorDelegate(_asyncIterator((0,_tracker__WEBPACK_IMPORTED_MODULE_2__.toGenerator)(requests)), _awaitAsyncGenerator);
     })();
   }
   name() {
@@ -2419,7 +2410,7 @@ class TiK {
     var stateSelect = document.getElementById("incldead");
     var td = document.createElement("td");
     td.appendChild(select);
-    common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.insertBefore(td, stateSelect.parentElement);
+    common__WEBPACK_IMPORTED_MODULE_1__["default"].dom.insertBefore(td, stateSelect.parentElement);
   }
 }
 
