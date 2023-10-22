@@ -34,8 +34,10 @@
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
+// @grant GM_registerMenuCommand
 // @namespace http://tampermonkey.net/
 // @require https://cdn.jsdelivr.net/npm/jquery@^3.6.4/dist/jquery.min.js
+// @require https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @updateURL https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js
 // ==/UserScript==
 
@@ -55,12 +57,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_cache__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/cache */ "./src/utils/cache.ts");
 /* harmony import */ var _utils_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/dom */ "./src/utils/dom.ts");
 /* harmony import */ var common__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! common */ "../common/dist/index.mjs");
+/* harmony import */ var _settings__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./settings */ "./src/settings.ts");
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_trackers__WEBPACK_IMPORTED_MODULE_0__, _utils_cache__WEBPACK_IMPORTED_MODULE_1__]);
 ([_trackers__WEBPACK_IMPORTED_MODULE_0__, _utils_cache__WEBPACK_IMPORTED_MODULE_1__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 function _asyncIterator(iterable) { var method, async, sync, retry = 2; for ("undefined" != typeof Symbol && (async = Symbol.asyncIterator, sync = Symbol.iterator); retry--;) { if (async && null != (method = iterable[async])) return method.call(iterable); if (sync && null != (method = iterable[sync])) return new AsyncFromSyncIterator(method.call(iterable)); async = "@@asyncIterator", sync = "@@iterator"; } throw new TypeError("Object is not async iterable"); }
 function AsyncFromSyncIterator(s) { function AsyncFromSyncIteratorContinuation(r) { if (Object(r) !== r) return Promise.reject(new TypeError(r + " is not an object.")); var done = r.done; return Promise.resolve(r.value).then(function (value) { return { value: value, done: done }; }); } return AsyncFromSyncIterator = function AsyncFromSyncIterator(s) { this.s = s, this.n = s.next; }, AsyncFromSyncIterator.prototype = { s: null, n: null, next: function next() { return AsyncFromSyncIteratorContinuation(this.n.apply(this.s, arguments)); }, return: function _return(value) { var ret = this.s.return; return void 0 === ret ? Promise.resolve({ value: value, done: !0 }) : AsyncFromSyncIteratorContinuation(ret.apply(this.s, arguments)); }, throw: function _throw(value) { var thr = this.s.return; return void 0 === thr ? Promise.reject(value) : AsyncFromSyncIteratorContinuation(thr.apply(this.s, arguments)); } }, new AsyncFromSyncIterator(s); }
+
+
 
 
 
@@ -77,10 +82,7 @@ var main = /*#__PURE__*/function () {
 
     console.log("Init User script");
     /******************************************************************************/
-
-    var only_show_unique_titles = false; // change to true if you wish
-    var better_constant = 1.15; // you can change this too.. wouldn't recommend going below 1.05
-    var useCache = false;
+    var settings = (0,_settings__WEBPACK_IMPORTED_MODULE_4__.getSettings)();
 
     /******************************************************************************/
     if (document.getElementById("tracker-select")) return;
@@ -116,12 +118,12 @@ var main = /*#__PURE__*/function () {
             var item = _step.value;
             {
               var request = item;
-              if (useCache && request.imdbId && (0,_utils_cache__WEBPACK_IMPORTED_MODULE_1__.existsInCache)(targetTracker.name(), request.imdbId)) {
+              if (settings.useCache && request.imdbId && (0,_utils_cache__WEBPACK_IMPORTED_MODULE_1__.existsInCache)(targetTracker.name(), request.imdbId)) {
                 hideTorrents(request);
                 (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
                 continue;
               }
-              var response = yield targetTracker.canUpload(request, only_show_unique_titles);
+              var response = yield targetTracker.canUpload(request, settings.onlyNewTitles);
               (0,_utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
               if (!response) {
                 if (request.imdbId) {
@@ -177,6 +179,71 @@ window.addEventListener("beforeunload", function () {
 });
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
+
+/***/ }),
+
+/***/ "./src/settings.ts":
+/*!*************************!*\
+  !*** ./src/settings.ts ***!
+  \*************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getSettings": () => (/* binding */ getSettings)
+/* harmony export */ });
+var defaultConfig = {
+  onlyNewTitles: false,
+  useCache: true,
+  sizeDifferenceThreshold: 1.2
+};
+
+// Initialize the library
+GM_config.init({
+  id: "find-unique-titles-settings",
+  title: "Find Unique Titles",
+  fields: {
+    onlyNewTitles: {
+      label: "Only new titles",
+      type: "checkbox",
+      default: defaultConfig.onlyNewTitles
+    },
+    useCache: {
+      label: "Use cache",
+      type: "checkbox",
+      default: defaultConfig.useCache
+    },
+    sizeDifferenceThreshold: {
+      label: "Size Difference Threshold",
+      type: "float",
+      default: defaultConfig.sizeDifferenceThreshold
+    }
+  },
+  css: "\n        #find-unique-titles-settings {\n        }\n        #find-unique-titles-settings .config_var {\n            display: flex;\n            align-items: center;\n            justify-content: space-between;\n        }\n    ",
+  events: {
+    open: function open() {
+      GM_config.frame.style.width = "400px"; // Adjust width as needed
+      GM_config.frame.style.height = "250px"; // Adjust width as needed
+      GM_config.frame.style.position = "fixed";
+      GM_config.frame.style.left = "50%";
+      GM_config.frame.style.top = "50%";
+      GM_config.frame.style.transform = "translate(-50%, -50%)";
+    },
+    save: function save() {
+      GM_config.close();
+    }
+  }
+});
+
+// Add menu command to open the configuration
+GM_registerMenuCommand("Settings", () => GM_config.open());
+var getSettings = () => {
+  return {
+    onlyNewTitles: GM_config.get("onlyNewTitles"),
+    useCache: GM_config.get("useCache"),
+    sizeDifferenceThreshold: GM_config.get("sizeDifferenceThreshold")
+  };
+};
 
 /***/ }),
 

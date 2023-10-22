@@ -1,22 +1,22 @@
-import pkg from '../package.json'
-import type { UserscriptOptions } from 'webpack-userscript'
+import pkg from "../package.json";
+import type { UserscriptOptions } from "webpack-userscript";
 
 interface IWebpackUserScript {
   /* userscript version */
-  scriptVersion: string
+  scriptVersion: string;
 
   /* homepage url (github pages) */
-  scriptHomePage: string
+  scriptHomePage: string;
 
   /* script file name, without file extension */
-  scriptFileName: string
+  scriptFileName: string;
 
   /**
    * userscript headers
    * including script name, description, match url, grants and so on
    * see https://www.tampermonkey.net/documentation.php for details
    **/
-  scriptHeaders: UserscriptOptions['headers']
+  scriptHeaders: UserscriptOptions["headers"];
 }
 
 export const UserScriptConfig: IWebpackUserScript = {
@@ -55,12 +55,19 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://ptchdbits.co/torrents.php*",
       "https://hdsky.me/torrents.php*",
       "https://www.cinematik.net/browse.php*",
-      "https://pterclub.com/torrents.php*"
+      "https://pterclub.com/torrents.php*",
     ],
     require: [
       `https://cdn.jsdelivr.net/npm/jquery@${pkg.dependencies.jquery}/dist/jquery.min.js`,
+      "https://openuserjs.org/src/libs/sizzle/GM_config.js",
     ],
-    grant: ["GM.xmlHttpRequest", "GM.setValue", "GM.getValue"],
-    updateURL: 'https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js'
-  }
-}
+    grant: [
+      "GM.xmlHttpRequest",
+      "GM.setValue",
+      "GM.getValue",
+      "GM_registerMenuCommand",
+    ],
+    updateURL:
+      "https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js",
+  },
+};
