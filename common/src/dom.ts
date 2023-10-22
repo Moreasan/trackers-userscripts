@@ -34,9 +34,9 @@ export const appendErrorMessage = () => {
   addChild(document.body, div);
 };
 
-export const findFirst = (...selectors: string[]) => {
+export const findFirst = (element: Element, ...selectors: string[]) => {
   for (let selector of selectors) {
-    let elements = document.querySelectorAll(selector);
+    let elements = element.querySelectorAll(selector);
     if (elements.length > 0) {
       return elements;
     }

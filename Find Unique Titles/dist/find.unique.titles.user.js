@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
-// @version 0.0.2
+// @version 0.0.3
 // @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
@@ -1957,9 +1957,9 @@ class PTP {
   getSearchRequest() {
     return _wrapAsyncGenerator(function* () {
       var requests = [];
-      var nodes = common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.findFirst("#torrents-movie-view table.torrent_table > tbody", ".cover-movie-list__movie");
+      var nodes = common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.findFirst(document, "#torrents-movie-view table.torrent_table > tbody", "table.torrent_table > tbody tr.basic-movie-list__details-row", ".cover-movie-list__movie");
       nodes === null || nodes === void 0 ? void 0 : nodes.forEach(element => {
-        var elements = common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.findFirst(".basic-movie-list__movie__ratings-and-tags", ".cover-movie-list__movie__rating-and-tags");
+        var elements = common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.findFirst(element, ".basic-movie-list__movie__ratings-and-tags", ".cover-movie-list__movie__rating-and-tags");
         var imdbId = elements ? (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(elements[0]) : null;
         var request = {
           torrents: parseTorrents(element),
@@ -2927,9 +2927,9 @@ const appendErrorMessage = () => {
     div.style.color = "white";
     addChild(document.body, div);
 };
-const findFirst = (...selectors) => {
+const findFirst = (element, ...selectors) => {
     for (let selector of selectors) {
-        let elements = document.querySelectorAll(selector);
+        let elements = element.querySelectorAll(selector);
         if (elements.length > 0) {
             return elements;
         }

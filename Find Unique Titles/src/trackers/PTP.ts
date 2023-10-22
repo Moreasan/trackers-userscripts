@@ -61,7 +61,7 @@ const parseCategory = (element: HTMLElement): Category => {
     ".basic-movie-list__torrent-edition__main"
   )?.textContent;
   if (!categoryTitle) {
-    return null
+    return null;
   }
   if (categoryTitle.includes("Stand-up Comedy ")) {
     return Category.STAND_UP;
@@ -88,11 +88,14 @@ export default class PTP implements tracker {
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     const nodes = tracker_tools.dom.findFirst(
+      document,
       "#torrents-movie-view table.torrent_table > tbody",
+      "table.torrent_table > tbody tr.basic-movie-list__details-row",
       ".cover-movie-list__movie"
     );
     nodes?.forEach((element: HTMLElement) => {
       let elements = tracker_tools.dom.findFirst(
+        element,
         ".basic-movie-list__movie__ratings-and-tags",
         ".cover-movie-list__movie__rating-and-tags"
       );
