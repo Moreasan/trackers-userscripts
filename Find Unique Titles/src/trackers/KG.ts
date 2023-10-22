@@ -81,10 +81,10 @@ export default class KG implements tracker {
 
   async canUpload(request: Request) {
     if (!request.imdbId) return true;
-    const queryUrl =
-      "https://karagarga.in/browse.php?sort=size&search=" +
-      request.imdbId +
-      "&search_type=imdb&d=DESC";
+    const queryUrl = `https://karagarga.in/browse.php?sort=added&search=${request.imdbId.replace(
+      "",
+      ""
+    )}&search_type=imdb&d=DESC`;
 
     const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
 
