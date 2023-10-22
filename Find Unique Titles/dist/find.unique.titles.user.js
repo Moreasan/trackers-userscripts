@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
-// @version 0.0.1
+// @version 0.0.2
 // @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
@@ -1714,7 +1714,7 @@ class KG {
   canUpload(request) {
     return _asyncToGenerator(function* () {
       if (!request.imdbId) return true;
-      var queryUrl = "https://karagarga.in/browse.php?sort=size&search=" + request.imdbId + "&search_type=imdb&d=DESC";
+      var queryUrl = "https://karagarga.in/browse.php?sort=added&search=".concat(request.imdbId.replace("", ""), "&search_type=imdb&d=DESC");
       var result = yield common__WEBPACK_IMPORTED_MODULE_2__["default"].http.fetchAndParseHtml(queryUrl);
       return result.querySelector("tr.oddrow") === null;
     })();
@@ -1906,6 +1906,9 @@ function isSupportedCategory(category) {
 }
 var parseTorrents = element => {
   var torrents = [];
+  if (element.classList.contains("cover-movie-list__movie")) {
+    return [];
+  }
   element.querySelectorAll("tr.basic-movie-list__torrent-row").forEach(element => {
     if (element.querySelector(".basic-movie-list__torrent-edition")) {
       return;
@@ -1928,7 +1931,11 @@ var parseTorrents = element => {
   return torrents;
 };
 var parseCategory = element => {
-  var categoryTitle = element.querySelector(".basic-movie-list__torrent-edition__main").textContent;
+  var _element$querySelecto;
+  var categoryTitle = (_element$querySelecto = element.querySelector(".basic-movie-list__torrent-edition__main")) === null || _element$querySelecto === void 0 ? void 0 : _element$querySelecto.textContent;
+  if (!categoryTitle) {
+    return null;
+  }
   if (categoryTitle.includes("Stand-up Comedy ")) {
     return _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.STAND_UP;
   } else if (categoryTitle.includes("Live Performance ")) {
@@ -1949,10 +1956,11 @@ class PTP {
   }
   getSearchRequest() {
     return _wrapAsyncGenerator(function* () {
-      var _document$querySelect;
       var requests = [];
-      (_document$querySelect = document.querySelectorAll("#torrents-movie-view table.torrent_table > tbody")) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.forEach(element => {
-        var imdbId = (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element.querySelector(".basic-movie-list__movie__ratings-and-tags"));
+      var nodes = common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.findFirst("#torrents-movie-view table.torrent_table > tbody", ".cover-movie-list__movie");
+      nodes === null || nodes === void 0 ? void 0 : nodes.forEach(element => {
+        var elements = common__WEBPACK_IMPORTED_MODULE_3__["default"].dom.findFirst(".basic-movie-list__movie__ratings-and-tags", ".cover-movie-list__movie__rating-and-tags");
+        var imdbId = elements ? (0,_utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(elements[0]) : null;
         var request = {
           torrents: parseTorrents(element),
           dom: element,
@@ -2894,6 +2902,50 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @trim21/gm-fetch */ "../node_modules/@trim21/gm-fetch/dist/index.mjs");
 
 
+const insertBefore = (newNode, existingNode) => {
+    existingNode.parentNode.insertBefore(newNode, existingNode);
+};
+const insertAfter = (newNode, existingNode) => {
+    existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+};
+const addChild = (parent, child) => {
+    parent.appendChild(child);
+};
+const appendErrorMessage = () => {
+    const div = document.createElement("div");
+    div.innerHTML =
+        '<span style="margin-left:15px;color:white;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;\n" onclick="this.parentElement.style.display=\'none\';">&times;</span>' +
+            '<span id="message"></span>';
+    div.style.position = "fixed";
+    div.style.bottom = "50px";
+    div.style.left = "50%";
+    div.style.display = "none";
+    div.style.width = "50%";
+    div.style.padding = "20px";
+    div.style.transform = "translate(-50%, 0)";
+    div.style.backgroundColor = "#f44336";
+    div.style.color = "white";
+    addChild(document.body, div);
+};
+const findFirst = (...selectors) => {
+    for (let selector of selectors) {
+        let elements = document.querySelectorAll(selector);
+        if (elements.length > 0) {
+            return elements;
+        }
+    }
+    return null;
+};
+
+var dom = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    addChild: addChild,
+    appendErrorMessage: appendErrorMessage,
+    findFirst: findFirst,
+    insertAfter: insertAfter,
+    insertBefore: insertBefore
+});
+
 const parser = new DOMParser();
 const fetchUrl = async (url, wait = 1000) => {
     await sleep(wait);
@@ -2905,7 +2957,7 @@ const fetchAndParseHtml = async (query_url) => {
     return parser.parseFromString(response, "text/html").body;
 };
 const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 var http = /*#__PURE__*/Object.freeze({
@@ -2914,48 +2966,9 @@ var http = /*#__PURE__*/Object.freeze({
     fetchUrl: fetchUrl
 });
 
-const insertBefore = (newNode, existingNode) => {
-    existingNode.parentNode.insertBefore(newNode, existingNode);
-};
-const insertAfter = (newNode, existingNode) => {
-    existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
-};
-const addChild = (parent, child) => {
-    parent.appendChild(child);
-};
-const appendErrorMessage = () => {
-    const div = document.createElement('div');
-    div.innerHTML = '<span style="margin-left:15px;color:white;font-weight:bold;float:right;font-size:22px;line-height:20px;cursor:pointer;transition:0.3s;\n" onclick="this.parentElement.style.display=\'none\';">&times;</span>' +
-        '<span id="message"></span>';
-    div.style.position = 'fixed';
-    div.style.bottom = "50px";
-    div.style.left = "50%";
-    div.style.display = "none";
-    div.style.width = "50%";
-    div.style.padding = "20px";
-    div.style.transform = "translate(-50%, 0)";
-    div.style.backgroundColor = "#f44336";
-    div.style.color = "white";
-    addChild(document.body, div);
-};
-const showError = (message) => {
-    const element = document.querySelector('#message');
-    element.innerHTML = "Error occurred in Fin Unique titles script: " + message;
-    element.parentElement.style.display = "block";
-};
-
-var dom = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    addChild: addChild,
-    appendErrorMessage: appendErrorMessage,
-    insertAfter: insertAfter,
-    insertBefore: insertBefore,
-    showError: showError
-});
-
 const tracker_tools = {
     http,
-    dom
+    dom,
 };
 
 

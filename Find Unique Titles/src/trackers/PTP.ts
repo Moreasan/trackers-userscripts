@@ -29,6 +29,9 @@ function isSupportedCategory(category: Category) {
 
 const parseTorrents = (element: HTMLElement) => {
   const torrents = [];
+  if (element.classList.contains("cover-movie-list__movie")) {
+    return [];
+  }
   element
     .querySelectorAll("tr.basic-movie-list__torrent-row")
     .forEach((element: HTMLElement) => {
@@ -56,7 +59,10 @@ const parseTorrents = (element: HTMLElement) => {
 const parseCategory = (element: HTMLElement): Category => {
   const categoryTitle = element.querySelector(
     ".basic-movie-list__torrent-edition__main"
-  ).textContent;
+  )?.textContent;
+  if (!categoryTitle) {
+    return null
+  }
   if (categoryTitle.includes("Stand-up Comedy ")) {
     return Category.STAND_UP;
   } else if (categoryTitle.includes("Live Performance ")) {
@@ -81,22 +87,29 @@ export default class PTP implements tracker {
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
-    document
-      .querySelectorAll("#torrents-movie-view table.torrent_table > tbody")
-      ?.forEach((element: HTMLElement) => {
-        const imdbId = parseImdbIdFromLink(
-          element.querySelector(".basic-movie-list__movie__ratings-and-tags")
-        );
+    const nodes = tracker_tools.dom.findFirst(
+      "#torrents-movie-view table.torrent_table > tbody",
+      ".cover-movie-list__movie"
+    );
+    nodes?.forEach((element: HTMLElement) => {
+      let elements = tracker_tools.dom.findFirst(
+        ".basic-movie-list__movie__ratings-and-tags",
+        ".cover-movie-list__movie__rating-and-tags"
+      );
 
-        const request: Request = {
-          torrents: parseTorrents(element),
-          dom: element as HTMLElement,
-          imdbId,
-          query: "",
-          category: parseCategory(element),
-        };
-        requests.push(request);
-      });
+      const imdbId = elements
+        ? parseImdbIdFromLink(elements[0] as HTMLElement)
+        : null;
+
+      const request: Request = {
+        torrents: parseTorrents(element),
+        dom: element as HTMLElement,
+        imdbId,
+        query: "",
+        category: parseCategory(element),
+      };
+      requests.push(request);
+    });
 
     yield* toGenerator(requests);
   }
