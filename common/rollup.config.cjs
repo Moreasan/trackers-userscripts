@@ -1,5 +1,4 @@
 const typescript = require('@rollup/plugin-typescript');
-const pkg = require("./package.json");
 const path = require("path");
 
 const sourcemapPathTransform = (relativeSourcePath, sourcemapPath) => {
@@ -7,7 +6,12 @@ const sourcemapPathTransform = (relativeSourcePath, sourcemapPath) => {
 };
 
 module.exports = {
-  input: "./src/index.ts",
+  input: {
+    'http/index': 'src/http/index.ts',
+    'dom/index': 'src/dom/index.ts',
+    'trackers/index': 'src/trackers/index.ts',
+    'searcher/index': 'src/searcher/index.ts',
+  },
   plugins: [
     typescript({
       tsconfig: "tsconfig.json",
@@ -17,17 +21,9 @@ module.exports = {
     // ES module (for bundlers) build.
     {
       format: "esm",
-      file: pkg.module,
-      exports: "default",
-      sourcemap: true,
-      sourcemapExcludeSources: false,
-      sourcemapPathTransform,
-    },
-    // CommonJS (for Node) build.
-    {
-      format: "cjs",
-      file: pkg.main,
-      exports: "default",
+      dir: "dist",
+      entryFileNames: '[name].mjs',
+      exports: "named",
       sourcemap: true,
       sourcemapExcludeSources: false,
       sourcemapPathTransform,

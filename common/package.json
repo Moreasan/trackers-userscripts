@@ -6,35 +6,46 @@
   },
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "generatePTConfig": "tsc -m esnext -t es2022 scripts/PrivateSitesGenerator.ts --moduleResolution node --outDir dist && node --es-module-specifier-resolution=node dist/scripts/PrivateSitesGenerator.js"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
+  "types": "dist/src/index.d.ts",
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/preset-env": "^7.21.4",
     "@babel/preset-typescript": "^7.21.4",
     "@babel/register": "^7.21.0",
     "@crashmax/prettier-config": "^3.2.1",
+    "@rollup/plugin-typescript": "^11.1.0",
     "@types/copy-webpack-plugin": "^10.1.0",
+    "@types/esprima": "^4.0.5",
+    "@types/estraverse": "^5.1.5",
     "@types/tampermonkey": "^4.0.10",
     "@types/terser-webpack-plugin": "^5.2.0",
     "@types/webpack": "^5.28.1",
     "@types/webpack-dev-server": "^4.7.2",
     "babel-loader": "^9.1.2",
-    "webpack": "^5.79.0",
-    "webpack-cli": "^5.0.1",
-    "typescript": "^5.0.4",
+    "esprima": "^4.0.1",
+    "estraverse": "^5.3.0",
     "rollup": "^3.20.3",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.5.0",
+    "typescript": "^5.2.2",
     "unbuild": "^1.2.1",
-    "@rollup/plugin-typescript": "^11.1.0",
-    "tslib": "^2.5.0"
+    "webpack": "^5.79.0",
+    "webpack-cli": "^5.0.1"
   },
   "exports": {
-    ".": {
-      "types": "./dist/types/src/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+    "./http": {
+      "types": "./dist/types/src/http/index.d.ts",
+      "import": "./dist/http/index.mjs"
+    },
+    "./dom": {
+      "types": "./dist/types/src/dom/index.d.ts",
+      "import": "./dist/dom/index.mjs"
     }
-  }
+  },
+  "type": "module"
 }

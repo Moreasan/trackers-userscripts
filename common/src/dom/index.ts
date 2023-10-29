@@ -34,6 +34,12 @@ export const appendErrorMessage = () => {
   addChild(document.body, div);
 };
 
+export const showError = (message: string) => {
+  const element = document.querySelector("#message")! as HTMLElement;
+  element.innerHTML = "Error occurred in Fin Unique titles script: " + message;
+  element.parentElement!.style.display = "block";
+};
+
 export const findFirst = (element: Element, ...selectors: string[]) => {
   for (let selector of selectors) {
     let elements = element.querySelectorAll(selector);
