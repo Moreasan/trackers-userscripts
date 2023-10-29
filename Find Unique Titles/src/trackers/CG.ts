@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { Category, MetaData, Request, toGenerator, tracker } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild } from "common/dom";
 
 const parseCategory = (element: HTMLElement) => {
   const text = element.textContent.toLowerCase();
@@ -83,13 +84,13 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       request.imdbId +
       "&orderby=size&dir=DESC";
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.textContent?.includes("Nothing found!");
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector(".embedded > p") as HTMLElement,
       select
     );

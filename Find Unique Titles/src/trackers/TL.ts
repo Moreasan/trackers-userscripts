@@ -1,6 +1,6 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { addChild } from "common/dom";
 
 export default class TL implements tracker {
   canBeUsedAsSource(): boolean {
@@ -53,7 +53,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     select.style.margin = "20px 0";
     select.style.padding = "2px 2px 3px 2px";
     select.style.color = "#111";
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector(".sub-navbar") as HTMLElement,
       select
     );

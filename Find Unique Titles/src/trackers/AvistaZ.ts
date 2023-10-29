@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink } from "../utils/utils";
 import { tracker, Request, MetaData, toGenerator } from "./tracker";
-import tracker_tools from "common";
+import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 export default class AvistaZ implements tracker {
   canBeUsedAsSource(): boolean {
@@ -42,13 +43,13 @@ export default class AvistaZ implements tracker {
     if (!request.imdbId) return true;
     const queryUrl = "https://avistaz.to/movies?search=&imdb=" + request.imdbId;
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.textContent?.includes("No Movie found!");
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector("#content-area > div.well.well-sm") as HTMLElement,
       select
     );

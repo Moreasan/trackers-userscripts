@@ -4,7 +4,7 @@ export interface Torrent {
   tags: Array<string> | null;
   format?: string | null;
   resolution?: string | null;
-  dom: HTMLElement | null;
+  dom: HTMLElement;
 }
 
 export enum Category {

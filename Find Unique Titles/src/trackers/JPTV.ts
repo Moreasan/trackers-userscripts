@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild } from "common/dom";
 
 export default class JPTV implements tracker {
   canBeUsedAsSource(): boolean {
@@ -19,7 +20,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     let nodes = document.querySelectorAll(".view-torrent");
     for (const element of nodes) {
-      let response = await tracker_tools.http.fetchAndParseHtml(
+      let response = await fetchAndParseHtml(
         (element as HTMLAnchorElement).href
       );
       const imdbId = parseImdbIdFromLink(response as HTMLElement);
@@ -56,7 +57,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector(".form-torrent-search") as HTMLElement,
       select
     );

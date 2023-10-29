@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Request, toGenerator, Torrent, tracker } from "./tracker";
-import tracker_tools from "common";
+import { MetaData, Request, toGenerator, Torrent, tracker } from "./tracker";
+import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 export default class GPW implements tracker {
   canBeUsedAsSource(): boolean {
@@ -77,14 +78,14 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     if (!request.imdbId) return true;
     const queryUrl = `https://greatposterwall.com/torrents.php?groupname=${request.imdbId}`;
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.querySelector(".torrent-listings-no-result") !== null;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
     select.classList.add('Input')
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector(".SearchPageFooter-actions"),
       select
     );

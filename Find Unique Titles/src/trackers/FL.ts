@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild } from "common/dom";
 
 export default class FL implements tracker {
   canBeUsedAsSource(): boolean {
@@ -29,7 +30,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       if (!link) {
         continue;
       }
-      let response = await tracker_tools.http.fetchAndParseHtml(
+      let response = await fetchAndParseHtml(
         (link as HTMLAnchorElement).href
       );
       const imdbId = parseImdbIdFromLink(response as HTMLElement);
@@ -65,13 +66,13 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       request.imdbId +
       "&cat=0&searchin=1&sort=3";
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.querySelectorAll(".torrentrow").length === 0;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector("form p") as HTMLElement,
       select
     );

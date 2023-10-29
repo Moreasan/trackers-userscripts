@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { Category, Request, toGenerator, tracker, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild } from "common/dom";
 
 function parseTorrent(element: HTMLElement) {
   let infos = element
@@ -85,12 +86,12 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
   async canUpload(request: Request) {
     if (!request.imdbId) return true;
     const queryUrl = `https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&cataloguenumber=${request.imdbId}&order_by=time&order_way=desc&tags_type=0`;
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
     return result.querySelector(".torrent_card_container") === null;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector("#ft_container p") as HTMLElement,
       select
     );

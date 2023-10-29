@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { tracker, Request, MetaData } from "./tracker";
+import { fetchAndParseHtml } from "common/http";
+import { insertBefore } from "common/dom";
 
 export default class CLANSUD implements tracker {
   canBeUsedAsSource(): boolean {
@@ -41,7 +42,7 @@ export default class CLANSUD implements tracker {
         continue;
       }
       const link = (topic.querySelector("a") as HTMLAnchorElement).href;
-      let response = await tracker_tools.http.fetchAndParseHtml(link);
+      let response = await fetchAndParseHtml(link);
       const imdbId = parseImdbIdFromLink(response);
       const request: Request = {
         torrents: [],
@@ -62,7 +63,7 @@ export default class CLANSUD implements tracker {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.insertBefore(
+    insertBefore(
       select,
       document.querySelector('div[data-tableid="topics"]') as HTMLElement
     );

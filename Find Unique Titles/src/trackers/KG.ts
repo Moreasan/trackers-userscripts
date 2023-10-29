@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, Request, toGenerator, Torrent, tracker } from "./tracker";
-import tracker_tools from "common";
+import { Category, MetaData, Request, toGenerator, Torrent, tracker } from "./tracker";
+import { fetchAndParseHtml } from "common/http";
+import { insertBefore } from "common/dom";
 
 const parseCategory = (element: HTMLElement): Category => {
   const category = Category.MOVIE;
@@ -86,13 +87,13 @@ export default class KG implements tracker {
       ""
     )}&search_type=imdb&d=DESC`;
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.querySelector("tr.oddrow") === null;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.insertBefore(
+    insertBefore(
       select,
       document.getElementById("showdead") as HTMLElement
     );

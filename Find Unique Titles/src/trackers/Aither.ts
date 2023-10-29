@@ -1,6 +1,7 @@
 import { parseSize } from "../utils/utils";
 import { MetaData, Request, toGenerator, tracker } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild, insertAfter } from "common/dom";
 
 export default class Aither implements tracker {
   canBeUsedAsSource(): boolean {
@@ -52,7 +53,7 @@ export default class Aither implements tracker {
       request.imdbId +
       "&sortField=size";
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.textContent.includes(
       "There is no result in database for query"
@@ -65,7 +66,7 @@ export default class Aither implements tracker {
     select.style.width = "170px";
     div.classList.add("form__group");
     select.classList.add("form__select");
-    tracker_tools.dom.addChild(div, select);
-    tracker_tools.dom.insertAfter(div, parent.querySelector("h2"));
+    addChild(div, select);
+    insertAfter(div, parent.querySelector("h2"));
   }
 }

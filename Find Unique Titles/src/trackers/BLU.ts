@@ -1,6 +1,7 @@
 import { parseSize } from "../utils/utils";
 import { MetaData, Request, toGenerator, tracker } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild } from "common/dom";
 
 export default class BLU implements tracker {
   canBeUsedAsSource(): boolean {
@@ -54,14 +55,14 @@ export default class BLU implements tracker {
       request.imdbId +
       "&sortField=size";
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.querySelector(".torrent-listings-no-result") !== null;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
     select.classList.add("form__select");
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelectorAll(".panel__actions")[1] as HTMLElement,
       select
     );

@@ -1,6 +1,6 @@
 import { parseImdbIdFromLink } from "../utils/utils";
 import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { addChild, insertAfter } from "common/dom";
 
 export default class CG implements tracker {
   canBeUsedAsSource(): boolean {
@@ -32,7 +32,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 }
 
   name(): string {
-    return "HDT";
+    return "IPT";
   }
 
   async canUpload(request: Request) {
@@ -41,8 +41,8 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
   insertTrackersSelect(select: HTMLElement): void {
     const element = document.createElement("p");
-    tracker_tools.dom.addChild(element, select);
-    tracker_tools.dom.insertAfter(
+    addChild(element, select);
+    insertAfter(
       element,
       document.querySelector('.mBox form input[name="q"]').closest("p")
     );

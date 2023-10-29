@@ -1,6 +1,5 @@
 import {
   parseImdbId,
-  parseImdbIdFromLink,
   parseResolution,
   parseSize,
 } from "../utils/utils";
@@ -12,7 +11,8 @@ import {
   Torrent,
   Category,
 } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild } from "common/dom";
 
 const isExclusive = (element: HTMLElement) => {
   const exclusiveLink = element.querySelector(
@@ -117,7 +117,7 @@ export default class HDB implements tracker {
       request.imdbId +
       "&sort=size&h=8&d=DESC";
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result
       .querySelector("#resultsarea")
@@ -127,7 +127,7 @@ export default class HDB implements tracker {
   insertTrackersSelect(select: HTMLElement): void {
     document.querySelector("#moresearch3 > td:nth-child(2)").innerHTML +=
       "<br><br>Find unique for:<br>";
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector("#moresearch3 > td:nth-child(2)") as HTMLElement,
       select
     );

@@ -1,6 +1,6 @@
 import { parseImdbIdFromLink } from "../utils/utils";
 import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { addChild } from "common/dom";
 
 export default class NewInsane implements tracker {
   canBeUsedAsSource(): boolean {
@@ -42,7 +42,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.addChild(
+    addChild(
       document.querySelector(".searchbuttons.actiontitle") as HTMLElement,
       select
     );

@@ -1,6 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { addChild } from "common/dom";
 
 export default class CHD implements tracker {
   canBeUsedAsSource(): boolean {
@@ -30,7 +31,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       if (!link) {
         continue;
       }
-      let response = await tracker_tools.http.fetchAndParseHtml(
+      let response = await fetchAndParseHtml(
         (link as HTMLAnchorElement).href
       );
       const imdbId = parseImdbIdFromLink(response as HTMLElement);
@@ -66,6 +67,6 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const element = document
       .querySelector(".searchbox")
       .children[2].querySelector("td td.rowfollow tr");
-    tracker_tools.dom.addChild(element as HTMLElement, select);
+    addChild(element as HTMLElement, select);
   }
 }

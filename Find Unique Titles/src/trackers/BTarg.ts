@@ -1,6 +1,7 @@
 import { parseImdbId } from "../utils/utils";
 import { MetaData, Request, tracker } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { insertAfter } from "common/dom";
 
 export default class BTarg implements tracker {
   canBeUsedAsSource(): boolean {
@@ -30,7 +31,7 @@ export default class BTarg implements tracker {
       if (link.href.includes("#")) {
         continue;
       }
-      let response = await tracker_tools.http.fetchAndParseHtml(
+      let response = await fetchAndParseHtml(
         (link as HTMLAnchorElement).href
       );
       const imdbId = parseImdbId(response.textContent as string);
@@ -53,7 +54,7 @@ export default class BTarg implements tracker {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    tracker_tools.dom.insertAfter(
+    insertAfter(
       select,
       document.querySelector('select[name="inclfree"]') as HTMLElement
     );

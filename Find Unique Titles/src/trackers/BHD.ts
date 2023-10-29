@@ -1,9 +1,10 @@
-import { parseImdbId, parseImdbIdFromLink, parseResolution, parseSize } from "../utils/utils";
+import { parseImdbIdFromLink, parseResolution, parseSize } from "../utils/utils";
 import { Category, MetaData, Request, toGenerator, Torrent, tracker } from "./tracker";
-import tracker_tools from "common";
+import { insertBefore } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 const parseTorrents = (element: HTMLElement): Array<Torrent> => {
-  const torrents = [];
+  const torrents: Torrent[] = [];
   element.querySelectorAll('tr[id^="resulttorrent"]').forEach((torrentElement) => {
     const data = torrentElement.children[0].textContent.trim().split("/");
     const size = parseSize(torrentElement.children[4].textContent.trim());
@@ -123,7 +124,7 @@ export default class BHD implements tracker {
     const queryUrl =
       "https://beyond-hd.me/library/movies?activity=&q=" + request.imdbId;
 
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
 
     return result.querySelectorAll(".bhd-meta-box").length === 0;
   }
@@ -131,7 +132,7 @@ export default class BHD implements tracker {
   insertTrackersSelect(select: HTMLElement): void {
     select.classList.add("beta-form-main");
     select.style.width = "170px";
-    tracker_tools.dom.insertBefore(
+    insertBefore(
       select,
       document.querySelector(".button-center") as HTMLElement
     );

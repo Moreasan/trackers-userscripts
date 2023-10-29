@@ -1,6 +1,6 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { addChild } from "common/dom";
 
 export default class HDSky implements tracker {
   canBeUsedAsSource(): boolean {
@@ -56,6 +56,6 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const element = document
       .querySelector(".searchbox")
       .children[2].querySelector("td td.rowfollow tr");
-    tracker_tools.dom.addChild(element as HTMLElement, select);
+    addChild(element as HTMLElement, select);
   }
 }

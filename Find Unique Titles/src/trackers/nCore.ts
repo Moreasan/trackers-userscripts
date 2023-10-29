@@ -1,6 +1,6 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import tracker_tools from "common";
+import { addChild } from "common/dom";
 
 export default class MTeam implements tracker {
   canBeUsedAsSource(): boolean {
@@ -50,6 +50,6 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
   insertTrackersSelect(select: HTMLElement): void {
     const element = document.querySelector("#keresoresz tr");
-    tracker_tools.dom.addChild(element as HTMLElement, select);
+    addChild(element as HTMLElement, select);
   }
 }

@@ -8,9 +8,9 @@ import {
   updateNewContent,
   updateTotalCount,
 } from "./utils/dom";
-import tracker_tools from "common";
 import "./settings";
 import { getSettings } from "./settings";
+import { appendErrorMessage, showError } from "common/dom";
 
 function hideTorrents(request: Request) {
   request.dom.style.display = "none";
@@ -88,9 +88,10 @@ const main = async function () {
   (sourceTracker as tracker).insertTrackersSelect(select);
 };
 
-tracker_tools.dom.appendErrorMessage();
+
+appendErrorMessage();
 main().catch((e) => {
-  tracker_tools.dom.showError(e.message);
+  showError(e.message);
 });
 
 let currentUrl = document.location.href;

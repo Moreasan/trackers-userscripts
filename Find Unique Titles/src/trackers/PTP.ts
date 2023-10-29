@@ -1,5 +1,4 @@
 import {
-  addToCache,
   addToMemoryCache,
   getFromMemoryCache,
 } from "../utils/cache";
@@ -16,7 +15,8 @@ import {
   Torrent,
   tracker,
 } from "./tracker";
-import tracker_tools from "common";
+import { fetchAndParseHtml } from "common/http";
+import { findFirst, insertBefore } from "common/dom";
 
 function isSupportedCategory(category: Category) {
   return (
@@ -87,14 +87,14 @@ export default class PTP implements tracker {
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
-    const nodes = tracker_tools.dom.findFirst(
+    const nodes = findFirst(
       document,
       "#torrents-movie-view table.torrent_table > tbody",
       "table.torrent_table > tbody tr.basic-movie-list__details-row",
       ".cover-movie-list__movie"
     );
     nodes?.forEach((element: HTMLElement) => {
-      let elements = tracker_tools.dom.findFirst(
+      let elements = findFirst(
         element,
         ".basic-movie-list__movie__ratings-and-tags",
         ".cover-movie-list__movie__rating-and-tags"
@@ -128,7 +128,7 @@ export default class PTP implements tracker {
     if (!torrents) {
       const query_url =
         "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
-      const result = await tracker_tools.http.fetchAndParseHtml(query_url);
+      const result = await fetchAndParseHtml(query_url);
       torrents = parseAvailableTorrents(result);
       addToMemoryCache(request.imdbId, torrents);
     }
@@ -153,7 +153,7 @@ export default class PTP implements tracker {
   insertTrackersSelect(select: HTMLSelectElement): void {
     let element = document.querySelector(".search-form__footer__buttons");
     if (!element) return;
-    tracker_tools.dom.insertBefore(select, element as HTMLElement);
+    insertBefore(select, element as HTMLElement);
   }
 }
 

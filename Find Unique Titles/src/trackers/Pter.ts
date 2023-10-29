@@ -7,7 +7,8 @@ import {
   Torrent,
   tracker,
 } from "./tracker";
-import tracker_tools from "common";
+import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 function parseTorrent(element: HTMLElement): Torrent {
   const size = parseSize(element.childNodes[6].textContent);
@@ -126,7 +127,7 @@ export default class Pter implements tracker {
   async canUpload(request: Request) {
     if (!request.imdbId) return true;
     const queryUrl = `https://pterclub.com/torrents.php?search=${request.imdbId}`;
-    const result = await tracker_tools.http.fetchAndParseHtml(queryUrl);
+    const result = await fetchAndParseHtml(queryUrl);
     return result.querySelector("#torrenttable") === null;
   }
 
@@ -138,6 +139,6 @@ export default class Pter implements tracker {
     td.classList.add("embedded");
     td.appendChild(select);
 
-    tracker_tools.dom.addChild(targetLine, td);
+    addChild(targetLine, td);
   }
 }

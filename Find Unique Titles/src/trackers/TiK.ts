@@ -1,6 +1,6 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { tracker, Request, MetaData, toGenerator } from "./tracker";
-import tracker_tools from "common";
+import { insertBefore } from "common/dom";
 
 const findTorrentsTable = () => {
   let tables = document.querySelectorAll("table");
@@ -56,7 +56,7 @@ export default class TiK implements tracker {
       if (!link) {
         continue;
       }
-      let response = await tracker_tools.http.fetchAndParseHtml(
+      let response = await fetchAndParseHtml(
         (link as HTMLAnchorElement).href
       );
       const imdbId = parseImdbIdFromLink(response as HTMLElement);
@@ -90,6 +90,6 @@ export default class TiK implements tracker {
     const stateSelect = document.getElementById("incldead");
     const td = document.createElement("td");
     td.appendChild(select);
-    tracker_tools.dom.insertBefore(td, stateSelect.parentElement);
+    insertBefore(td, stateSelect.parentElement);
   }
 }
