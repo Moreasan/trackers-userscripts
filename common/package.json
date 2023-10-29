@@ -45,7 +45,16 @@
     "./dom": {
       "types": "./dist/types/src/dom/index.d.ts",
       "import": "./dist/dom/index.mjs"
+    },
+    "./trackers": {
+      "types": "./dist/types/src/trackers/index.d.ts",
+      "import": "./dist/trackers/index.mjs"
+    },
+    "./searcher": {
+      "types": "./dist/types/src/searcher/index.d.ts",
+      "import": "./dist/searcher/index.mjs"
     }
   },
-  "type": "module"
+  "type": "module",
+  "sideEffects": false
 }

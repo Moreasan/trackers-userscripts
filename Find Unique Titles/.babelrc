@@ -4,8 +4,13 @@
     [
       "@babel/preset-env",
       {
+        "useBuiltIns": "entry",
+        "corejs": "3.22",
         "targets": {
-          "esmodules": true
+          "browsers": [
+            "last 1 chrome version",
+            "last 1 firefox version"
+          ]
         }
       }
     ]

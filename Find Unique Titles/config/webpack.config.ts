@@ -1,30 +1,33 @@
-import url from 'url'
-import path from 'path'
-import TerserPlugin from 'terser-webpack-plugin'
-import WebpackUserscript from 'webpack-userscript'
-import CopyWebpackPlugin from 'copy-webpack-plugin'
-import { DefinePlugin } from 'webpack'
-import { UserScriptConfig } from './userscript.config'
+import { UserScriptConfig } from "./userscript.config";
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import path from "path";
+import TerserPlugin from "terser-webpack-plugin";
+import url from "url";
+import * as webpack from "webpack";
+import "webpack-dev-server";
+import WebpackUserscript from "webpack-userscript";
 
-const { scriptHeaders, scriptVersion, scriptHomePage, scriptFileName } = UserScriptConfig
-const publicFolder = path.resolve(__dirname, '../public')
-const outputPath = path.resolve(__dirname, '../dist')
-const mode = process.env.NODE_ENV || 'development'
-const isDev = mode === 'development'
-const port = 8080
+const { scriptHeaders, scriptVersion, scriptHomePage, scriptFileName } =
+  UserScriptConfig;
+const publicFolder = path.resolve(__dirname, "../public");
+const outputPath = path.resolve(__dirname, "../dist");
+const mode =
+  (process.env.NODE_ENV as "development" | "production") || "development";
+const isDev = mode === "development";
+const port = 8080;
 
-module.exports = {
+const config: webpack.Configuration = {
   mode,
   devtool: false,
-  target: 'web',
-  entry: path.join(__dirname, '../src/index.ts'),
+  target: "web",
+  entry: path.join(__dirname, "../src/index.ts"),
   output: {
     path: outputPath,
     filename: `${scriptFileName}.js`,
-    publicPath: path.join(__dirname, '../public'),
+    publicPath: path.join(__dirname, "../public"),
   },
   watchOptions: {
-    ignored: ['**/public', '**/node_modules', '**/dist'],
+    ignored: ["**/public", "**/node_modules", "**/dist"],
   },
   devServer: {
     port,
@@ -38,66 +41,86 @@ module.exports = {
     client: false,
   },
   optimization: {
-    minimize: !isDev,
+    minimize: true,
+    usedExports: true,
+    sideEffects: true,
+    innerGraph: true,
     minimizer: [
       new TerserPlugin({
         extractComments: false,
         terserOptions: {
-          output: { comments: false },
-          compress: !isDev
-        }
-      })
-    ]
+          compress: {
+            dead_code: true,
+            conditionals: false, // don't optimize conditionals
+            booleans: false, // don't optimize booleans
+            if_return: false, // don't optimize if-s followed by return/continue
+            join_vars: false, // don't join var declarations
+            collapse_vars: false, // don't collapse vars
+            reduce_vars: false, // don't try to optimize/collapse specific variable values
+            sequences: false, // don't join consecutive simple statements using commas
+          },
+          mangle: false, // don't alter variable/function names
+          keep_classnames: true,
+          keep_fnames: true,
+          output: {
+            beautify: true, // maintain original formatting
+            comments: false, // remove comments
+            indent_level: 2, // maintain an indentation level of 2 spaces
+          },
+        },
+      }),
+    ],
   },
   resolve: {
-    extensions: ['.ts', '.js', '*.mjs']
+    extensions: [".ts", ".js", "*.mjs"],
   },
   experiments: {
-    topLevelAwait: true
+    topLevelAwait: true,
   },
   module: {
     rules: [
       {
         test: /\.ts$/,
         exclude: /(node_modules)/,
-        loader: 'babel-loader',
+        loader: "babel-loader",
       },
       {
         test: /\.css$/,
-        use: [
-          'sass-loader',
-          'style-loader',
-          'css-loader',
-        ]
+        use: ["sass-loader", "style-loader", "css-loader"],
       },
       {
         test: /\.html$/,
-        use: [
-          'raw-loader',
-        ]
-      }
-    ]
+        use: ["raw-loader"],
+      },
+    ],
   },
   plugins: [
-    new DefinePlugin({
+    new webpack.DefinePlugin({
       VERSION: JSON.stringify(scriptVersion),
       NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-      BASE_PATH: JSON.stringify(isDev ? `https://localhost:${port}/` : scriptHomePage)
+      BASE_PATH: JSON.stringify(
+        isDev ? `https://localhost:${port}/` : scriptHomePage
+      ),
     }),
     new CopyWebpackPlugin({
       patterns: [
         {
           from: outputPath,
           to: publicFolder,
-          noErrorOnMissing: true
-        }
-      ]
+          noErrorOnMissing: true,
+        },
+      ],
     }),
     new WebpackUserscript({
       headers: scriptHeaders,
       proxyScript: {
-        baseURL: url.pathToFileURL(outputPath).toString().replace('http', 'https')
-      }
-    })
-  ]
-}
+        baseURL: url
+          .pathToFileURL(outputPath)
+          .toString()
+          .replace("http", "https"),
+      },
+    }),
+  ],
+};
+
+export default config;

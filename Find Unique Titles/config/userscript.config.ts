@@ -21,7 +21,7 @@ interface IWebpackUserScript {
 
 export const UserScriptConfig: IWebpackUserScript = {
   scriptVersion: pkg.version,
-  scriptHomePage: pkg.homepage,
+  scriptHomePage: "",
   scriptFileName: pkg.name,
   scriptHeaders: {
     name: "Find Unique Titles",
@@ -56,6 +56,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://hdsky.me/torrents.php*",
       "https://www.cinematik.net/browse.php*",
       "https://pterclub.com/torrents.php*",
+      "https://pterc.com/torrents.php*",
     ],
     require: [
       `https://cdn.jsdelivr.net/npm/jquery@${pkg.dependencies.jquery}/dist/jquery.min.js`,
