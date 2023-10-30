@@ -1,15 +1,23 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, toGenerator, Torrent, tracker } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import {
+  Category,
+  MetaData,
+  Request,
+  toGenerator,
+  Torrent,
+  tracker,
+} from "./tracker";
 import { insertBefore } from "common/dom";
+import { search, SearchResult } from "common/searcher";
+import { KG as KGTracker } from "common/trackers";
 
 const parseCategory = (element: HTMLElement): Category => {
   const category = Category.MOVIE;
   let img = element.querySelectorAll("td img")[0];
-  const imageSrc: string = img.attributes["src"].value;
-  if (imageSrc.includes("40.jpg")) return Category.AUDIOBOOK;
-  if (imageSrc.includes("41.jpg")) return Category.BOOK;
-  if (img.attributes["title"].value.includes("Music")) return Category.MUSIC;
+  const imageSrc = img.getAttribute("src");
+  if (imageSrc?.includes("40.jpg")) return Category.AUDIOBOOK;
+  if (imageSrc?.includes("41.jpg")) return Category.BOOK;
+  if (img.getAttribute("title")?.includes("Music")) return Category.MUSIC;
   return category;
 };
 const parseTorrent = (element: HTMLElement): Array<Torrent> => {
@@ -82,20 +90,14 @@ export default class KG implements tracker {
 
   async canUpload(request: Request) {
     if (!request.imdbId) return true;
-    const queryUrl = `https://karagarga.in/browse.php?sort=added&search=${request.imdbId.replace(
-      "",
-      ""
-    )}&search_type=imdb&d=DESC`;
-
-    const result = await fetchAndParseHtml(queryUrl);
-
-    return result.querySelector("tr.oddrow") === null;
+    const result = await search(KGTracker, {
+      movie_title: "",
+      movie_imdb_id: request.imdbId,
+    });
+    return result == SearchResult.NOT_FOUND;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    insertBefore(
-      select,
-      document.getElementById("showdead") as HTMLElement
-    );
+    insertBefore(select, document.getElementById("showdead") as HTMLElement);
   }
 }

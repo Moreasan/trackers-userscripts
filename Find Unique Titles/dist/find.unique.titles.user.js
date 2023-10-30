@@ -1126,15 +1126,16 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
-      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/trackers/index.mjs");
       const parseCategory = element => {
         const category = _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
         let img = element.querySelectorAll("td img")[0];
-        const imageSrc = img.attributes.src.value;
-        if (imageSrc.includes("40.jpg")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.AUDIOBOOK;
-        if (imageSrc.includes("41.jpg")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.BOOK;
-        if (img.attributes.title.value.includes("Music")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
+        const imageSrc = img.getAttribute("src");
+        if (imageSrc?.includes("40.jpg")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.AUDIOBOOK;
+        if (imageSrc?.includes("41.jpg")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.BOOK;
+        if (img.getAttribute("title")?.includes("Music")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
         return category;
       };
       const parseTorrent = element => {
@@ -1185,12 +1186,15 @@
         }
         async canUpload(request) {
           if (!request.imdbId) return true;
-          const queryUrl = `https://karagarga.in/browse.php?sort=added&search=${request.imdbId.replace("", "")}&search_type=imdb&d=DESC`;
-          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
-          return null === result.querySelector("tr.oddrow");
+          request.imdbId.replace("", "");
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_2__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_3__.KG, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_FOUND;
         }
         insertTrackersSelect(select) {
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.insertBefore)(select, document.getElementById("showdead"));
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.insertBefore)(select, document.getElementById("showdead"));
         }
       }
     },
@@ -2069,7 +2073,8 @@
     },
     "../common/dist/http/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
-        fetchAndParseHtml: () => fetchAndParseHtml
+        fetchAndParseHtml: () => fetchAndParseHtml,
+        fetchUrl: () => fetchUrl
       });
       var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
       const parser = new DOMParser;
@@ -2083,6 +2088,131 @@
         return parser.parseFromString(response, "text/html").body;
       };
       const sleep = ms => new Promise((resolve => setTimeout(resolve, ms)));
+    },
+    "../common/dist/searcher/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        SearchResult: () => SearchResult,
+        search: () => search
+      });
+      var _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../common/dist/http/index.mjs");
+      var SearchResult;
+      !function(SearchResult) {
+        SearchResult[SearchResult.FOUND = 0] = "FOUND";
+        SearchResult[SearchResult.NOT_FOUND = 1] = "NOT_FOUND";
+        SearchResult[SearchResult.LOGGED_OUT = 2] = "LOGGED_OUT";
+        SearchResult[SearchResult.ERROR = 3] = "ERROR";
+      }(SearchResult || (SearchResult = {}));
+      const search = async (tracker, options) => {
+        "rateLimit" in tracker && tracker.rateLimit;
+        tracker.searchUrl.split("/")[2];
+        (new Date).getTime();
+        const success_match = "positiveMatch" in tracker ? tracker.positiveMatch : false;
+        const searchUrl = await replaceSearchUrlParams(tracker, options);
+        if (searchUrl.indexOf("=00000000") > -1 || searchUrl.indexOf("=undefined") > -1) return SearchResult.ERROR;
+        let response;
+        let reqHeader = {};
+        if ("Milkie" == tracker.name) reqHeader = {
+          Host: "milkie.cc",
+          Authorization: options.milkie_authToken
+        }; else if ("TNT" == tracker.name) reqHeader = {
+          Host: "tntracker.org",
+          Authorization: options.tnt_authToken
+        }; else if ("DonTor" == tracker.name) reqHeader = {
+          Host: "dontorrent.ninja",
+          Referer: "https://dontorrent.ninja"
+        };
+        if ("mPOST" in tracker) {
+          const post_data = await replaceSearchUrlParams(tracker, options);
+          response = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchUrl)(searchUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              ...reqHeader
+            },
+            body: post_data
+          });
+        } else response = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchUrl)(searchUrl, {
+          headers: reqHeader
+        });
+        if (tracker.positiveMatch && tracker.loggedOutRegex && response.match(tracker.loggedOutRegex)) return SearchResult.LOGGED_OUT; else if (response.match(tracker.matchRegex) ? !success_match : success_match) return SearchResult.NOT_FOUND; else if (tracker.loggedOutRegex && response.match(tracker.loggedOutRegex)) return SearchResult.LOGGED_OUT; else return SearchResult.FOUND;
+      };
+      const replaceSearchUrlParams = async (tracker, options) => {
+        let search_url = "mPOST" in tracker ? tracker.mPOST : tracker.searchUrl;
+        if ("goToUrl" in tracker) search_url = tracker.goToUrl;
+        let movie_id = options.movie_imdb_id;
+        if (options.movie_imdb_id) {
+          if (search_url.match("%tvdbid%")) movie_id = await getTVDbID(options.movie_imdb_id); else if (search_url.match("%tmdbid%")) movie_id = await getTMDbID(options.movie_imdb_id); else if (search_url.match("%doubanid%")) movie_id = await getDoubanID0(options.movie_imdb_id);
+          if (search_url.match("%doubanid%") && "00000000" == movie_id) movie_id = await getDoubanID1(options.movie_imdb_id);
+          if (search_url.match("%doubanid%") && "00000000" == movie_id) movie_id = await getDoubanID2(options.movie_imdb_id);
+          if (search_url.match("%doubanid%") && "00000000" == movie_id) movie_id = await getDoubanID3(options.movie_imdb_id);
+        }
+        const space_replace = "spaceEncode" in tracker ? tracker.spaceEncode : "+";
+        const search_string = options.movie_title || "".trim().replace(/ +\(.*|&|:/g, "").replace(/\s+/g, space_replace);
+        const search_string_orig = options.movie_original_title?.trim().replace(/ +\(.*|&|:/g, "").replace(/\s+/g, space_replace);
+        return search_url.replace(/%tt%/g, movie_id).replace(/%nott%/g, movie_id.substring(2)).replace(/%tvdbid%/g, movie_id).replace(/%tmdbid%/g, movie_id).replace(/%doubanid%/g, movie_id).replace(/%seriesid%/g, options.series_id).replace(/%seasonid%/g, options.season_id).replace(/%episodeid%/g, options.episode_id).replace(/%search_string%/g, search_string).replace(/%search_string_orig%/g, search_string_orig).replace(/%year%/g, options.movie_year).replace(/---/g, "-");
+      };
+      const getTVDbID = async imdbID => {
+        const url = "https://thetvdb.com/api/GetSeriesByRemoteID.php?imdbid=" + imdbID;
+        const response = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchUrl)(url);
+        if (response.match("seriesid")) {
+          const xmldata = (new DOMParser).parseFromString(response, "application/xml");
+          return xmldata.getElementsByTagName("seriesid")[0].childNodes[0].nodeValue;
+        }
+        return "00000000";
+      };
+      const getTMDbID = async imdbID => {
+        const url = "https://api.themoviedb.org/3/find/" + imdbID + "?api_key=d12b33d3f4fb8736dc06f22560c4f8d4&external_source=imdb_id";
+        const response = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchUrl)(url);
+        const result = JSON.parse(response);
+        if (result.movie_results && result.movie_results.length > 0) return result.movie_results[0].id; else if (result.tv_results && result.tv_results.length > 0) return result.tv_results[0].id; else if (result.tv_episode_results && result.tv_episode_results.length > 0) return result.tv_episode_results[0].id;
+        return "00000000";
+      };
+      const getDoubanID0 = async imdbID => {
+        const url = "https://movie.douban.com/j/subject_suggest?q=" + imdbID;
+        const response = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchUrl)(url);
+        const result = JSON.parse(response);
+        if (result && result.length) return result[0].id;
+        return "00000000";
+      };
+      const getDoubanID1 = async imdbID => {
+        const url = "https://www.douban.com/search?cat=1002&q=" + imdbID;
+        const result = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchAndParseHtml)(url);
+        const element = result.querySelector("[onclick*=" + imdbID + "]");
+        if (element) {
+          const href = element.getAttribute("href");
+          if (href && href.match(/subject%2F(\d+)/)) return href.match(/subject%2F(\d+)/)[1];
+        }
+        return "00000000";
+      };
+      const getDoubanID2 = async imdbID => {
+        const url = 'https://query.wikidata.org/sparql?format=json&query=SELECT * WHERE {?s wdt:P345 "' + imdbID + '". OPTIONAL { ?s wdt:P4529 ?Douban_film_ID. }}';
+        const response = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchUrl)(url);
+        const result = JSON.parse(response);
+        if (null != result.results.bindings[0]) if (null != result.results.bindings[0].Douban_film_ID) return result.results.bindings[0].Douban_film_ID.value;
+        return "00000000";
+      };
+      const getDoubanID3 = async imdbID => {
+        const url = 'https://www.google.com/search?q="' + imdbID + '" site:https://movie.douban.com/subject&safe=off';
+        const result = await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.fetchUrl)(url);
+        if (result.match("movie.douban.com/subject/")) {
+          const x = result.split("movie.douban.com/subject/")[1];
+          return x.split("/")[0];
+        } else return "00000000";
+      };
+    },
+    "../common/dist/trackers/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        KG: () => KG
+      });
+      const KG = {
+        TV: false,
+        name: "KG",
+        searchUrl: "https://karagarga.in/browse.php?sort=added&search=%nott%&search_type=imdb&d=DESC",
+        loggedOutRegex: /Cloudflare|Ray ID|Not logged in!/,
+        matchRegex: /No torrents found/,
+        rateLimit: 125,
+        both: true
+      };
     },
     "../node_modules/@trim21/gm-fetch/dist/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
