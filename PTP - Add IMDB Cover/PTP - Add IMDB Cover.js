@@ -6,6 +6,7 @@
 // @match        https://passthepopcorn.me/upload.php?*
 // @match        https://passthepopcorn.me/upload.php
 // @match        https://passthepopcorn.me/requests.php*
+// @match        https://passthepopcorn.me/torrents.php*action=editgroup*
 // @icon         https://www.google.com/s2/favicons?domain=passthepopcorn.me
 // @grant        GM_xmlhttpRequest
 // @grant        GM.getValue
@@ -15,6 +16,9 @@
 await (async function () {
   "use strict";
 
+  const isEditPage = () => {
+    return location.toString().includes("action=editgroup");
+  };
   const addListener = () => {
     if (window.location.href.includes("requests.php")) {
       document.querySelectorAll("#request_form > div").forEach((d) => {
@@ -294,10 +298,23 @@ await (async function () {
   };
 
   let coverInput = document.getElementById("image");
-  document.querySelector("#autofill").addEventListener("click", async () => {
+  let triggerButton = document.querySelector("#autofill");
+  if (isEditPage()) {
+    coverInput = document.getElementsByName("image")[0];
+    triggerButton = document.createElement("button");
+    triggerButton.textContent = "Fetch";
+    coverInput.parentElement.appendChild(triggerButton);
+  }
+  triggerButton.addEventListener("click", async (event) => {
     try {
       let apiToken = await getPtpImgApiKey();
-      let imdbId = document.querySelector("#imdb").value;
+      let imdbId;
+      if (isEditPage()) {
+        event.preventDefault();
+        imdbId = document.getElementsByName("newimdb")[0].value;
+      } else {
+        imdbId = document.querySelector("#imdb").value;
+      }
       if (imdbId.startsWith("http"))
         imdbId = "tt" + imdbId.split("/tt")[1].split("/")[0];
       let url = await fetchCover(imdbId);
@@ -308,7 +325,7 @@ await (async function () {
       coverInput.value = await uploadToPtpimg(url, apiToken);
       coverInput.dispatchEvent(new Event("change"));
     } catch (err) {
-      console.trace(err)
+      console.trace(err);
     }
   });
   coverInput.addEventListener("change", async (event) => {
