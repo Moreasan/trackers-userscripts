@@ -1,5 +1,12 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { MetaData, Request, SearchResult, tracker } from "./tracker";
+import {
+  Category,
+  MetaData,
+  MovieRequest,
+  Request,
+  SearchResult,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -9,19 +16,24 @@ export default class CHD implements tracker {
   }
 
   canBeUsedAsTarget(): boolean {
-    return false;
+    return true;
   }
 
   canRun(url: string): boolean {
     return url.includes("ptchdbits.co");
   }
 
-  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    let nodes = document.querySelectorAll(".torrents")[0].children[0].children;
+  async *getSearchRequest(): AsyncGenerator<
+    MetaData | Request<any>,
+    void,
+    void
+  > {
+    let nodes = Array.from(
+      document.querySelectorAll(".torrents")[0].children[0].children
+    ) as Array<HTMLElement>;
     yield {
       total: nodes.length,
     };
-    let i = 1;
     for (const element of nodes) {
       if (!element.querySelector(".torrentname")) {
         continue;
@@ -39,7 +51,7 @@ export default class CHD implements tracker {
         element.querySelector(".rowfollow:nth-child(5)")!!.textContent!!
       );
       console.log("size:", size);
-      const request: Request = {
+      const request: MovieRequest = {
         torrents: [
           {
             size,
@@ -59,7 +71,22 @@ export default class CHD implements tracker {
     return "CHD";
   }
 
-  async search(request: Request): Promise<SearchResult> {
+  async search(request: Request<any>): Promise<SearchResult> {
+    if (request.category === Category.MOVIE) {
+      const movieRequest = request as MovieRequest;
+      const queryUrl =
+        "https://ptchdbits.co/torrents.php?medium1=1&incldead=0&spstate=0&inclbookmarked=0&search=" +
+        movieRequest.imdbId +
+        "&search_area=4&search_mode=0";
+
+      const result = await fetchAndParseHtml(queryUrl);
+      let notFound = result.querySelector(".torrentname") === null;
+      if (notFound) {
+        return SearchResult.NOT_EXIST;
+      }
+      return SearchResult.EXIST;
+    }
+
     return SearchResult.NOT_CHECKED;
   }
 

@@ -661,13 +661,13 @@
           return true;
         }
         canBeUsedAsTarget() {
-          return false;
+          return true;
         }
         canRun(url) {
           return url.includes("ptchdbits.co");
         }
         async* getSearchRequest() {
-          let nodes = document.querySelectorAll(".torrents")[0].children[0].children;
+          let nodes = Array.from(document.querySelectorAll(".torrents")[0].children[0].children);
           yield {
             total: nodes.length
           };
@@ -696,6 +696,14 @@
           return "CHD";
         }
         async search(request) {
+          if (request.category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE) {
+            const movieRequest = request;
+            const queryUrl = "https://ptchdbits.co/torrents.php?medium1=1&incldead=0&spstate=0&inclbookmarked=0&search=" + movieRequest.imdbId + "&search_area=4&search_mode=0";
+            const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_0__.fetchAndParseHtml)(queryUrl);
+            let notFound = null === result.querySelector(".torrentname");
+            if (notFound) return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_EXIST;
+            return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.EXIST;
+          }
           return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_CHECKED;
         }
         insertTrackersSelect(select) {
