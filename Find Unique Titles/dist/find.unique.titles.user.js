@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
-// @version 0.0.4
+// @version 0.0.5
 // @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
@@ -32,6 +32,8 @@
 // @match https://www.cinematik.net/browse.php*
 // @match https://pterclub.com/torrents.php*
 // @match https://pterc.com/torrents.php*
+// @match https://torrentseeds.org/torrents*
+// @match https://torrentseeds.org/categories/*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -1186,7 +1188,6 @@
         }
         async canUpload(request) {
           if (!request.imdbId) return true;
-          request.imdbId.replace("", "");
           const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_2__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_3__.KG, {
             movie_title: "",
             movie_imdb_id: request.imdbId
@@ -1681,6 +1682,91 @@
         }
       }
     },
+    "./src/trackers/TSeeds.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        default: () => TSeeds
+      });
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/trackers/index.mjs");
+      const parseCategory = element => {
+        const icon = element.querySelector("i.torrent-icon");
+        if (!icon) return;
+        if (icon.classList.contains("fa-female")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.XXX;
+        if (icon.classList.contains("fa-tv")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+        if (icon.classList.contains("fa-film")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        if (icon.classList.contains("fa-music")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
+        if (icon.classList.contains("fa-basketball-ball")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.SPORT;
+        if (icon.classList.contains("fa-gamepad")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.GAME;
+        return;
+      };
+      class TSeeds {
+        canBeUsedAsSource() {
+          return true;
+        }
+        canBeUsedAsTarget() {
+          return true;
+        }
+        canRun(url) {
+          return url.includes("torrentseeds.org");
+        }
+        async* getSearchRequest() {
+          let torrentsSelector = "#torrent-list-table tbody tr";
+          if (isCategoryPage()) torrentsSelector = ".cat-torrents table tbody tr";
+          let nodes = document.querySelectorAll(torrentsSelector);
+          yield {
+            total: nodes.length
+          };
+          for (const element of nodes) {
+            const category = parseCategory(element);
+            let imdbId = null;
+            if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) {
+              const link = element.querySelector('a.view-torrent[href*="/torrents/"]');
+              let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(link.href);
+              imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbIdFromLink)(response);
+            }
+            let sizeText = element.querySelector(".torrent-listings-size span")?.textContent;
+            if (isCategoryPage()) sizeText = element.children[7]?.textContent?.trim();
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(sizeText);
+            const request = {
+              torrents: [ {
+                size,
+                tags: [],
+                dom: element
+              } ],
+              dom: element,
+              imdbId,
+              query: "",
+              category
+            };
+            yield request;
+          }
+        }
+        name() {
+          return "TSeeds";
+        }
+        async canUpload(request) {
+          if (!request.imdbId) return true;
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.TSeeds, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND;
+        }
+        insertTrackersSelect(select) {
+          if (isCategoryPage()) (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.addChild)(document.querySelector(".table-responsive.cat-torrents .text-center"), select); else {
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("form-group", "col-xs-3");
+            wrapper.appendChild(select);
+            (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.addChild)(document.querySelector("#torrent-list-search div.row"), wrapper);
+          }
+        }
+      }
+      const isCategoryPage = () => document.location.toString().includes("/categories/");
+    },
     "./src/trackers/TiK.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         default: () => TiK
@@ -1781,6 +1867,7 @@
             Pter: () => _Pter__WEBPACK_IMPORTED_MODULE_24__.default,
             SC: () => _SC__WEBPACK_IMPORTED_MODULE_1__.default,
             TL: () => _TL__WEBPACK_IMPORTED_MODULE_17__.default,
+            TSeeds: () => _TSeeds__WEBPACK_IMPORTED_MODULE_25__.default,
             TiK: () => _TiK__WEBPACK_IMPORTED_MODULE_23__.default,
             nCore: () => _nCore__WEBPACK_IMPORTED_MODULE_20__.default
           });
@@ -1809,6 +1896,7 @@
           var _CHD__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./src/trackers/CHD.ts");
           var _HDSky__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./src/trackers/HDSky.ts");
           var _Pter__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("./src/trackers/Pter.ts");
+          var _TSeeds__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("./src/trackers/TSeeds.ts");
           var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_0__ ]);
           _PTP__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           __webpack_async_result__();
@@ -2202,7 +2290,8 @@
     },
     "../common/dist/trackers/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
-        KG: () => KG
+        KG: () => KG,
+        TSeeds: () => TSeeds
       });
       const KG = {
         TV: false,
@@ -2211,6 +2300,15 @@
         loggedOutRegex: /Cloudflare|Ray ID|Not logged in!/,
         matchRegex: /No torrents found/,
         rateLimit: 125,
+        both: true
+      };
+      const TSeeds = {
+        TV: false,
+        name: "TSeeds",
+        searchUrl: "https://www.torrentseeds.org/torrents?tmdbId=%tmdbid%",
+        loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
+        matchRegex: /"Download">/,
+        positiveMatch: true,
         both: true
       };
     },

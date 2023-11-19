@@ -5,6 +5,10 @@ You copy paste the content of the file `dist/find.unique.titles.user.js`.
 You can generate it by running run `npm run dev`.
 
 # Changelog
+## 2023-11
+- Some work is done to use IMDB Scout code for searching
+- Add support for TSeeds
+
 ## 2023-10
 - Add support for TiK
 - Add support for Pter

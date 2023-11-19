@@ -23,6 +23,7 @@ import nCore from "./nCore";
 import CHD from "./CHD";
 import HDSky from "./HDSky";
 import Pter from "./Pter";
+import TSeeds from "./TSeeds";
 
 export {
   PTP,
@@ -50,4 +51,5 @@ export {
   HDSky,
   TiK,
   Pter,
+  TSeeds,
 };
