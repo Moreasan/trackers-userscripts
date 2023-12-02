@@ -1,7 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import { Category, MetaData, Request, toGenerator, tracker } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
 import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 const parseCategory = (element: HTMLElement) => {
   const text = element.textContent.toLowerCase();
@@ -52,7 +52,7 @@ export default class CG implements tracker {
     return url.includes("cinemageddon.net");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("table.torrenttable tbody tr")
@@ -62,7 +62,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
         const request: Request = {
           torrents: parseTorrents(element),
-          dom: element,
+          dom: [element],
           imdbId,
           title: "",
           category,
@@ -70,14 +70,14 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         requests.push(request);
       });
 
-    yield* toGenerator(requests)
+    yield* toGenerator(requests);
   }
 
   name(): string {
     return "CG";
   }
 
-  async canUpload(request: Request) {
+  async canUpload(request: Request): Promise<boolean> {
     if (!request.imdbId) return true;
     const queryUrl =
       "https://cinemageddon.net/browse.php?search=" +
@@ -86,13 +86,10 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.textContent?.includes("Nothing found!");
+    return result.textContent!!.includes("Nothing found!");
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    addChild(
-      document.querySelector(".embedded > p") as HTMLElement,
-      select
-    );
+    addChild(document.querySelector(".embedded > p") as HTMLElement, select);
   }
 }

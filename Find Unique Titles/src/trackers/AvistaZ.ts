@@ -25,7 +25,7 @@ export default class AvistaZ implements tracker {
 
         const request: Request = {
           torrents: [],
-          dom: element,
+          dom: [element],
           imdbId,
           title: "",
         };

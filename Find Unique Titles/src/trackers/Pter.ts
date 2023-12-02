@@ -109,7 +109,7 @@ export default class Pter implements tracker {
 
         const request: Request = {
           torrents: [parseTorrent(element)],
-          dom: element,
+          dom: [element],
           imdbId,
           title: "",
           category: parseCategory(element),

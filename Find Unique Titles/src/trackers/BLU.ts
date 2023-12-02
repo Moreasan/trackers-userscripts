@@ -34,7 +34,7 @@ export default class BLU implements tracker {
               dom: element,
             },
           ],
-          dom: element,
+          dom: [element],
           imdbId,
           title: "",
         };

@@ -21,7 +21,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       const imdbId = parseImdbIdFromLink(element as HTMLElement);
       const request: Request = {
         torrents: [],
-        dom: element.parentElement,
+        dom: [element!!.parentElement as HTMLElement],
         imdbId,
         title: "",
       };
@@ -44,7 +44,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     addChild(element, select);
     insertAfter(
       element,
-      document.querySelector('.mBox form input[name="q"]').closest("p")
+      document.querySelector('.mBox form input[name="q"]')!!.closest("p") as HTMLElement
     );
   }
 }

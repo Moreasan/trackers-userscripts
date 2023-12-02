@@ -13,7 +13,9 @@ import { getSettings } from "./settings";
 import { appendErrorMessage, showError } from "common/dom";
 
 function hideTorrents(request: Request) {
-  request.dom.style.display = "none";
+  for (let element of request.dom) {
+    element.style.display = "none";
+  }
   for (let torrent of request.torrents) {
     torrent.dom.style.display = "none";
   }

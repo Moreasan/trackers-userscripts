@@ -33,7 +33,7 @@ export default class TSeeds implements tracker {
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     let torrentsSelector = "#torrent-list-table tbody tr";
     if (isCategoryPage()) {
-      torrentsSelector = '.cat-torrents table tbody tr'
+      torrentsSelector = ".cat-torrents table tbody tr";
     }
     let nodes = document.querySelectorAll(torrentsSelector);
     yield {
@@ -54,11 +54,9 @@ export default class TSeeds implements tracker {
       let sizeText = element.querySelector(".torrent-listings-size span")
         ?.textContent as string;
       if (isCategoryPage()) {
-        sizeText = element.children[7]?.textContent?.trim() as string
+        sizeText = element.children[7]?.textContent?.trim() as string;
       }
-      const size = parseSize(
-        sizeText
-      );
+      const size = parseSize(sizeText);
 
       const request: Request = {
         torrents: [
@@ -68,7 +66,7 @@ export default class TSeeds implements tracker {
             dom: element as HTMLElement,
           },
         ],
-        dom: element as HTMLElement,
+        dom: [element as HTMLElement],
         imdbId,
         title: "",
         category,

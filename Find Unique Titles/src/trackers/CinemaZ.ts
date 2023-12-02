@@ -25,7 +25,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
         const request: Request = {
           torrents: [],
-          dom: element,
+          dom: [element],
           imdbId,
           title: "",
         };
@@ -45,7 +45,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.textContent?.includes("No Movie found!");
+    return result.textContent!!.includes("No Movie found!");
   }
 
   insertTrackersSelect(select: HTMLElement): void {

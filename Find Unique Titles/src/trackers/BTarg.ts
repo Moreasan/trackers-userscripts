@@ -1,7 +1,16 @@
-import { parseImdbId } from "../utils/utils";
-import { MetaData, Request, tracker } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import { parseImdbId, parseSize } from "../utils/utils";
+import { Category, MetaData, Request, tracker } from "./tracker";
 import { insertAfter } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
+
+const parseCategory = (element: HTMLElement) => {
+  const category = element.children[0]!!.querySelector('a')!!.href
+  if (category.includes("cat=02")) return Category.MOVIE
+  if (category.includes("cat=03")) return Category.TV
+  if (category.includes("cat=05")) return Category.XXX
+  if (category.includes("cat=08")) return Category.LIVE_PERFORMANCE
+  return Category.OTHER;
+}
 
 export default class BTarg implements tracker {
   canBeUsedAsSource(): boolean {
@@ -17,29 +26,35 @@ export default class BTarg implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const rows = document.querySelectorAll("tr.browsetable");
+    const items = Array.from(
+      document.querySelectorAll('tr a[href*="details.php?id"]')
+    ).filter(
+      (link) => !link.href.includes("#") && link.href.includes("/details.php")
+    );
     yield {
-      total: rows.length,
+      total: items.length,
     };
-    for (const row of rows) {
-      const link: HTMLAnchorElement | null = row.querySelector(
-        'a[href*="details.php?id"]'
-      );
-      if (!link) {
-        continue;
-      }
-      if (link.href.includes("#")) {
-        continue;
-      }
-      let response = await fetchAndParseHtml(
-        (link as HTMLAnchorElement).href
-      );
+    for (const item of items) {
+      let response = await fetchAndParseHtml((item as HTMLAnchorElement).href);
       const imdbId = parseImdbId(response.textContent as string);
+      const size = parseSize(
+        item.parentElement?.nextElementSibling?.textContent as string
+      );
       const request: Request = {
-        torrents: [],
-        dom: row as HTMLElement,
+        torrents: [
+          {
+            size,
+            dom: item.parentElement?.parentElement as HTMLElement,
+            tags: [],
+          },
+        ],
+        dom: [
+          item.parentElement?.parentElement as HTMLElement,
+          item.parentElement?.parentElement?.nextElementSibling as HTMLElement,
+        ],
         imdbId,
         title: "",
+        category: parseCategory(item.parentElement!!.parentElement!!)
       };
       yield request;
     }

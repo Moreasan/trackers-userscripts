@@ -6,12 +6,14 @@ import { search, SearchResult } from "common/searcher";
 import { MTV as MTVTracker, MTV_TV } from "common/trackers";
 
 const parseCategory = (element: Element): Category | undefined => {
-  const movieBanner = element.querySelector("div[title=\"hd.movie\"]");
+  const movieBanner = element.querySelector('div[title="hd.movie"]');
   if (movieBanner) return Category.MOVIE;
   return Category.TV;
 };
 
-const parseYearAndTitle = (htmlElement: HTMLElement): { title: string | undefined, year: number | undefined } => {
+const parseYearAndTitle = (
+  htmlElement: HTMLElement
+): { title: string | undefined; year: number | undefined } => {
   const pageTitle = htmlElement
     .querySelector("#content h2")
     ?.textContent?.trim();
@@ -29,7 +31,6 @@ const parseYearAndTitle = (htmlElement: HTMLElement): { title: string | undefine
   return { title: undefined, year: undefined };
 };
 
-
 export default class MTV implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
@@ -43,10 +44,10 @@ export default class MTV implements tracker {
     return url.includes("morethantv.me");
   }
 
-  async* getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     let nodes = document.querySelectorAll("tr.torrent");
     yield {
-      total: nodes.length
+      total: nodes.length,
     };
     for (const element of nodes) {
       const category = parseCategory(element);
@@ -55,7 +56,7 @@ export default class MTV implements tracker {
       let year = undefined;
       if (category == Category.MOVIE) {
         const link: HTMLAnchorElement | null = element.querySelector(
-          "td a[href*=\"torrents.php?id=\"]"
+          'td a[href*="torrents.php?id="]'
         );
         let response = await fetchAndParseHtml(
           (link as HTMLAnchorElement).href
@@ -74,11 +75,11 @@ export default class MTV implements tracker {
             dom: element as HTMLElement,
           },
         ],
-        dom: element as HTMLElement,
+        dom: [element as HTMLElement],
         imdbId,
         title,
         year,
-        category
+        category,
       };
       yield request;
     }

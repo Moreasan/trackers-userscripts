@@ -60,7 +60,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
         const request: Request = {
           torrents,
-          dom: element,
+          dom: [element],
           imdbId,
           title: "",
         };

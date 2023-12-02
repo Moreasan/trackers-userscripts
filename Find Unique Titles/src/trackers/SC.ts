@@ -20,7 +20,7 @@ function parseTorrent(element: HTMLElement) {
   return {
     size,
     tags: [],
-    dom: element,
+    dom: [element],
     resolution,
     format,
   };
@@ -67,7 +67,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
         const request: Request = {
           torrents: [parseTorrent(element)],
-          dom: dom,
+          dom: [dom],
           imdbId,
           title: "",
           category: parseCategory(element),

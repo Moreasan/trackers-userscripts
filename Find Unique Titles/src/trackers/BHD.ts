@@ -59,7 +59,7 @@ const parseTorrentsFromTorrentsPage = (): Array<Request> => {
 
     const request: Request = {
       torrents: torrents,
-      dom: element,
+      dom: [element],
       imdbId,
       title: "",
       category: parseCategory(element)
@@ -70,13 +70,13 @@ const parseTorrentsFromTorrentsPage = (): Array<Request> => {
 };
 
 const parseTorrentsFromMoviesPage = (): Array<Request> => {
-  const requests = [];
+  const requests: Array<Request> = [];
   document.querySelectorAll(".bhd-meta-box").forEach((element) => {
     let imdbId = parseImdbIdFromLink(element as HTMLElement);
 
     const request: Request = {
       torrents: parseTorrents(element as HTMLElement),
-      dom: element as HTMLElement,
+      dom: [element as HTMLElement],
       imdbId,
       title: "",
     };

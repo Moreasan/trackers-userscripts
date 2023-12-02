@@ -21,6 +21,7 @@ export enum Category {
   DOCUMENTARY,
   GAME,
   XXX,
+  OTHER,
 }
 
 export interface Request {
@@ -28,7 +29,7 @@ export interface Request {
   title?: string;
   year?: number;
   torrents: Array<Torrent>;
-  dom: HTMLElement;
+  dom: Array<HTMLElement>;
   category?: Category;
 }
 

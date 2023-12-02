@@ -17,12 +17,10 @@ export default class FL implements tracker {
   }
 
 async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
     let nodes = document.querySelectorAll(".torrentrow");
     yield {
       total: nodes.length
     }
-    let i = 1;
     for (const element of nodes) {
       const link: HTMLAnchorElement | null = element.querySelector(
         'a[href*="details.php?id"]'
@@ -47,7 +45,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
             dom: element,
           },
         ],
-        dom: element as HTMLElement,
+        dom: [element as HTMLElement],
         imdbId,
         title: "",
       };

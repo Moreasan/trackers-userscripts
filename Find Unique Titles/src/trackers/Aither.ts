@@ -21,7 +21,7 @@ export default class Aither implements tracker {
     document
       .querySelectorAll(".panelV2 tbody tr")
       .forEach((element: HTMLElement) => {
-        let imdbId = element.querySelector("#imdb_id")?.textContent.trim();
+        let imdbId = element.querySelector("#imdb_id")!!.textContent!!.trim();
 
         let size = parseSize(element.children[5]!.textContent!);
         const request: Request = {
@@ -32,7 +32,7 @@ export default class Aither implements tracker {
               dom: element,
             },
           ],
-          dom: element,
+          dom: [element],
           imdbId,
           title: "",
         };

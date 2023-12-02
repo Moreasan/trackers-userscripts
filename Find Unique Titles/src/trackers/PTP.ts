@@ -43,7 +43,7 @@ const parseTorrents = (element: HTMLElement) => {
         tags.push("Remux");
       }
       const torrent: Torrent = {
-        dom: element,
+        dom: [element],
         size,
         tags,
         resolution,
@@ -103,7 +103,7 @@ export default class PTP implements tracker {
 
       const request: Request = {
         torrents: parseTorrents(element),
-        dom: element as HTMLElement,
+        dom: [element as HTMLElement],
         imdbId,
         title: "",
         category: parseCategory(element),

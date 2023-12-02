@@ -73,7 +73,7 @@ export default class KG implements tracker {
       let torrents = parseTorrent(element as HTMLElement);
       const request: Request = {
         torrents,
-        dom: element as HTMLElement,
+        dom: [element as HTMLElement],
         imdbId,
         title: "",
         category: parseCategory(element as HTMLElement),

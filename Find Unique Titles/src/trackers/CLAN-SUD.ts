@@ -46,7 +46,7 @@ export default class CLANSUD implements tracker {
       const imdbId = parseImdbIdFromLink(response);
       const request: Request = {
         torrents: [],
-        dom: topic as HTMLElement,
+        dom: [topic as HTMLElement],
         imdbId,
         title: "",
       };

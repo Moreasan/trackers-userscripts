@@ -70,7 +70,7 @@ export default class TiK implements tracker {
             dom: element,
           },
         ],
-        dom: element as HTMLElement,
+        dom: [element as HTMLElement],
         imdbId,
         title: "",
       };

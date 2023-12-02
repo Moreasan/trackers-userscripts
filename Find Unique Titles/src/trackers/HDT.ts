@@ -34,7 +34,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
               dom: element,
             },
           ],
-          dom: line,
+          dom: [line],
           imdbId,
           title: "",
         };

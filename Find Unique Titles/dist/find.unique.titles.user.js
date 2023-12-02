@@ -59,7 +59,7 @@
           var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _trackers__WEBPACK_IMPORTED_MODULE_1__, _utils_cache__WEBPACK_IMPORTED_MODULE_3__ ]);
           [_trackers__WEBPACK_IMPORTED_MODULE_1__, _utils_cache__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__;
           function hideTorrents(request) {
-            request.dom.style.display = "none";
+            for (let element of request.dom) element.style.display = "none";
             for (let torrent of request.torrents) torrent.dom.style.display = "none";
           }
           const main = async function() {
@@ -201,7 +201,7 @@
         async* getSearchRequest() {
           const requests = [];
           document.querySelectorAll(".panelV2 tbody tr").forEach((element => {
-            let imdbId = element.querySelector("#imdb_id")?.textContent.trim();
+            let imdbId = element.querySelector("#imdb_id").textContent.trim();
             let size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[5].textContent);
             const request = {
               torrents: [ {
@@ -209,7 +209,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -261,7 +261,7 @@
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
             const request = {
               torrents: [],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -336,7 +336,7 @@
           const torrents = [ torrent ];
           const request = {
             torrents,
-            dom: element,
+            dom: [ element ],
             imdbId,
             title: "",
             category: parseCategory(element)
@@ -351,7 +351,7 @@
           let imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
           const request = {
             torrents: parseTorrents(element),
-            dom: element,
+            dom: [ element ],
             imdbId,
             title: ""
           };
@@ -421,7 +421,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -448,9 +448,18 @@
       __webpack_require__.d(__webpack_exports__, {
         default: () => BTarg
       });
-      var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
-      var common_http__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../common/dist/http/index.mjs");
-      var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      const parseCategory = element => {
+        const category = element.children[0].querySelector("a").href;
+        if (category.includes("cat=02")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        if (category.includes("cat=03")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+        if (category.includes("cat=05")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.XXX;
+        if (category.includes("cat=08")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.LIVE_PERFORMANCE;
+        return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.OTHER;
+      };
       class BTarg {
         canBeUsedAsSource() {
           return true;
@@ -462,21 +471,24 @@
           return url.includes("https://btarg.com.ar");
         }
         async* getSearchRequest() {
-          const rows = document.querySelectorAll("tr.browsetable");
+          const items = Array.from(document.querySelectorAll('tr a[href*="details.php?id"]')).filter((link => !link.href.includes("#") && link.href.includes("/details.php")));
           yield {
-            total: rows.length
+            total: items.length
           };
-          for (const row of rows) {
-            const link = row.querySelector('a[href*="details.php?id"]');
-            if (!link) continue;
-            if (link.href.includes("#")) continue;
-            let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_0__.fetchAndParseHtml)(link.href);
-            const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbId)(response.textContent);
+          for (const item of items) {
+            let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(item.href);
+            const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbId)(response.textContent);
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(item.parentElement?.nextElementSibling?.textContent);
             const request = {
-              torrents: [],
-              dom: row,
+              torrents: [ {
+                size,
+                dom: item.parentElement?.parentElement,
+                tags: []
+              } ],
+              dom: [ item.parentElement?.parentElement, item.parentElement?.parentElement?.nextElementSibling ],
               imdbId,
-              title: ""
+              title: "",
+              category: parseCategory(item.parentElement.parentElement)
             };
             yield request;
           }
@@ -488,7 +500,7 @@
           return false;
         }
         insertTrackersSelect(select) {
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.insertAfter)(select, document.querySelector('select[name="inclfree"]'));
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.insertAfter)(select, document.querySelector('select[name="inclfree"]'));
         }
       }
     },
@@ -498,8 +510,8 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
       var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
       const parseCategory = element => {
         const text = element.textContent.toLowerCase();
         if (text.includes("ebook")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.BOOK;
@@ -538,7 +550,7 @@
             const category = parseCategory(element);
             const request = {
               torrents: parseTorrents(element),
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: "",
               category
@@ -554,7 +566,7 @@
           if (!request.imdbId) return true;
           const queryUrl = "https://cinemageddon.net/browse.php?search=" + request.imdbId + "&orderby=size&dir=DESC";
           const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
-          return result.textContent?.includes("Nothing found!");
+          return result.textContent.includes("Nothing found!");
         }
         insertTrackersSelect(select) {
           (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelector(".embedded > p"), select);
@@ -597,7 +609,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -651,7 +663,7 @@
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
             const request = {
               torrents: [],
-              dom: topic,
+              dom: [ topic ],
               imdbId,
               title: ""
             };
@@ -693,7 +705,7 @@
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
             const request = {
               torrents: [],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -708,7 +720,7 @@
           if (!request.imdbId) return true;
           const queryUrl = "https://cinemaz.to/movies?search=&imdb=" + request.imdbId;
           const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
-          return result.textContent?.includes("No Movie found!");
+          return result.textContent.includes("No Movie found!");
         }
         insertTrackersSelect(select) {
           (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelector("#content-area > div.well.well-sm"), select);
@@ -749,7 +761,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -816,7 +828,7 @@
             }
             const request = {
               torrents,
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -907,7 +919,7 @@
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbId)(element.querySelector("a[data-imdb-link]")?.getAttribute("data-imdb-link"));
             const request = {
               torrents: [ parseTorrent(element) ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: "",
               category: parseCategory(element)
@@ -960,7 +972,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -1009,7 +1021,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: line,
+              dom: [ line ],
               imdbId,
               title: ""
             };
@@ -1052,7 +1064,7 @@
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
             const request = {
               torrents: [],
-              dom: element.parentElement,
+              dom: [ element.parentElement ],
               imdbId,
               title: ""
             };
@@ -1104,7 +1116,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -1175,7 +1187,7 @@
             let torrents = parseTorrent(element);
             const request = {
               torrents,
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: "",
               category: parseCategory(element)
@@ -1268,7 +1280,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title,
               year,
@@ -1332,7 +1344,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -1375,7 +1387,7 @@
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
             const request = {
               torrents: [],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -1421,7 +1433,7 @@
               const tags = [];
               if (title.includes("Remux")) tags.push("Remux");
               const torrent = {
-                dom: element,
+                dom: [ element ],
                 size,
                 tags,
                 resolution
@@ -1453,7 +1465,7 @@
                 const imdbId = elements ? (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(elements[0]) : null;
                 const request = {
                   torrents: parseTorrents(element),
-                  dom: element,
+                  dom: [ element ],
                   imdbId,
                   title: "",
                   category: parseCategory(element)
@@ -1641,7 +1653,7 @@
             if (imdbId) imdbId = "tt" + imdbId; else imdbId = null;
             const request = {
               torrents: [ parseTorrent(element) ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: "",
               category: parseCategory(element)
@@ -1689,7 +1701,7 @@
         return {
           size,
           tags: [],
-          dom: element,
+          dom: [ element ],
           resolution,
           format
         };
@@ -1721,7 +1733,7 @@
             let imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(links_container);
             const request = {
               torrents: [ parseTorrent(element) ],
-              dom,
+              dom: [ dom ],
               imdbId,
               title: "",
               category: parseCategory(element)
@@ -1772,7 +1784,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -1849,7 +1861,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: "",
               category
@@ -1930,7 +1942,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -2047,7 +2059,7 @@
                 tags: [],
                 dom: element
               } ],
-              dom: element,
+              dom: [ element ],
               imdbId,
               title: ""
             };
@@ -2086,6 +2098,7 @@
         Category[Category.DOCUMENTARY = 10] = "DOCUMENTARY";
         Category[Category.GAME = 11] = "GAME";
         Category[Category.XXX = 12] = "XXX";
+        Category[Category.OTHER = 13] = "OTHER";
         return Category;
       }({});
       const toGenerator = async function*(requests) {

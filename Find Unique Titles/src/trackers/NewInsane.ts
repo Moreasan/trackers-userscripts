@@ -15,7 +15,7 @@ export default class NewInsane implements tracker {
     return url.includes("newinsane.info");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("table.torrenttable tr.torrentrow")
@@ -23,15 +23,15 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         const imdbId = parseImdbIdFromLink(element);
         const request: Request = {
           torrents: [],
-          dom: element as HTMLElement,
+          dom: [element as HTMLElement],
           imdbId,
           title: "",
         };
         requests.push(request);
       });
 
-  yield* toGenerator(requests)
-}
+    yield* toGenerator(requests);
+  }
 
   name(): string {
     return "NewInsane";
