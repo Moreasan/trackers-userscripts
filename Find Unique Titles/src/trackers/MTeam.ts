@@ -37,7 +37,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         ],
         dom: element,
         imdbId,
-        query: "",
+        title: "",
       };
       requests.push(request);
     }

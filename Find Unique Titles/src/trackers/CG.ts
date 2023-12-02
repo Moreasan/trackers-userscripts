@@ -64,7 +64,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
           torrents: parseTorrents(element),
           dom: element,
           imdbId,
-          query: "",
+          title: "",
           category,
         };
         requests.push(request);

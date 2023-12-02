@@ -72,7 +72,7 @@ export default class TiK implements tracker {
         ],
         dom: element as HTMLElement,
         imdbId,
-        query: "",
+        title: "",
       };
       yield request
     }

@@ -111,7 +111,7 @@ export default class Pter implements tracker {
           torrents: [parseTorrent(element)],
           dom: element,
           imdbId,
-          query: "",
+          title: "",
           category: parseCategory(element),
         };
         requests.push(request);

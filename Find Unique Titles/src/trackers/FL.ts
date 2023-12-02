@@ -49,7 +49,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         ],
         dom: element as HTMLElement,
         imdbId,
-        query: "",
+        title: "",
       };
       yield request
     }

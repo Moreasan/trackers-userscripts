@@ -34,7 +34,7 @@ export default class Aither implements tracker {
           ],
           dom: element,
           imdbId,
-          query: "",
+          title: "",
         };
         requests.push(request);
       });

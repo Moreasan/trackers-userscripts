@@ -211,7 +211,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -263,7 +263,7 @@
               torrents: [],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -338,7 +338,7 @@
             torrents,
             dom: element,
             imdbId,
-            query: "",
+            title: "",
             category: parseCategory(element)
           };
           requests.push(request);
@@ -353,7 +353,7 @@
             torrents: parseTorrents(element),
             dom: element,
             imdbId,
-            query: ""
+            title: ""
           };
           requests.push(request);
         }));
@@ -423,7 +423,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -476,7 +476,7 @@
               torrents: [],
               dom: row,
               imdbId,
-              query: ""
+              title: ""
             };
             yield request;
           }
@@ -540,7 +540,7 @@
               torrents: parseTorrents(element),
               dom: element,
               imdbId,
-              query: "",
+              title: "",
               category
             };
             requests.push(request);
@@ -599,7 +599,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             yield request;
           }
@@ -653,7 +653,7 @@
               torrents: [],
               dom: topic,
               imdbId,
-              query: ""
+              title: ""
             };
             yield request;
           }
@@ -695,7 +695,7 @@
               torrents: [],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -751,7 +751,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             yield request;
           }
@@ -818,7 +818,7 @@
               torrents,
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -909,7 +909,7 @@
               torrents: [ parseTorrent(element) ],
               dom: element,
               imdbId,
-              query: "",
+              title: "",
               category: parseCategory(element)
             };
             requests.push(request);
@@ -962,7 +962,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }
@@ -1011,7 +1011,7 @@
               } ],
               dom: line,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -1054,7 +1054,7 @@
               torrents: [],
               dom: element.parentElement,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -1106,7 +1106,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }
@@ -1177,7 +1177,7 @@
               torrents,
               dom: element,
               imdbId,
-              query: "",
+              title: "",
               category: parseCategory(element)
             };
             requests.push(request);
@@ -1215,6 +1215,25 @@
         if (movieBanner) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
         return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
       };
+      const parseYearAndTitle = htmlElement => {
+        const pageTitle = htmlElement.querySelector("#content h2")?.textContent?.trim();
+        if (pageTitle) {
+          const regex = /^(.*?)\s*\((\d{4})\)\s*-/;
+          const match = pageTitle.match(regex);
+          if (match) {
+            const title = match[1].trim();
+            const year = parseInt(match[2], 10);
+            return {
+              title,
+              year
+            };
+          }
+        }
+        return {
+          title: void 0,
+          year: void 0
+        };
+      };
       class MTV {
         canBeUsedAsSource() {
           return true;
@@ -1233,10 +1252,13 @@
           for (const element of nodes) {
             const category = parseCategory(element);
             let imdbId = null;
+            let title;
+            let year;
             if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) {
               const link = element.querySelector('td a[href*="torrents.php?id="]');
               let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(link.href);
               imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbIdFromLink)(response);
+              ({title, year} = parseYearAndTitle(response));
             }
             let sizeText = element.children[4]?.textContent;
             const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(sizeText);
@@ -1248,7 +1270,8 @@
               } ],
               dom: element,
               imdbId,
-              query: "",
+              title,
+              year,
               category
             };
             yield request;
@@ -1261,9 +1284,9 @@
           let result = common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND;
           if (request.category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) result = await (0, 
           common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.MTV, {
-            movie_title: request.query
+            movie_title: request.title
           }); else result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.MTV_TV, {
-            movie_title: request.query
+            movie_title: request.title
           });
           return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND;
         }
@@ -1311,7 +1334,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }
@@ -1354,7 +1377,7 @@
               torrents: [],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -1377,13 +1400,13 @@
           __webpack_require__.d(__webpack_exports__, {
             default: () => PTP
           });
-          var _utils_cache__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/cache.ts");
+          var _utils_cache__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/cache.ts");
           var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
           var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
-          var common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/http/index.mjs");
           var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
-          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _utils_cache__WEBPACK_IMPORTED_MODULE_3__ ]);
-          _utils_cache__WEBPACK_IMPORTED_MODULE_3__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+          var common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/http/index.mjs");
+          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _utils_cache__WEBPACK_IMPORTED_MODULE_4__ ]);
+          _utils_cache__WEBPACK_IMPORTED_MODULE_4__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           function isSupportedCategory(category) {
             return void 0 === category || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.DOCUMENTARY || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.LIVE_PERFORMANCE;
           }
@@ -1432,7 +1455,7 @@
                   torrents: parseTorrents(element),
                   dom: element,
                   imdbId,
-                  query: "",
+                  title: "",
                   category: parseCategory(element)
                 };
                 requests.push(request);
@@ -1444,13 +1467,21 @@
             }
             async canUpload(request, onlyNew) {
               if (!isSupportedCategory(request.category)) return false;
-              if (!request.imdbId) return true;
-              let torrents = (0, _utils_cache__WEBPACK_IMPORTED_MODULE_3__.getFromMemoryCache)(request.imdbId);
-              if (!torrents) {
-                const query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
-                const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_4__.fetchAndParseHtml)(query_url);
-                torrents = parseAvailableTorrents(result);
-                (0, _utils_cache__WEBPACK_IMPORTED_MODULE_3__.addToMemoryCache)(request.imdbId, torrents);
+              let torrents = [];
+              if (!request.imdbId) {
+                if (request.title && request.year) {
+                  const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(request.title)}&year=${request.year}`;
+                  const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_3__.fetchAndParseHtml)(query_url);
+                  torrents = parseAvailableTorrents(result);
+                }
+              } else {
+                torrents = (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.getFromMemoryCache)(request.imdbId);
+                if (!torrents) {
+                  const query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
+                  const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_3__.fetchAndParseHtml)(query_url);
+                  torrents = parseAvailableTorrents(result);
+                  (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.addToMemoryCache)(request.imdbId, torrents);
+                }
               }
               let notFound = !torrents.length;
               if (notFound) return true;
@@ -1470,10 +1501,10 @@
           const parseAvailableTorrents = result => {
             const torrents = [];
             result.querySelectorAll('#torrent-table tr[id^="group_torrent_header_"]').forEach((line => {
-              const data = line.children[0].textContent.trim().split("/");
-              const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(line.children[1].textContent.trim());
+              const data = line.children[0]?.textContent?.trim().split("/");
+              const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(line.children[1]?.textContent?.trim());
               const tags = [];
-              if (line.textContent.includes("Remux")) tags.push("Remux");
+              if (line.textContent?.includes("Remux")) tags.push("Remux");
               const torrent = {
                 container: data[0].split("]")[1].trim(),
                 format: data[1].trim(),
@@ -1612,7 +1643,7 @@
               torrents: [ parseTorrent(element) ],
               dom: element,
               imdbId,
-              query: "",
+              title: "",
               category: parseCategory(element)
             };
             requests.push(request);
@@ -1692,7 +1723,7 @@
               torrents: [ parseTorrent(element) ],
               dom,
               imdbId,
-              query: "",
+              title: "",
               category: parseCategory(element)
             };
             requests.push(request);
@@ -1743,7 +1774,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }));
@@ -1820,7 +1851,7 @@
               } ],
               dom: element,
               imdbId,
-              query: "",
+              title: "",
               category
             };
             yield request;
@@ -1901,7 +1932,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             yield request;
           }
@@ -2018,7 +2049,7 @@
               } ],
               dom: element,
               imdbId,
-              query: ""
+              title: ""
             };
             requests.push(request);
           }

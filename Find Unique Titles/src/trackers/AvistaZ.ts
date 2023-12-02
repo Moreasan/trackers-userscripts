@@ -27,7 +27,7 @@ export default class AvistaZ implements tracker {
           torrents: [],
           dom: element,
           imdbId,
-          query: "",
+          title: "",
         };
         requests.push(request);
       });

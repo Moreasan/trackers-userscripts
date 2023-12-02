@@ -25,7 +25,8 @@ export enum Category {
 
 export interface Request {
   imdbId: string | null;
-  query: string;
+  title?: string;
+  year?: number;
   torrents: Array<Torrent>;
   dom: HTMLElement;
   category?: Category;
@@ -34,6 +35,7 @@ export interface Request {
 export interface MetaData {
   total: number;
 }
+
 export interface tracker {
   canRun(url: string): boolean;
 

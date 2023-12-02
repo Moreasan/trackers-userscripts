@@ -75,7 +75,7 @@ export default class KG implements tracker {
         torrents,
         dom: element as HTMLElement,
         imdbId,
-        query: "",
+        title: "",
         category: parseCategory(element as HTMLElement),
       };
       requests.push(request);

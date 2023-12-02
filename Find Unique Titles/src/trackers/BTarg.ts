@@ -39,7 +39,7 @@ export default class BTarg implements tracker {
         torrents: [],
         dom: row as HTMLElement,
         imdbId,
-        query: "",
+        title: "",
       };
       yield request;
     }

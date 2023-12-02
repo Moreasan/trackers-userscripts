@@ -23,7 +23,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         torrents: [],
         dom: element.parentElement,
         imdbId,
-        query: "",
+        title: "",
       };
       requests.push(request);
     });

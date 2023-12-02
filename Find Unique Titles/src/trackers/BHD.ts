@@ -61,7 +61,7 @@ const parseTorrentsFromTorrentsPage = (): Array<Request> => {
       torrents: torrents,
       dom: element,
       imdbId,
-      query: "",
+      title: "",
       category: parseCategory(element)
     };
     requests.push(request);
@@ -78,7 +78,7 @@ const parseTorrentsFromMoviesPage = (): Array<Request> => {
       torrents: parseTorrents(element as HTMLElement),
       dom: element as HTMLElement,
       imdbId,
-      query: "",
+      title: "",
     };
     requests.push(request);
   });

@@ -1,7 +1,4 @@
-import {
-  addToMemoryCache,
-  getFromMemoryCache,
-} from "../utils/cache";
+import { addToMemoryCache, getFromMemoryCache } from "../utils/cache";
 import {
   parseImdbIdFromLink,
   parseResolution,
@@ -15,10 +12,10 @@ import {
   Torrent,
   tracker,
 } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
 import { findFirst, insertBefore } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
-function isSupportedCategory(category: Category) {
+function isSupportedCategory(category: Category | undefined) {
   return (
     category === undefined ||
     category === Category.MOVIE ||
@@ -108,7 +105,7 @@ export default class PTP implements tracker {
         torrents: parseTorrents(element),
         dom: element as HTMLElement,
         imdbId,
-        query: "",
+        title: "",
         category: parseCategory(element),
       };
       requests.push(request);
@@ -123,14 +120,24 @@ export default class PTP implements tracker {
 
   async canUpload(request: Request, onlyNew: boolean): Promise<boolean> {
     if (!isSupportedCategory(request.category)) return false;
-    if (!request.imdbId) return true;
-    let torrents = getFromMemoryCache(request.imdbId);
-    if (!torrents) {
-      const query_url =
-        "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
-      const result = await fetchAndParseHtml(query_url);
-      torrents = parseAvailableTorrents(result);
-      addToMemoryCache(request.imdbId, torrents);
+    let torrents = [];
+    if (!request.imdbId) {
+      if (request.title && request.year) {
+        const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(
+          request.title
+        )}&year=${request.year}`;
+        const result = await fetchAndParseHtml(query_url);
+        torrents = parseAvailableTorrents(result);
+      }
+    } else {
+      torrents = getFromMemoryCache(request.imdbId);
+      if (!torrents) {
+        const query_url =
+          "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
+        const result = await fetchAndParseHtml(query_url);
+        torrents = parseAvailableTorrents(result);
+        addToMemoryCache(request.imdbId, torrents);
+      }
     }
     let notFound = !torrents.length;
     if (notFound) {
@@ -158,14 +165,14 @@ export default class PTP implements tracker {
 }
 
 const parseAvailableTorrents = (result: HTMLElement): Array<Torrent> => {
-  const torrents = [];
+  const torrents: Array<Torrent> = [];
   result
     .querySelectorAll('#torrent-table tr[id^="group_torrent_header_"]')
     .forEach((line) => {
-      const data = line.children[0].textContent.trim().split("/");
-      const size = parseSize(line.children[1].textContent.trim());
+      const data = line.children[0]?.textContent?.trim().split("/");
+      const size = parseSize(line.children[1]?.textContent?.trim());
       const tags = [];
-      if (line.textContent.includes("Remux")) {
+      if (line.textContent?.includes("Remux")) {
         tags.push("Remux");
       }
       const torrent: Torrent = {

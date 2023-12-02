@@ -97,7 +97,7 @@ export default class HDB implements tracker {
           torrents: [parseTorrent(element)],
           dom: element as HTMLElement,
           imdbId,
-          query: "",
+          title: "",
           category: parseCategory(element),
         };
         requests.push(request);

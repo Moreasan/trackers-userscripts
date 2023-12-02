@@ -70,7 +70,7 @@ export default class TSeeds implements tracker {
         ],
         dom: element as HTMLElement,
         imdbId,
-        query: "",
+        title: "",
         category,
       };
       yield request;

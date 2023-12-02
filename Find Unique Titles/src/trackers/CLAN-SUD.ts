@@ -48,7 +48,7 @@ export default class CLANSUD implements tracker {
         torrents: [],
         dom: topic as HTMLElement,
         imdbId,
-        query: "",
+        title: "",
       };
       yield request;
     }
