@@ -5,6 +5,9 @@ You copy paste the content of the file `dist/find.unique.titles.user.js`.
 You can generate it by running run `npm run dev`.
 
 # Changelog
+## 2023-12
+- Add support for MTV
+- Add support for using title and year when IMDB ID is not available. It only works with MTV and PTP right now
 ## 2023-11
 - Some work is done to use IMDB Scout code for searching
 - Add support for TSeeds
