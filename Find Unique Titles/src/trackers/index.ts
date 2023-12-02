@@ -24,6 +24,7 @@ import CHD from "./CHD";
 import HDSky from "./HDSky";
 import Pter from "./Pter";
 import TSeeds from "./TSeeds";
+import MTV from "./MTV";
 
 export {
   PTP,
@@ -52,4 +53,5 @@ export {
   TiK,
   Pter,
   TSeeds,
+  MTV,
 };

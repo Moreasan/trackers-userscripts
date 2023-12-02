@@ -34,6 +34,7 @@
 // @match https://pterc.com/torrents.php*
 // @match https://torrentseeds.org/torrents*
 // @match https://torrentseeds.org/categories/*
+// @match https://www.morethantv.me/torrents/browse*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -1199,6 +1200,86 @@
         }
       }
     },
+    "./src/trackers/MTV.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        default: () => MTV
+      });
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/trackers/index.mjs");
+      const parseCategory = element => {
+        const movieBanner = element.querySelector('div[title="hd.movie"]');
+        if (movieBanner) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+      };
+      class MTV {
+        canBeUsedAsSource() {
+          return true;
+        }
+        canBeUsedAsTarget() {
+          return true;
+        }
+        canRun(url) {
+          return url.includes("morethantv.me");
+        }
+        async* getSearchRequest() {
+          let nodes = document.querySelectorAll("tr.torrent");
+          yield {
+            total: nodes.length
+          };
+          for (const element of nodes) {
+            const category = parseCategory(element);
+            let imdbId = null;
+            if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) {
+              const link = element.querySelector('td a[href*="torrents.php?id="]');
+              let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(link.href);
+              imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbIdFromLink)(response);
+            }
+            let sizeText = element.children[4]?.textContent;
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(sizeText);
+            const request = {
+              torrents: [ {
+                size,
+                tags: [],
+                dom: element
+              } ],
+              dom: element,
+              imdbId,
+              query: "",
+              category
+            };
+            yield request;
+          }
+        }
+        name() {
+          return "MTV";
+        }
+        async canUpload(request) {
+          let result = common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND;
+          if (request.category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) result = await (0, 
+          common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.MTV, {
+            movie_title: request.query
+          }); else result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.MTV_TV, {
+            movie_title: request.query
+          });
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND;
+        }
+        insertTrackersSelect(select) {
+          const wrapper = document.createElement("tr");
+          const label = document.createElement("td");
+          const selectTd = document.createElement("td");
+          label.textContent = "Find Unique for:";
+          label.classList.add("label");
+          selectTd.appendChild(select);
+          wrapper.appendChild(label);
+          wrapper.appendChild(selectTd);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.addChild)(document.querySelector("#search_box table.noborder tbody"), wrapper);
+        }
+      }
+    },
     "./src/trackers/MTeam.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         default: () => MTeam
@@ -1861,6 +1942,7 @@
             IPT: () => _IPT__WEBPACK_IMPORTED_MODULE_6__.default,
             JPTV: () => _JPTV__WEBPACK_IMPORTED_MODULE_13__.default,
             KG: () => _KG__WEBPACK_IMPORTED_MODULE_3__.default,
+            MTV: () => _MTV__WEBPACK_IMPORTED_MODULE_26__.default,
             MTeam: () => _MTeam__WEBPACK_IMPORTED_MODULE_19__.default,
             NewInsane: () => _NewInsane__WEBPACK_IMPORTED_MODULE_9__.default,
             PTP: () => _PTP__WEBPACK_IMPORTED_MODULE_0__.default,
@@ -1897,6 +1979,7 @@
           var _HDSky__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./src/trackers/HDSky.ts");
           var _Pter__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("./src/trackers/Pter.ts");
           var _TSeeds__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("./src/trackers/TSeeds.ts");
+          var _MTV__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("./src/trackers/MTV.ts");
           var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_0__ ]);
           _PTP__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           __webpack_async_result__();
@@ -2291,6 +2374,8 @@
     "../common/dist/trackers/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         KG: () => KG,
+        MTV: () => MTV,
+        MTV_TV: () => MTV_TV,
         TSeeds: () => TSeeds
       });
       const KG = {
@@ -2301,6 +2386,24 @@
         matchRegex: /No torrents found/,
         rateLimit: 125,
         both: true
+      };
+      const MTV = {
+        TV: false,
+        name: "MTV",
+        searchUrl: "https://www.morethantv.me/torrents.php?filter_cat[1]=1&filter_cat[2]=1&title=+%2B%search_string%+%2B%year%",
+        loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
+        spaceEncode: "+%2B",
+        matchRegex: /action=download/,
+        positiveMatch: true
+      };
+      const MTV_TV = {
+        TV: true,
+        name: "MTV",
+        searchUrl: "https://www.morethantv.me/torrents.php?filter_cat[3]=1&filter_cat[5]=1&filter_cat[4]=1&filter_cat[6]=1&title=+%2B%search_string%",
+        loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
+        spaceEncode: "+%2B",
+        matchRegex: /action=download/,
+        positiveMatch: true
       };
       const TSeeds = {
         TV: false,
