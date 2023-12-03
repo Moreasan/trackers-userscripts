@@ -1,9 +1,14 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, SearchResult, Torrent, tracker } from "./tracker";
+import {
+  Category,
+  MetaData,
+  Request,
+  SearchResult,
+  Torrent,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
-import { logger } from "common/logger";
-
 
 function parseTorrent(element: HTMLElement): Torrent {
   let infos = element
@@ -66,7 +71,6 @@ export default class SC implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    logger.debug(`[{0}] Parsing titles to check`, this.name());
     const elements = Array.from(
       document.querySelectorAll(".torrent_card")
     ).filter((element) => element.querySelector(".torrent_tags") != null);
@@ -88,7 +92,6 @@ export default class SC implements tracker {
         year,
         category: parseCategory(element as HTMLElement),
       };
-      logger.debug(`[{0}] Search request: {1}`, this.name(), request);
       yield request;
     }
   }

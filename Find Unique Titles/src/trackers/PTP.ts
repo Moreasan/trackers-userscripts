@@ -145,6 +145,8 @@ export default class PTP implements tracker {
         )}&year=${request.year}`;
         result = await fetchAndParseHtml(query_url);
         torrents = parseAvailableTorrents(result);
+      } else {
+        return SearchResult.NOT_CHECKED
       }
     } else {
       torrents = getFromMemoryCache(request.imdbId);
@@ -158,7 +160,7 @@ export default class PTP implements tracker {
     }
     let notFound = !torrents.length;
     if (notFound) {
-      if (hasRequests(result)) {
+      if (result && hasRequests(result)) {
         if (request.imdbId) {
           return SearchResult.NOT_EXIST_WITH_REQUEST;
         } else {

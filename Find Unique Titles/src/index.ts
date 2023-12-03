@@ -67,64 +67,76 @@ const main = async function () {
       const metadata = (await requestGenerator.next()).value as MetaData;
       addCounter();
       updateTotalCount(metadata.total);
+      logger.debug(`[{0}] Parsing titles to check`, sourceTracker!!.name());
       for await (const item of requestGenerator) {
         const request = item as Request;
-        if (
-          settings.useCache &&
-          request.imdbId &&
-          existsInCache(targetTracker.name(), request.imdbId)
-        ) {
-          hideTorrents(request);
+        logger.debug(`[{0}] Search request: {1}`, sourceTracker!!.name(), request);
+        try {
+          if (
+            settings.useCache &&
+            request.imdbId &&
+            existsInCache(targetTracker.name(), request.imdbId)
+          ) {
+            logger.debug("Title exists in target tracker, found using cache")
+            hideTorrents(request);
+            updateCount(i++);
+            continue;
+          }
+          const response = await targetTracker.search(request);
           updateCount(i++);
-          continue;
-        }
-        const response = await targetTracker.search(request);
-        updateCount(i++);
-        if (
-          response == SearchResult.EXIST ||
-          response == SearchResult.NOT_ALLOWED
-        ) {
-          if (request.imdbId) {
-            await addToCache(targetTracker.name(), request.imdbId);
+          if (
+            response == SearchResult.EXIST ||
+            response == SearchResult.NOT_ALLOWED
+          ) {
+            if (request.imdbId) {
+              await addToCache(targetTracker.name(), request.imdbId);
+            }
+            hideTorrents(request);
+          } else if (response == SearchResult.NOT_LOGGED_IN) {
+            alert(`You are not logged in ${targetTracker.name()}`);
+            break;
+          } else {
+            newContent++;
+            updateNewContent(newContent);
+            if (response == SearchResult.MAYBE_NOT_EXIST) {
+              request.dom[0].setAttribute(
+                "title",
+                "Title may not exist on target tracker"
+              );
+              request.dom[0].style.border = "2px solid #9b59b6";
+            } else if (response == SearchResult.NOT_EXIST_WITH_REQUEST) {
+              request.dom[0].setAttribute(
+                "title",
+                "Title was not found and has matching requests"
+              );
+              request.dom[0].style.border = "2px solid #2ecc71";
+            } else if (response == SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST) {
+              request.dom[0].setAttribute(
+                "title",
+                "Title may not exists and there are matching requests"
+              );
+              request.dom[0].style.border = "2px solid #e67e22";
+            } else if (response == SearchResult.NOT_CHECKED) {
+              request.dom[0].setAttribute(
+                "title",
+                "Title was not checked on target tracker"
+              );
+              request.dom[0].style.border = "2px solid #e74c3c";
+            } else if (response != SearchResult.NOT_EXIST) {
+              request.dom[0].setAttribute(
+                "title",
+                "Title was not found on target tracker"
+              );
+              request.dom[0].style.border = "2px solid #3498db";
+            }
           }
-          hideTorrents(request);
-        } else if (response == SearchResult.NOT_LOGGED_IN) {
-          alert(`You are not logged in ${targetTracker.name()}`);
-          break;
-        } else {
-          newContent++;
-          updateNewContent(newContent);
-          if (response == SearchResult.MAYBE_NOT_EXIST) {
-            request.dom[0].setAttribute(
-              "title",
-              "Title may not exist on target tracker"
-            );
-            request.dom[0].style.border = "2px solid #9b59b6";
-          } else if (response == SearchResult.NOT_EXIST_WITH_REQUEST) {
-            request.dom[0].setAttribute(
-              "title",
-              "Title was not found and has matching requests"
-            );
-            request.dom[0].style.border = "2px solid #2ecc71";
-          } else if (response == SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST) {
-            request.dom[0].setAttribute(
-              "title",
-              "Title may not exists and there are matching requests"
-            );
-            request.dom[0].style.border = "2px solid #e67e22";
-          } else if (response == SearchResult.NOT_CHECKED) {
-            request.dom[0].setAttribute(
-              "title",
-              "Title was not checked on target tracker"
-            );
-            request.dom[0].style.border = "2px solid #e74c3c";
-          } else if (response != SearchResult.NOT_EXIST) {
-            request.dom[0].setAttribute(
-              "title",
-              "Title was not found on target tracker"
-            );
-            request.dom[0].style.border = "2px solid #3498db";
-          }
+        } catch (e) {
+          logger.info("Error occurred when checking {0}, {1]", request, e);
+          request.dom[0].setAttribute(
+            "title",
+            "Title was not checked due to an error"
+          );
+          request.dom[0].style.border = "2px solid red";
         }
       }
       clearMemoryCache();

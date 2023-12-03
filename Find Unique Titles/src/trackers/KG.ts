@@ -8,7 +8,6 @@ import {
   tracker,
 } from "./tracker";
 import { insertBefore } from "common/dom";
-import { logger } from "common/logger";
 import { search, SearchResult as SR } from "common/searcher";
 import { KG as KGTracker } from "common/trackers";
 
@@ -68,7 +67,6 @@ export default class KG implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    logger.debug(`[{0}] Parsing titles to check`, this.name());
     let elements = Array.from(
       document.querySelectorAll("#browse > tbody tr")
     ).filter(
@@ -95,7 +93,6 @@ export default class KG implements tracker {
         year,
         category: parseCategory(element as HTMLElement),
       };
-      logger.debug(`[{0}] Search request: {1}`, this.name(), request);
       yield request;
     }
   }

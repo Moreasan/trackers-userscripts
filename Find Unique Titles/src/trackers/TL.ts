@@ -1,13 +1,39 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import {
+  Category,
   MetaData,
   Request,
   SearchResult,
-  toGenerator,
   tracker,
 } from "./tracker";
 import { addChild } from "common/dom";
+import { logger } from "common/logger";
 
+const parseCategory = (element: Element) => {
+  const category = element
+    .querySelector(".info a.category")!!
+    .getAttribute("data-ccid");
+  if (category == "animation") return Category.ANIME;
+  if (category == "tv") return Category.TV;
+  if (category == "music") return Category.MUSIC;
+  if (category == "games") return Category.GAME;
+  if (category == "movies") return Category.MOVIE;
+  if (category == "books") return Category.BOOK;
+};
+const parseYearAndTitle = (element: Element) => {
+  const name = element.querySelector(".name a")!!.childNodes[0].textContent!!;
+  const regex = /^(.*?)\s+(\d{4})\s+(.*)$/;
+  const match = name.match(regex);
+
+  if (match) {
+    const title = match[1].trim();
+    const year = parseInt(match[2], 10);
+
+    return { title, year };
+  }
+
+  return { title: undefined, year: undefined };
+};
 export default class TL implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
@@ -22,29 +48,39 @@ export default class TL implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    document.querySelectorAll(".torrent")?.forEach((element: HTMLElement) => {
-      const imdbId = parseImdbIdFromLink(element);
+    logger.debug(`[{0}] Parsing titles to check`, this.name());
+    const elements = document.querySelectorAll(".torrent");
+    yield {
+      total: elements.length,
+    };
+    for (let element of elements) {
+      const imdbId = parseImdbIdFromLink(element as HTMLElement);
       const size = parseSize(
         element.querySelector(".td-size")?.textContent as string
       );
+      const category = parseCategory(element);
+      let title;
+      let year = undefined;
+      if (category == Category.MOVIE) {
+        ({ title, year } = parseYearAndTitle(element));
+      }
 
       const request: Request = {
         torrents: [
           {
             size,
             tags: [],
-            dom: element,
+            dom: element as HTMLElement,
           },
         ],
-        dom: [element],
+        dom: [element as HTMLElement],
         imdbId,
-        title: "",
+        title,
+        year,
+        category,
       };
-      requests.push(request);
-    });
-
-    yield* toGenerator(requests);
+      yield request;
+    }
   }
 
   name(): string {
