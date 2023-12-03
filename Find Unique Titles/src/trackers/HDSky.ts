@@ -1,5 +1,11 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
 
 export default class HDSky implements tracker {
@@ -12,14 +18,13 @@ export default class HDSky implements tracker {
   }
 
   canRun(url: string): boolean {
-    return (
-      url.includes("hdsky.me")
-    );
+    return url.includes("hdsky.me");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
-    for (const element of document.querySelectorAll('.torrents')[0].children[0].children) {
+    for (const element of document.querySelectorAll(".torrents")[0].children[0]
+      .children) {
       if (!element.querySelector(".torrentname")) {
         continue;
       }
@@ -41,15 +46,15 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       requests.push(request);
     }
 
-  yield* toGenerator(requests)
-}
+    yield* toGenerator(requests);
+  }
 
   name(): string {
     return "HDSky";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

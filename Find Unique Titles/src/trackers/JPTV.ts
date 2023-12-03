@@ -1,7 +1,13 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 export default class JPTV implements tracker {
   canBeUsedAsSource(): boolean {
@@ -16,7 +22,7 @@ export default class JPTV implements tracker {
     return url.includes("jptv.club");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     let nodes = document.querySelectorAll(".view-torrent");
     for (const element of nodes) {
@@ -45,15 +51,15 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       requests.push(request);
     }
 
-  yield* toGenerator(requests)
-}
+    yield* toGenerator(requests);
+  }
 
   name(): string {
     return "JPTV";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

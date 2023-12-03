@@ -1,8 +1,8 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
-import { search, SearchResult } from "common/searcher";
+import { search, SearchResult as SR } from "common/searcher";
 import { TSeeds as TSeedsTracker } from "common/trackers";
 
 const parseCategory = (element: Element): Category | undefined => {
@@ -79,13 +79,14 @@ export default class TSeeds implements tracker {
     return "TSeeds";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const result = await search(TSeedsTracker, {
       movie_title: "",
       movie_imdb_id: request.imdbId,
     });
-    return result == SearchResult.NOT_FOUND;
+    if (result == SR.LOGGED_OUT) return SearchResult.NOT_LOGGED_IN;
+    return result == SR.NOT_FOUND ? SearchResult.NOT_EXIST : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

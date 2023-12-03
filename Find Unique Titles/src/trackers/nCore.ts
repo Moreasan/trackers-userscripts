@@ -1,5 +1,11 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
 
 export default class MTeam implements tracker {
@@ -15,12 +21,13 @@ export default class MTeam implements tracker {
     return url.includes("https://ncore.pro");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     for (const element of document.querySelectorAll(".box_torrent")) {
-
       const imdbId = parseImdbIdFromLink(element);
-      const size = parseSize(element.children[1].children[4].textContent as string);
+      const size = parseSize(
+        element.children[1].children[4].textContent as string
+      );
 
       const request: Request = {
         torrents: [
@@ -37,15 +44,15 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       requests.push(request);
     }
 
-  yield* toGenerator(requests)
-}
+    yield* toGenerator(requests);
+  }
 
   name(): string {
     return "nCore";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

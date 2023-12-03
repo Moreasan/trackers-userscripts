@@ -1,6 +1,6 @@
 import * as trackers from "./trackers";
-import { tracker, Request, MetaData } from "./trackers/tracker";
-import { existsInCache, addToCache, clearMemoryCache } from "./utils/cache";
+import { MetaData, Request, SearchResult, tracker } from "./trackers/tracker";
+import { addToCache, clearMemoryCache, existsInCache } from "./utils/cache";
 import {
   addCounter,
   createTrackersSelect,
@@ -11,7 +11,7 @@ import {
 import "./settings";
 import { getSettings } from "./settings";
 import { appendErrorMessage, showError } from "common/dom";
-import { logger, LEVEL } from "common/logger"
+import { LEVEL, logger } from "common/logger";
 
 function hideTorrents(request: Request) {
   for (let element of request.dom) {
@@ -23,18 +23,18 @@ function hideTorrents(request: Request) {
 }
 
 const setUpLogger = (debugMode: boolean) => {
-  logger.setPrefix("[Find Unique Titles]")
-  if (debugMode){
-    logger.setLevel(LEVEL.DEBUG)
+  logger.setPrefix("[Find Unique Titles]");
+  if (debugMode) {
+    logger.setLevel(LEVEL.DEBUG);
   }
-}
+};
 
 const main = async function () {
   "use strict";
 
   const settings = getSettings();
 
-  setUpLogger(settings.debug)
+  setUpLogger(settings.debug);
 
   logger.info("Init User script");
 
@@ -78,19 +78,53 @@ const main = async function () {
           updateCount(i++);
           continue;
         }
-        const response = await targetTracker.canUpload(
-          request,
-          settings.onlyNewTitles
-        );
+        const response = await targetTracker.search(request);
         updateCount(i++);
-        if (!response) {
+        if (
+          response == SearchResult.EXIST ||
+          response == SearchResult.NOT_ALLOWED
+        ) {
           if (request.imdbId) {
             await addToCache(targetTracker.name(), request.imdbId);
           }
           hideTorrents(request);
+        } else if (response == SearchResult.NOT_LOGGED_IN) {
+          alert(`You are not logged in ${targetTracker.name()}`);
+          break;
         } else {
           newContent++;
           updateNewContent(newContent);
+          if (response == SearchResult.MAYBE_NOT_EXIST) {
+            request.dom[0].setAttribute(
+              "title",
+              "Title may not exist on target tracker"
+            );
+            request.dom[0].style.border = "2px solid #9b59b6";
+          } else if (response == SearchResult.NOT_EXIST_WITH_REQUEST) {
+            request.dom[0].setAttribute(
+              "title",
+              "Title was not found and has matching requests"
+            );
+            request.dom[0].style.border = "2px solid #2ecc71";
+          } else if (response == SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST) {
+            request.dom[0].setAttribute(
+              "title",
+              "Title may not exists and there are matching requests"
+            );
+            request.dom[0].style.border = "2px solid #e67e22";
+          } else if (response == SearchResult.NOT_CHECKED) {
+            request.dom[0].setAttribute(
+              "title",
+              "Title was not checked on target tracker"
+            );
+            request.dom[0].style.border = "2px solid #e74c3c";
+          } else if (response != SearchResult.NOT_EXIST) {
+            request.dom[0].setAttribute(
+              "title",
+              "Title was not found on target tracker"
+            );
+            request.dom[0].style.border = "2px solid #3498db";
+          }
         }
       }
       clearMemoryCache();
@@ -98,7 +132,6 @@ const main = async function () {
   });
   (sourceTracker as tracker).insertTrackersSelect(select);
 };
-
 
 appendErrorMessage();
 main().catch((e) => {

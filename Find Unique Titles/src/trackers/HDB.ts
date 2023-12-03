@@ -9,7 +9,7 @@ import {
   toGenerator,
   MetaData,
   Torrent,
-  Category,
+  Category, SearchResult
 } from "./tracker";
 import { fetchAndParseHtml } from "common/http";
 import { addChild } from "common/dom";
@@ -110,8 +110,8 @@ export default class HDB implements tracker {
     return "HDB";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl =
       "https://hdbits.org/browse.php?c3=1&c1=1&c2=1&tagsearchtype=or&imdb=" +
       request.imdbId +
@@ -121,7 +121,8 @@ export default class HDB implements tracker {
 
     return result
       .querySelector("#resultsarea")
-      .textContent.includes("Nothing here!");
+      .textContent.includes("Nothing here!") ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

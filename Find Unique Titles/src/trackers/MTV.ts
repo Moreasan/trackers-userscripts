@@ -1,8 +1,8 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
-import { search, SearchResult } from "common/searcher";
+import { search, SearchResult as SC } from "common/searcher";
 import { MTV as MTVTracker, MTV_TV } from "common/trackers";
 
 const parseCategory = (element: Element): Category | undefined => {
@@ -89,8 +89,8 @@ export default class MTV implements tracker {
     return "MTV";
   }
 
-  async canUpload(request: Request) {
-    let result = SearchResult.NOT_FOUND;
+  async search(request: Request): Promise<SearchResult> {
+    let result: SearchResult;
     if (request.category == Category.MOVIE) {
       result = await search(MTVTracker, {
         movie_title: request.title,
@@ -100,7 +100,8 @@ export default class MTV implements tracker {
         movie_title: request.title,
       });
     }
-    return result == SearchResult.NOT_FOUND;
+    return result == SC.NOT_FOUND ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

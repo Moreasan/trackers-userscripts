@@ -1,7 +1,8 @@
 import { parseSize } from "../utils/utils";
-import { MetaData, Request, toGenerator, tracker } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import { MetaData, Request, SearchResult, toGenerator, tracker } from "./tracker";
 import { addChild, insertAfter } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
+
 
 export default class Aither implements tracker {
   canBeUsedAsSource(): boolean {
@@ -46,8 +47,8 @@ export default class Aither implements tracker {
     return "Aither";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl =
       "https://aither.xyz/torrents?perPage=25&imdbId=" +
       request.imdbId +
@@ -57,7 +58,9 @@ export default class Aither implements tracker {
 
     return result.textContent.includes(
       "There is no result in database for query"
-    );
+    )
+      ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

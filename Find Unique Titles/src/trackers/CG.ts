@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, toGenerator, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, toGenerator, tracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -77,8 +77,8 @@ export default class CG implements tracker {
     return "CG";
   }
 
-  async canUpload(request: Request): Promise<boolean> {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl =
       "https://cinemageddon.net/browse.php?search=" +
       request.imdbId +
@@ -86,7 +86,8 @@ export default class CG implements tracker {
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.textContent!!.includes("Nothing found!");
+    return result.textContent!!.includes("Nothing found!") ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

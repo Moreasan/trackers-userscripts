@@ -17,14 +17,13 @@ export const logger = {
 
   info: (message: string, ...args: Array<any>) => {
     if (logger.level <= LEVEL.INFO) {
-      console.log(formatMessage(logger.level, message, args));
+      console.log(formatMessage(LEVEL.INFO, message, args));
     }
   },
 
   debug: (message: string, ...args: Array<any>) => {
-    // Log debug messages if level is 'debug'
     if (logger.level <= LEVEL.DEBUG) {
-      console.log(formatMessage(logger.level, message, args));
+      console.log(formatMessage(LEVEL.DEBUG, message, args));
     }
   },
 };
@@ -43,9 +42,9 @@ const formatMessage = (level: LEVEL, message: string, args: any[]): string => {
         const argIndex = parseInt(index, 10);
         const argValue = args[argIndex];
 
-        // Stringify objects and arrays
-        return typeof argValue === 'object' ? JSON.stringify(argValue) : argValue;
-
+        return typeof argValue === "object"
+          ? JSON.stringify(argValue)
+          : argValue;
       })
       .trim()
   );

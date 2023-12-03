@@ -1,7 +1,8 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, MetaData } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import { tracker, Request, MetaData, SearchResult } from "./tracker";
 import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
+import url from "url";
 
 export default class FL implements tracker {
   canBeUsedAsSource(): boolean {
@@ -16,11 +17,11 @@ export default class FL implements tracker {
     return url.includes("filelist.io");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     let nodes = document.querySelectorAll(".torrentrow");
     yield {
-      total: nodes.length
-    }
+      total: nodes.length,
+    };
     for (const element of nodes) {
       const link: HTMLAnchorElement | null = element.querySelector(
         'a[href*="details.php?id"]'
@@ -28,9 +29,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       if (!link) {
         continue;
       }
-      let response = await fetchAndParseHtml(
-        (link as HTMLAnchorElement).href
-      );
+      let response = await fetchAndParseHtml((link as HTMLAnchorElement).href);
       const imdbId = parseImdbIdFromLink(response as HTMLElement);
       const size = parseSize(
         element.querySelector(".torrenttable:nth-child(7)")
@@ -49,7 +48,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         imdbId,
         title: "",
       };
-      yield request
+      yield request;
     }
   }
 
@@ -57,8 +56,8 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     return "FL";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl =
       "https://filelist.io/browse.php?search=" +
       request.imdbId +
@@ -66,13 +65,12 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.querySelectorAll(".torrentrow").length === 0;
+    return result.querySelectorAll(".torrentrow").length === 0
+      ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    addChild(
-      document.querySelector("form p") as HTMLElement,
-      select
-    );
+    addChild(document.querySelector("form p") as HTMLElement, select);
   }
 }

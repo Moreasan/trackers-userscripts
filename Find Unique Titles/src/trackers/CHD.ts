@@ -1,7 +1,7 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, MetaData } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import { MetaData, Request, SearchResult, tracker } from "./tracker";
 import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 export default class CHD implements tracker {
   canBeUsedAsSource(): boolean {
@@ -11,15 +11,16 @@ export default class CHD implements tracker {
   canBeUsedAsTarget(): boolean {
     return false;
   }
-  
+
   canRun(url: string): boolean {
     return url.includes("ptchdbits.co");
   }
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    let nodes =document.querySelectorAll('.torrents')[0].children[0].children;
+
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+    let nodes = document.querySelectorAll(".torrents")[0].children[0].children;
     yield {
-      total: nodes.length
-    }
+      total: nodes.length,
+    };
     let i = 1;
     for (const element of nodes) {
       if (!element.querySelector(".torrentname")) {
@@ -31,13 +32,13 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       if (!link) {
         continue;
       }
-      let response = await fetchAndParseHtml(
-        (link as HTMLAnchorElement).href
-      );
+      let response = await fetchAndParseHtml((link as HTMLAnchorElement).href);
       const imdbId = parseImdbIdFromLink(response as HTMLElement);
 
-      const size = parseSize(element.querySelector('.rowfollow:nth-child(5)').innerText);
-      console.log("size:",size);
+      const size = parseSize(
+        element.querySelector(".rowfollow:nth-child(5)")!!.textContent!!
+      );
+      console.log("size:", size);
       const request: Request = {
         torrents: [
           {
@@ -50,22 +51,21 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         imdbId,
         title: "",
       };
-      yield request
+      yield request;
     }
   }
-  
 
   name(): string {
     return "CHD";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
     const element = document
-      .querySelector(".searchbox")
+      .querySelector(".searchbox")!!
       .children[2].querySelector("td td.rowfollow tr");
     addChild(element as HTMLElement, select);
   }

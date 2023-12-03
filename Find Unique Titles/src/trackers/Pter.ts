@@ -3,6 +3,7 @@ import {
   Category,
   MetaData,
   Request,
+  SearchResult,
   toGenerator,
   Torrent,
   tracker,
@@ -69,10 +70,12 @@ function parseCategory(element: HTMLElement) {
 }
 
 const isExclusive = (element: HTMLElement) => {
-  const torrentName = element.querySelector('.torrentname')
-  const exclusiveLink = torrentName.querySelector('a[href="torrents.php?tag_exclusive=yes"]')
+  const torrentName = element.querySelector(".torrentname");
+  const exclusiveLink = torrentName.querySelector(
+    'a[href="torrents.php?tag_exclusive=yes"]'
+  );
   return exclusiveLink != null;
-}
+};
 
 export default class Pter implements tracker {
   canBeUsedAsSource(): boolean {
@@ -94,8 +97,8 @@ export default class Pter implements tracker {
       .slice(1)
       .forEach((element: HTMLElement) => {
         if (isExclusive(element)) {
-          element.style.display = 'none'
-          return
+          element.style.display = "none";
+          return;
         }
         const spanElement = element.querySelector("span[data-imdbid]");
         let imdbId = spanElement
@@ -104,7 +107,7 @@ export default class Pter implements tracker {
         if (imdbId) {
           imdbId = "tt" + imdbId;
         } else {
-          imdbId = null
+          imdbId = null;
         }
 
         const request: Request = {
@@ -124,11 +127,13 @@ export default class Pter implements tracker {
     return "Pter";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl = `https://pterclub.com/torrents.php?search=${request.imdbId}`;
     const result = await fetchAndParseHtml(queryUrl);
-    return result.querySelector("#torrenttable") === null;
+    return result.querySelector("#torrenttable") === null
+      ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

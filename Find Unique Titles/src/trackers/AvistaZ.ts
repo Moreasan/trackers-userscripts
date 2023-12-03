@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request, MetaData, toGenerator } from "./tracker";
+import { tracker, Request, MetaData, toGenerator, SearchResult } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -39,13 +39,15 @@ export default class AvistaZ implements tracker {
     return "AvistaZ";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request) : Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl = "https://avistaz.to/movies?search=&imdb=" + request.imdbId;
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.textContent?.includes("No Movie found!");
+    return result.textContent?.includes("No Movie found!")
+      ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

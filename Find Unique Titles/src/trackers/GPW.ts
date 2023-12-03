@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { MetaData, Request, toGenerator, Torrent, tracker } from "./tracker";
+import { MetaData, Request, SearchResult, toGenerator, Torrent, tracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -74,13 +74,14 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     return "GPW";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl = `https://greatposterwall.com/torrents.php?groupname=${request.imdbId}`;
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.querySelector(".torrent-listings-no-result") !== null;
+    return result.querySelector(".torrent-listings-no-result") !== null ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

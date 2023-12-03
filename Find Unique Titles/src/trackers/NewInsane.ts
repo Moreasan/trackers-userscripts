@@ -1,5 +1,11 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
 
 export default class NewInsane implements tracker {
@@ -37,8 +43,8 @@ export default class NewInsane implements tracker {
     return "NewInsane";
   }
 
-  async canUpload(request: Request) {
-    return !request.imdbId;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

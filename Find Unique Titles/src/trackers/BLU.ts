@@ -1,7 +1,13 @@
 import { parseSize } from "../utils/utils";
-import { MetaData, Request, toGenerator, tracker } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 export default class BLU implements tracker {
   canBeUsedAsSource(): boolean {
@@ -48,8 +54,8 @@ export default class BLU implements tracker {
     return "BLU";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const queryUrl =
       "https://blutopia.xyz/torrents?perPage=25&imdbId=" +
       request.imdbId +
@@ -57,7 +63,9 @@ export default class BLU implements tracker {
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.querySelector(".torrent-listings-no-result") !== null;
+    return result.querySelector(".torrent-listings-no-result") !== null
+      ? SearchResult.NOT_EXIST
+      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

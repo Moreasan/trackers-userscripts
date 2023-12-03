@@ -1,5 +1,11 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
 
 export default class TL implements tracker {
@@ -15,7 +21,7 @@ export default class TL implements tracker {
     return url.includes("torrentleech.org");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document.querySelectorAll(".torrent")?.forEach((element: HTMLElement) => {
       const imdbId = parseImdbIdFromLink(element);
@@ -38,24 +44,21 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       requests.push(request);
     });
 
-  yield* toGenerator(requests)
-}
+    yield* toGenerator(requests);
+  }
 
   name(): string {
     return "TL";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
     select.style.margin = "20px 0";
     select.style.padding = "2px 2px 3px 2px";
     select.style.color = "#111";
-    addChild(
-      document.querySelector(".sub-navbar") as HTMLElement,
-      select
-    );
+    addChild(document.querySelector(".sub-navbar") as HTMLElement, select);
   }
 }

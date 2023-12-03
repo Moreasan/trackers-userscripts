@@ -1,7 +1,7 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request, MetaData } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
+import { MetaData, Request, SearchResult, tracker } from "./tracker";
 import { insertBefore } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 export default class CLANSUD implements tracker {
   canBeUsedAsSource(): boolean {
@@ -58,8 +58,8 @@ export default class CLANSUD implements tracker {
     return "CLAN-SUD";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

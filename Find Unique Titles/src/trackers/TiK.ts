@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, MetaData, toGenerator } from "./tracker";
+import { MetaData, Request, SearchResult, tracker } from "./tracker";
 import { insertBefore } from "common/dom";
 
 const findTorrentsTable = () => {
@@ -82,8 +82,8 @@ export default class TiK implements tracker {
     return "TiK";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

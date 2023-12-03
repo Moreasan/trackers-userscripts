@@ -1,16 +1,16 @@
 import { parseImdbId, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
 import { insertAfter } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
 const parseCategory = (element: HTMLElement) => {
-  const category = element.children[0]!!.querySelector('a')!!.href
-  if (category.includes("cat=02")) return Category.MOVIE
-  if (category.includes("cat=03")) return Category.TV
-  if (category.includes("cat=05")) return Category.XXX
-  if (category.includes("cat=08")) return Category.LIVE_PERFORMANCE
+  const category = element.children[0]!!.querySelector("a")!!.href;
+  if (category.includes("cat=02")) return Category.MOVIE;
+  if (category.includes("cat=03")) return Category.TV;
+  if (category.includes("cat=05")) return Category.XXX;
+  if (category.includes("cat=08")) return Category.LIVE_PERFORMANCE;
   return Category.OTHER;
-}
+};
 
 export default class BTarg implements tracker {
   canBeUsedAsSource(): boolean {
@@ -64,8 +64,8 @@ export default class BTarg implements tracker {
     return "BTarg";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

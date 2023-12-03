@@ -3,13 +3,13 @@ import {
   Category,
   MetaData,
   Request,
-  toGenerator,
+  SearchResult,
   Torrent,
   tracker,
 } from "./tracker";
 import { insertBefore } from "common/dom";
 import { logger } from "common/logger";
-import { search, SearchResult } from "common/searcher";
+import { search, SearchResult as SR } from "common/searcher";
 import { KG as KGTracker } from "common/trackers";
 
 const parseCategory = (element: HTMLElement): Category => {
@@ -104,13 +104,14 @@ export default class KG implements tracker {
     return "KG";
   }
 
-  async canUpload(request: Request) {
-    if (!request.imdbId) return true;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
     const result = await search(KGTracker, {
       movie_title: "",
       movie_imdb_id: request.imdbId,
     });
-    return result == SearchResult.NOT_FOUND;
+    if (result == SR.LOGGED_OUT) return SearchResult.NOT_LOGGED_IN;
+    return result == SR.NOT_FOUND ? SearchResult.NOT_EXIST : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

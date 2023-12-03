@@ -7,7 +7,8 @@ You can generate it by running run `npm run dev`.
 # Changelog
 ## 2023-12
 - Add support for MTV
-- Add support for using title and year when IMDB ID is not available. It only works with MTV and PTP right now
+- Add support for using title and year when IMDB ID is not available when checking titles on PTP.
+- The script now highlight the reason why a title can be uploaded
 ## 2023-11
 - Some work is done to use IMDB Scout code for searching
 - Add support for TSeeds

@@ -1,5 +1,11 @@
 import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request, toGenerator, MetaData } from "./tracker";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  tracker,
+} from "./tracker";
 import { addChild, insertAfter } from "common/dom";
 
 export default class CG implements tracker {
@@ -15,7 +21,7 @@ export default class CG implements tracker {
     return url.includes("iptorrents.com/movies");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document.querySelectorAll(".mBox table")?.forEach((element) => {
       const imdbId = parseImdbIdFromLink(element as HTMLElement);
@@ -28,15 +34,15 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
       requests.push(request);
     });
 
-  yield* toGenerator(requests)
-}
+    yield* toGenerator(requests);
+  }
 
   name(): string {
     return "IPT";
   }
 
-  async canUpload(request: Request) {
-    return false;
+  async search(request: Request): Promise<SearchResult> {
+    return SearchResult.NOT_CHECKED;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
@@ -44,7 +50,9 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     addChild(element, select);
     insertAfter(
       element,
-      document.querySelector('.mBox form input[name="q"]')!!.closest("p") as HTMLElement
+      document
+        .querySelector('.mBox form input[name="q"]')!!
+        .closest("p") as HTMLElement
     );
   }
 }

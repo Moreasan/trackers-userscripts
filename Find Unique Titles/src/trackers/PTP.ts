@@ -8,6 +8,7 @@ import {
   Category,
   MetaData,
   Request,
+  SearchResult,
   toGenerator,
   Torrent,
   tracker,
@@ -70,6 +71,14 @@ const parseCategory = (element: HTMLElement): Category => {
   }
 };
 
+const hasRequests = (element: Element) => {
+  return element
+    .querySelector("#no_results_message")!!
+    .textContent!!.trim()
+    .includes(
+      "Your search did not match any torrents, however it did match these requests."
+    );
+};
 export default class PTP implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
@@ -119,9 +128,10 @@ export default class PTP implements tracker {
     return "PTP";
   }
 
-  async canUpload(request: Request, onlyNew: boolean): Promise<boolean> {
-    if (!isSupportedCategory(request.category)) return false;
+  async search(request: Request): Promise<SearchResult> {
+    if (!isSupportedCategory(request.category)) return SearchResult.NOT_ALLOWED;
     let torrents = [];
+    let result;
     if (!request.imdbId) {
       logger.debug("NO IMDB ID was provided");
       if (request.title && request.year) {
@@ -133,7 +143,7 @@ export default class PTP implements tracker {
         const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(
           request.title
         )}&year=${request.year}`;
-        const result = await fetchAndParseHtml(query_url);
+        result = await fetchAndParseHtml(query_url);
         torrents = parseAvailableTorrents(result);
       }
     } else {
@@ -141,28 +151,35 @@ export default class PTP implements tracker {
       if (!torrents) {
         const query_url =
           "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
-        const result = await fetchAndParseHtml(query_url);
+        result = await fetchAndParseHtml(query_url);
         torrents = parseAvailableTorrents(result);
         addToMemoryCache(request.imdbId, torrents);
       }
     }
     let notFound = !torrents.length;
     if (notFound) {
-      return true;
+      if (hasRequests(result)) {
+        if (request.imdbId) {
+          return SearchResult.NOT_EXIST_WITH_REQUEST;
+        } else {
+          return SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST;
+        }
+      }
+      if (request.imdbId) {
+        return SearchResult.NOT_EXIST
+      } else {
+        return SearchResult.MAYBE_NOT_EXIST
+      }
     }
-    if (onlyNew) {
-      logger.debug("Title already exists and only new titles is enabled");
-      return false;
-    }
+    let searchResult: SearchResult = SearchResult.EXIST
     for (let torrent of request.torrents) {
-      if (canUploadTorrent(torrent, torrents)) {
-        torrent.dom.style.border = "2px solid red";
-        notFound = true;
+      if (searchTorrent(torrent, torrents)) {
+        searchResult = SearchResult.EXIST_BUT_MISSING_SLOT;
       } else {
         torrent.dom.style.display = "none";
       }
     }
-    return notFound;
+    return searchResult;
   }
 
   insertTrackersSelect(select: HTMLSelectElement): void {
@@ -227,10 +244,7 @@ function sameResolution(first: Torrent, second: Torrent) {
   if (second.resolution === "SD") return isSD(first.resolution);
 }
 
-const canUploadTorrent = (
-  torrent: Torrent,
-  availableTorrents: Array<Torrent>
-) => {
+const searchTorrent = (torrent: Torrent, availableTorrents: Array<Torrent>) => {
   const similarTorrents = availableTorrents.filter((e) => {
     return (
       sameResolution(torrent, e) &&

@@ -37,10 +37,22 @@ export interface MetaData {
   total: number;
 }
 
+export enum SearchResult {
+  EXIST,
+  EXIST_BUT_MISSING_SLOT,
+  NOT_EXIST,
+  MAYBE_NOT_EXIST,
+  NOT_EXIST_WITH_REQUEST,
+  MAYBE_NOT_EXIST_WITH_REQUEST,
+  NOT_CHECKED,
+  NOT_LOGGED_IN,
+  NOT_ALLOWED
+}
+
 export interface tracker {
   canRun(url: string): boolean;
 
-  canUpload(request: Request, onlyNewTitle: boolean): Promise<boolean>;
+  search(request: Request): Promise<SearchResult>;
 
   canBeUsedAsSource(): boolean;
 
