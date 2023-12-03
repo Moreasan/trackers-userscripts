@@ -14,6 +14,7 @@ import {
 } from "./tracker";
 import { findFirst, insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
+import { logger } from "common/logger";
 
 function isSupportedCategory(category: Category | undefined) {
   return (
@@ -122,7 +123,13 @@ export default class PTP implements tracker {
     if (!isSupportedCategory(request.category)) return false;
     let torrents = [];
     if (!request.imdbId) {
+      logger.debug("NO IMDB ID was provided");
       if (request.title && request.year) {
+        logger.debug(
+          "Searching by title and year: {0} - {1}",
+          request.title,
+          request.year
+        );
         const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(
           request.title
         )}&year=${request.year}`;
@@ -144,6 +151,7 @@ export default class PTP implements tracker {
       return true;
     }
     if (onlyNew) {
+      logger.debug("Title already exists and only new titles is enabled");
       return false;
     }
     for (let torrent of request.torrents) {

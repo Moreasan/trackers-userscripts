@@ -8,6 +8,7 @@ import {
   tracker,
 } from "./tracker";
 import { insertBefore } from "common/dom";
+import { logger } from "common/logger";
 import { search, SearchResult } from "common/searcher";
 import { KG as KGTracker } from "common/trackers";
 
@@ -19,6 +20,11 @@ const parseCategory = (element: HTMLElement): Category => {
   if (imageSrc?.includes("41.jpg")) return Category.BOOK;
   if (img.getAttribute("title")?.includes("Music")) return Category.MUSIC;
   return category;
+};
+const parseTitleAndYear = (element: Element) => {
+  const year = parseInt(element.children[3].textContent!!.trim(), 10);
+  const title = element.children[1].querySelector("a")!!.textContent!!.trim();
+  return { title, year };
 };
 const parseTorrent = (element: HTMLElement): Array<Torrent> => {
   const torrents: Array<Torrent> = [];
@@ -62,26 +68,36 @@ export default class KG implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    document.querySelectorAll("#browse > tbody tr").forEach((element) => {
+    logger.debug(`[{0}] Parsing titles to check`, this.name());
+    let elements = Array.from(
+      document.querySelectorAll("#browse > tbody tr")
+    ).filter(
+      (element) =>
+        element.querySelector("td:nth-child(2) > div > span:nth-child(1)") !=
+        null
+    );
+    yield {
+      total: elements.length,
+    };
+    for (let element of elements) {
       let linksContainer = element.querySelector(
         "td:nth-child(2) > div > span:nth-child(1)"
       );
-      if (linksContainer === null) return;
       const imdbId = parseImdbIdFromLink(linksContainer as HTMLElement);
 
       let torrents = parseTorrent(element as HTMLElement);
+      const { year, title } = parseTitleAndYear(element);
       const request: Request = {
         torrents,
         dom: [element as HTMLElement],
         imdbId,
-        title: "",
+        title,
+        year,
         category: parseCategory(element as HTMLElement),
       };
-      requests.push(request);
-    });
-
-    yield* toGenerator(requests);
+      logger.debug(`[{0}] Search request: {1}`, this.name(), request);
+      yield request;
+    }
   }
 
   name(): string {

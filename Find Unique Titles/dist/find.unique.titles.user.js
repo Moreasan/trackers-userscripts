@@ -1154,9 +1154,10 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
-      var common_searcher__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/searcher/index.mjs");
-      var common_trackers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/trackers/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_logger__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/logger/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/trackers/index.mjs");
       const parseCategory = element => {
         const category = _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
         let img = element.querySelectorAll("td img")[0];
@@ -1165,6 +1166,14 @@
         if (imageSrc?.includes("41.jpg")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.BOOK;
         if (img.getAttribute("title")?.includes("Music")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
         return category;
+      };
+      const parseTitleAndYear = element => {
+        const year = parseInt(element.children[3].textContent.trim(), 10);
+        const title = element.children[1].querySelector("a").textContent.trim();
+        return {
+          title,
+          year
+        };
       };
       const parseTorrent = element => {
         const torrents = [];
@@ -1192,36 +1201,41 @@
           return url.includes("karagarga.in");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll("#browse > tbody tr").forEach((element => {
+          common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[{0}] Parsing titles to check", this.name());
+          let elements = Array.from(document.querySelectorAll("#browse > tbody tr")).filter((element => null != element.querySelector("td:nth-child(2) > div > span:nth-child(1)")));
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
             let linksContainer = element.querySelector("td:nth-child(2) > div > span:nth-child(1)");
-            if (null === linksContainer) return;
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(linksContainer);
             let torrents = parseTorrent(element);
+            const {year, title} = parseTitleAndYear(element);
             const request = {
               torrents,
               dom: [ element ],
               imdbId,
-              title: "",
+              title,
+              year,
               category: parseCategory(element)
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_0__.toGenerator)(requests);
+            common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[{0}] Search request: {1}", this.name(), request);
+            yield request;
+          }
         }
         name() {
           return "KG";
         }
         async canUpload(request) {
           if (!request.imdbId) return true;
-          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_2__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_3__.KG, {
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.KG, {
             movie_title: "",
             movie_imdb_id: request.imdbId
           });
-          return result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_FOUND;
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND;
         }
         insertTrackersSelect(select) {
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.insertBefore)(select, document.getElementById("showdead"));
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.insertBefore)(select, document.getElementById("showdead"));
         }
       }
     },
@@ -1425,13 +1439,14 @@
           __webpack_require__.d(__webpack_exports__, {
             default: () => PTP
           });
-          var _utils_cache__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/cache.ts");
+          var _utils_cache__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/cache.ts");
           var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
           var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
           var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
-          var common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/http/index.mjs");
-          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _utils_cache__WEBPACK_IMPORTED_MODULE_4__ ]);
-          _utils_cache__WEBPACK_IMPORTED_MODULE_4__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+          var common_http__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/http/index.mjs");
+          var common_logger__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/logger/index.mjs");
+          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _utils_cache__WEBPACK_IMPORTED_MODULE_5__ ]);
+          _utils_cache__WEBPACK_IMPORTED_MODULE_5__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           function isSupportedCategory(category) {
             return void 0 === category || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.DOCUMENTARY || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.LIVE_PERFORMANCE;
           }
@@ -1494,23 +1509,28 @@
               if (!isSupportedCategory(request.category)) return false;
               let torrents = [];
               if (!request.imdbId) {
+                common_logger__WEBPACK_IMPORTED_MODULE_3__.logger.debug("NO IMDB ID was provided");
                 if (request.title && request.year) {
+                  common_logger__WEBPACK_IMPORTED_MODULE_3__.logger.debug("Searching by title and year: {0} - {1}", request.title, request.year);
                   const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(request.title)}&year=${request.year}`;
-                  const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_3__.fetchAndParseHtml)(query_url);
+                  const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_4__.fetchAndParseHtml)(query_url);
                   torrents = parseAvailableTorrents(result);
                 }
               } else {
-                torrents = (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.getFromMemoryCache)(request.imdbId);
+                torrents = (0, _utils_cache__WEBPACK_IMPORTED_MODULE_5__.getFromMemoryCache)(request.imdbId);
                 if (!torrents) {
                   const query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
-                  const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_3__.fetchAndParseHtml)(query_url);
+                  const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_4__.fetchAndParseHtml)(query_url);
                   torrents = parseAvailableTorrents(result);
-                  (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.addToMemoryCache)(request.imdbId, torrents);
+                  (0, _utils_cache__WEBPACK_IMPORTED_MODULE_5__.addToMemoryCache)(request.imdbId, torrents);
                 }
               }
               let notFound = !torrents.length;
               if (notFound) return true;
-              if (onlyNew) return false;
+              if (onlyNew) {
+                common_logger__WEBPACK_IMPORTED_MODULE_3__.logger.debug("Title already exists and only new titles is enabled");
+                return false;
+              }
               for (let torrent of request.torrents) if (canUploadTorrent(torrent, torrents)) {
                 torrent.dom.style.border = "2px solid red";
                 notFound = true;
@@ -2305,11 +2325,13 @@
         fetchUrl: () => fetchUrl,
         sleep: () => sleep
       });
-      var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
+      var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
+      var _logger_index_mjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../common/dist/logger/index.mjs");
       const parser = new DOMParser;
       const fetchUrl = async (input, options = {}, wait = 1e3) => {
         await sleep(wait);
-        const res = await (0, _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__.default)(input, options);
+        _logger_index_mjs__WEBPACK_IMPORTED_MODULE_0__.logger.debug("Will fetch {0}", input);
+        const res = await (0, _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_1__.default)(input, options);
         return await res.text();
       };
       const fetchAndParseHtml = async query_url => {
@@ -2337,12 +2359,21 @@
         setPrefix: prefix => {
           logger.prefix = prefix;
         },
-        info: message => {
-          if (logger.level <= LEVEL.INFO) console.log(`${logger.prefix} [INFO] ${message}`);
+        info: (message, ...args) => {
+          if (logger.level <= LEVEL.INFO) console.log(formatMessage(logger.level, message, args));
         },
-        debug: message => {
-          if (logger.level <= LEVEL.DEBUG) console.log(`${logger.prefix} [DEBUG] ${message}`);
+        debug: (message, ...args) => {
+          if (logger.level <= LEVEL.DEBUG) console.log(formatMessage(logger.level, message, args));
         }
+      };
+      const formatMessage = (level, message, args) => {
+        let levelPrefix = "";
+        if (level == LEVEL.INFO) levelPrefix = "[INFO]"; else if (level == LEVEL.DEBUG) levelPrefix = "[DEBUG]";
+        return `${logger.prefix} ${levelPrefix} "` + message.replace(/{(\d+)}/g, ((match, index) => {
+          const argIndex = parseInt(index, 10);
+          const argValue = args[argIndex];
+          return "object" == typeof argValue ? JSON.stringify(argValue) : argValue;
+        })).trim();
       };
     },
     "../common/dist/searcher/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
