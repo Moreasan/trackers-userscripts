@@ -11,6 +11,7 @@ import {
 import "./settings";
 import { getSettings } from "./settings";
 import { appendErrorMessage, showError } from "common/dom";
+import { logger, LEVEL } from "common/logger"
 
 function hideTorrents(request: Request) {
   for (let element of request.dom) {
@@ -21,14 +22,22 @@ function hideTorrents(request: Request) {
   }
 }
 
+const setUpLogger = (debugMode: boolean) => {
+  logger.setPrefix("[Find Unique Titles]")
+  if (debugMode){
+    logger.setLevel(LEVEL.DEBUG)
+  }
+}
+
 const main = async function () {
   "use strict";
 
-  console.log("Init User script");
-  /******************************************************************************/
   const settings = getSettings();
 
-  /******************************************************************************/
+  setUpLogger(settings.debug)
+
+  logger.info("Init User script");
+
   if (document.getElementById("tracker-select")) return;
   const url = window.location.href;
   let sourceTracker: tracker | null = null;

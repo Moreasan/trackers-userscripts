@@ -114,10 +114,8 @@ const config: webpack.Configuration = {
     new WebpackUserscript({
       headers: scriptHeaders,
       proxyScript: {
-        baseURL: url
-          .pathToFileURL(outputPath)
-          .toString()
-          .replace("http", "https"),
+        baseURL: `http://127.0.0.1:${port}`,
+        filename: "[basename].proxy.user.js",
       },
     }),
   ],

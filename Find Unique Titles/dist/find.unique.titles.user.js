@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
-// @version 0.0.5
+// @version 0.0.6
 // @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
@@ -51,30 +51,36 @@
     "./src/index.ts": (module, __unused_webpack___webpack_exports__, __webpack_require__) => {
       __webpack_require__.a(module, (async (__webpack_handle_async_dependencies__, __webpack_async_result__) => {
         try {
-          var _trackers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/index.ts");
-          var _utils_cache__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/cache.ts");
-          var _utils_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/dom.ts");
-          var _settings__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/settings.ts");
-          var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
-          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _trackers__WEBPACK_IMPORTED_MODULE_1__, _utils_cache__WEBPACK_IMPORTED_MODULE_3__ ]);
-          [_trackers__WEBPACK_IMPORTED_MODULE_1__, _utils_cache__WEBPACK_IMPORTED_MODULE_3__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__;
+          var _trackers__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/trackers/index.ts");
+          var _utils_cache__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/cache.ts");
+          var _utils_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/dom.ts");
+          var _settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/settings.ts");
+          var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
+          var common_logger__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../common/dist/logger/index.mjs");
+          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _trackers__WEBPACK_IMPORTED_MODULE_2__, _utils_cache__WEBPACK_IMPORTED_MODULE_4__ ]);
+          [_trackers__WEBPACK_IMPORTED_MODULE_2__, _utils_cache__WEBPACK_IMPORTED_MODULE_4__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__;
           function hideTorrents(request) {
             for (let element of request.dom) element.style.display = "none";
             for (let torrent of request.torrents) torrent.dom.style.display = "none";
           }
+          const setUpLogger = debugMode => {
+            common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.setPrefix("[Find Unique Titles]");
+            if (debugMode) common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.setLevel(common_logger__WEBPACK_IMPORTED_MODULE_0__.LEVEL.DEBUG);
+          };
           const main = async function() {
-            console.log("Init User script");
-            const settings = (0, _settings__WEBPACK_IMPORTED_MODULE_0__.getSettings)();
+            const settings = (0, _settings__WEBPACK_IMPORTED_MODULE_1__.getSettings)();
+            setUpLogger(settings.debug);
+            common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.info("Init User script");
             if (document.getElementById("tracker-select")) return;
             const url = window.location.href;
             let sourceTracker = null;
             let targetTrackers = [];
-            Object.keys(_trackers__WEBPACK_IMPORTED_MODULE_1__).forEach((trackerName => {
-              const trackerImplementation = new _trackers__WEBPACK_IMPORTED_MODULE_1__[trackerName];
+            Object.keys(_trackers__WEBPACK_IMPORTED_MODULE_2__).forEach((trackerName => {
+              const trackerImplementation = new _trackers__WEBPACK_IMPORTED_MODULE_2__[trackerName];
               if (trackerImplementation.canRun(url)) sourceTracker = trackerImplementation; else if (trackerImplementation.canBeUsedAsTarget()) targetTrackers.push(trackerImplementation);
             }));
             if (null == sourceTracker) return;
-            const select = (0, _utils_dom__WEBPACK_IMPORTED_MODULE_2__.createTrackersSelect)(targetTrackers.map((tracker => tracker.name())));
+            const select = (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.createTrackersSelect)(targetTrackers.map((tracker => tracker.name())));
             select.addEventListener("change", (async () => {
               let answer = confirm("Start searching new content for:  " + select.value);
               if (answer) {
@@ -83,33 +89,33 @@
                 let newContent = 0;
                 let requestGenerator = sourceTracker.getSearchRequest();
                 const metadata = (await requestGenerator.next()).value;
-                (0, _utils_dom__WEBPACK_IMPORTED_MODULE_2__.addCounter)();
-                (0, _utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateTotalCount)(metadata.total);
+                (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.addCounter)();
+                (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateTotalCount)(metadata.total);
                 for await (const item of requestGenerator) {
                   const request = item;
-                  if (settings.useCache && request.imdbId && (0, _utils_cache__WEBPACK_IMPORTED_MODULE_3__.existsInCache)(targetTracker.name(), request.imdbId)) {
+                  if (settings.useCache && request.imdbId && (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.existsInCache)(targetTracker.name(), request.imdbId)) {
                     hideTorrents(request);
-                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
+                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateCount)(i++);
                     continue;
                   }
                   const response = await targetTracker.canUpload(request, settings.onlyNewTitles);
-                  (0, _utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateCount)(i++);
+                  (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateCount)(i++);
                   if (!response) {
-                    if (request.imdbId) await (0, _utils_cache__WEBPACK_IMPORTED_MODULE_3__.addToCache)(targetTracker.name(), request.imdbId);
+                    if (request.imdbId) await (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.addToCache)(targetTracker.name(), request.imdbId);
                     hideTorrents(request);
                   } else {
                     newContent++;
-                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_2__.updateNewContent)(newContent);
+                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateNewContent)(newContent);
                   }
                 }
-                (0, _utils_cache__WEBPACK_IMPORTED_MODULE_3__.clearMemoryCache)();
+                (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.clearMemoryCache)();
               }
             }));
             sourceTracker.insertTrackersSelect(select);
           };
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.appendErrorMessage)();
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.appendErrorMessage)();
           main().catch((e => {
-            (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.showError)(e.message);
+            (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.showError)(e.message);
           }));
           let currentUrl = document.location.href;
           const observer = new MutationObserver((async () => {
@@ -136,6 +142,7 @@
       const defaultConfig = {
         onlyNewTitles: false,
         useCache: true,
+        debug: false,
         sizeDifferenceThreshold: 1.2
       };
       GM_config.init({
@@ -156,6 +163,11 @@
             label: "Size Difference Threshold",
             type: "float",
             default: defaultConfig.sizeDifferenceThreshold
+          },
+          debug: {
+            label: "Debug mode",
+            type: "checkbox",
+            default: defaultConfig.debug
           }
         },
         css: "\n        #find-unique-titles-settings {\n        }\n        #find-unique-titles-settings .config_var {\n            display: flex;\n            align-items: center;\n            justify-content: space-between;\n        }\n    ",
@@ -177,6 +189,7 @@
       const getSettings = () => ({
         onlyNewTitles: GM_config.get("onlyNewTitles"),
         useCache: GM_config.get("useCache"),
+        debug: GM_config.get("debug"),
         sizeDifferenceThreshold: GM_config.get("sizeDifferenceThreshold")
       });
     },
@@ -2289,7 +2302,8 @@
     "../common/dist/http/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         fetchAndParseHtml: () => fetchAndParseHtml,
-        fetchUrl: () => fetchUrl
+        fetchUrl: () => fetchUrl,
+        sleep: () => sleep
       });
       var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
       const parser = new DOMParser;
@@ -2303,6 +2317,33 @@
         return parser.parseFromString(response, "text/html").body;
       };
       const sleep = ms => new Promise((resolve => setTimeout(resolve, ms)));
+    },
+    "../common/dist/logger/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        LEVEL: () => LEVEL,
+        logger: () => logger
+      });
+      var LEVEL;
+      !function(LEVEL) {
+        LEVEL[LEVEL.DEBUG = 0] = "DEBUG";
+        LEVEL[LEVEL.INFO = 1] = "INFO";
+      }(LEVEL || (LEVEL = {}));
+      const logger = {
+        level: LEVEL.INFO,
+        prefix: "",
+        setLevel: level => {
+          logger.level = level;
+        },
+        setPrefix: prefix => {
+          logger.prefix = prefix;
+        },
+        info: message => {
+          if (logger.level <= LEVEL.INFO) console.log(`${logger.prefix} [INFO] ${message}`);
+        },
+        debug: message => {
+          if (logger.level <= LEVEL.DEBUG) console.log(`${logger.prefix} [DEBUG] ${message}`);
+        }
+      };
     },
     "../common/dist/searcher/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
@@ -2318,9 +2359,12 @@
         SearchResult[SearchResult.ERROR = 3] = "ERROR";
       }(SearchResult || (SearchResult = {}));
       const search = async (tracker, options) => {
-        "rateLimit" in tracker && tracker.rateLimit;
-        tracker.searchUrl.split("/")[2];
-        (new Date).getTime();
+        const rate = "rateLimit" in tracker ? tracker.rateLimit : 200;
+        const domain = tracker.searchUrl.split("/")[2];
+        const now = (new Date).getTime();
+        let lastLoaded = window.localStorage[domain + "_lastLoaded"];
+        if (!lastLoaded) lastLoaded = now - 5e4; else lastLoaded = parseInt(lastLoaded);
+        if (now - lastLoaded < rate) await (0, _http_index_mjs__WEBPACK_IMPORTED_MODULE_0__.sleep)(now - lastLoaded); else window.localStorage[domain + "_lastLoaded"] = (new Date).getTime();
         const success_match = "positiveMatch" in tracker ? tracker.positiveMatch : false;
         const searchUrl = await replaceSearchUrlParams(tracker, options);
         if (searchUrl.indexOf("=00000000") > -1 || searchUrl.indexOf("=undefined") > -1) return SearchResult.ERROR;
@@ -2423,7 +2467,6 @@
         TSeeds: () => TSeeds
       });
       const KG = {
-        TV: false,
         name: "KG",
         searchUrl: "https://karagarga.in/browse.php?sort=added&search=%nott%&search_type=imdb&d=DESC",
         loggedOutRegex: /Cloudflare|Ray ID|Not logged in!/,
@@ -2432,7 +2475,6 @@
         both: true
       };
       const MTV = {
-        TV: false,
         name: "MTV",
         searchUrl: "https://www.morethantv.me/torrents.php?filter_cat[1]=1&filter_cat[2]=1&title=+%2B%search_string%+%2B%year%",
         loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
@@ -2441,16 +2483,15 @@
         positiveMatch: true
       };
       const MTV_TV = {
-        TV: true,
         name: "MTV",
         searchUrl: "https://www.morethantv.me/torrents.php?filter_cat[3]=1&filter_cat[5]=1&filter_cat[4]=1&filter_cat[6]=1&title=+%2B%search_string%",
         loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
         spaceEncode: "+%2B",
         matchRegex: /action=download/,
-        positiveMatch: true
+        positiveMatch: true,
+        TV: true
       };
       const TSeeds = {
-        TV: false,
         name: "TSeeds",
         searchUrl: "https://www.torrentseeds.org/torrents?tmdbId=%tmdbid%",
         loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,

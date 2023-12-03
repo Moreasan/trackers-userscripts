@@ -1,6 +1,7 @@
 const defaultConfig: Settings = {
   onlyNewTitles: false,
   useCache: true,
+  debug: false,
   sizeDifferenceThreshold: 1.2,
 };
 
@@ -23,6 +24,11 @@ GM_config.init({
       label: "Size Difference Threshold",
       type: "float",
       default: defaultConfig.sizeDifferenceThreshold,
+    },
+    debug: {
+      label: "Debug mode",
+      type: "checkbox",
+      default: defaultConfig.debug,
     },
   },
   css: `
@@ -56,6 +62,7 @@ export const getSettings = (): Settings => {
   return {
     onlyNewTitles: GM_config.get("onlyNewTitles"),
     useCache: GM_config.get("useCache"),
+    debug: GM_config.get("debug"),
     sizeDifferenceThreshold: GM_config.get("sizeDifferenceThreshold"),
   };
 };
@@ -63,5 +70,6 @@ export const getSettings = (): Settings => {
 interface Settings {
   useCache: boolean;
   onlyNewTitles: boolean;
+  debug: boolean;
   sizeDifferenceThreshold: number;
 }

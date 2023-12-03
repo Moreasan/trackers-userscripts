@@ -53,6 +53,10 @@
     "./searcher": {
       "types": "./dist/types/src/searcher/index.d.ts",
       "import": "./dist/searcher/index.mjs"
+    },
+    "./logger": {
+      "types": "./dist/types/src/logger/index.d.ts",
+      "import": "./dist/logger/index.mjs"
     }
   },
   "type": "module",

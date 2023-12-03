@@ -1,5 +1,5 @@
 import { fetchAndParseHtml, fetchUrl, sleep } from "../http";
-import { Index } from "../trackers";
+import { PrivateTracker } from "../trackers";
 
 export type SearchOptions = {
   episode_id?: string;
@@ -21,7 +21,7 @@ export enum SearchResult {
 }
 
 export const search = async (
-  tracker: Index,
+  tracker: PrivateTracker,
   options: SearchOptions
 ): Promise<SearchResult> => {
   const rate: number =
@@ -107,7 +107,7 @@ export const search = async (
 };
 
 const replaceSearchUrlParams = async (
-  tracker: Index,
+  tracker: PrivateTracker,
   options: SearchOptions
 ) => {
   let search_url: string =

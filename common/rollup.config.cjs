@@ -11,6 +11,7 @@ module.exports = {
     'dom/index': 'src/dom/index.ts',
     'trackers/index': 'src/trackers/index.ts',
     'searcher/index': 'src/searcher/index.ts',
+    'logger/index': 'src/logger/index.ts',
   },
   plugins: [
     typescript({
