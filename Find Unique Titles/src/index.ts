@@ -70,14 +70,18 @@ const main = async function () {
       logger.debug(`[{0}] Parsing titles to check`, sourceTracker!!.name());
       for await (const item of requestGenerator) {
         const request = item as Request;
-        logger.debug(`[{0}] Search request: {1}`, sourceTracker!!.name(), request);
+        logger.debug(
+          `[{0}] Search request: {1}`,
+          sourceTracker!!.name(),
+          request
+        );
         try {
           if (
             settings.useCache &&
             request.imdbId &&
             existsInCache(targetTracker.name(), request.imdbId)
           ) {
-            logger.debug("Title exists in target tracker, found using cache")
+            logger.debug("Title exists in target tracker, found using cache");
             hideTorrents(request);
             updateCount(i++);
             continue;
@@ -122,12 +126,18 @@ const main = async function () {
                 "Title was not checked on target tracker"
               );
               request.dom[0].style.border = "2px solid #e74c3c";
-            } else if (response != SearchResult.NOT_EXIST) {
+            } else if (response == SearchResult.NOT_EXIST) {
               request.dom[0].setAttribute(
                 "title",
                 "Title was not found on target tracker"
               );
               request.dom[0].style.border = "2px solid #3498db";
+            } else if (response == SearchResult.EXIST_BUT_MISSING_SLOT) {
+              request.dom[0].setAttribute(
+                "title",
+                "Title exists but there is an available slot on target tracker"
+              );
+              request.dom[0].style.border = "2px solid #ff00ff";
             }
           }
         } catch (e) {

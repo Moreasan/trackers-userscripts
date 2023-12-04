@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
-// @version 0.0.6
+// @version 0.0.7
 // @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
@@ -126,9 +126,12 @@
                       } else if (response == _trackers_tracker__WEBPACK_IMPORTED_MODULE_5__.SearchResult.NOT_CHECKED) {
                         request.dom[0].setAttribute("title", "Title was not checked on target tracker");
                         request.dom[0].style.border = "2px solid #e74c3c";
-                      } else if (response != _trackers_tracker__WEBPACK_IMPORTED_MODULE_5__.SearchResult.NOT_EXIST) {
+                      } else if (response == _trackers_tracker__WEBPACK_IMPORTED_MODULE_5__.SearchResult.NOT_EXIST) {
                         request.dom[0].setAttribute("title", "Title was not found on target tracker");
                         request.dom[0].style.border = "2px solid #3498db";
+                      } else if (response == _trackers_tracker__WEBPACK_IMPORTED_MODULE_5__.SearchResult.EXIST_BUT_MISSING_SLOT) {
+                        request.dom[0].setAttribute("title", "Title exists but there is an available slot on target tracker");
+                        request.dom[0].style.border = "2px solid #ff00ff";
                       }
                     }
                   } catch (e) {
