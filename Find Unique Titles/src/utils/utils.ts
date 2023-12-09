@@ -34,9 +34,20 @@ export const parseImdbId = (text: string) => {
 };
 
 export const parseResolution = (text: string) => {
-  const resolutions = ["720p", "1080p", "2160p"];
+  const resolutionsAndAliases: Record<string, string[]> = {
+    "720p": ["720p", "hd"],
+    "1080p": ["1080p", "fhd", "full_hd"],
+    "2160p": ["2160p", "uhd", "4k"],
+    SD: ["sd", "pal", "ntsc"],
+  };
   if (!text) return null;
-  for (let resolution of resolutions) {
+  for (let resolution in resolutionsAndAliases) {
+    let aliases = resolutionsAndAliases[resolution];
+    for (let alias of aliases) {
+      if (text.includes(alias)) {
+        return resolution;
+      }
+    }
     if (text.includes(resolution)) return resolution;
   }
   const regex = /\b(\d{3})x(\d{3})\b/;
@@ -58,4 +69,30 @@ export const parseYearAndTitleFromReleaseName = (releaseName: string) => {
     return { year, title };
   }
   return { year: undefined, title: undefined };
+};
+
+export const parseCodec = (title: string) => {
+  title = title.toLowerCase();
+  const codecAndAlias: Record<string, string[]> = {
+    x264: ["x264", "h264", "h.264", "h 264"],
+    x265: ["x265", "h265", "h.265", "h 265", "hevc"],
+  };
+  for (let codec in codecAndAlias) {
+    let aliases = codecAndAlias[codec];
+    for (let alias of aliases) {
+      if (title.includes(alias)) {
+        return codec;
+      }
+    }
+  }
+
+  return null;
+};
+
+export const parseTags = (title: string) => {
+  const tags: string[] = [];
+  if (title.toLowerCase().includes("remux")) tags.push("Remux");
+  if (title.includes("HDR")) tags.push("HDR");
+
+  return tags;
 };

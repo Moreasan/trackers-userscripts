@@ -1,11 +1,11 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import {
-  Category,
-  MetaData,
-  Request,
-  SearchResult,
-  tracker,
-} from "./tracker";
+  parseCodec,
+  parseImdbIdFromLink,
+  parseResolution,
+  parseSize,
+  parseTags,
+} from "../utils/utils";
+import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
 import { addChild } from "common/dom";
 import { logger } from "common/logger";
 
@@ -49,11 +49,13 @@ export default class TL implements tracker {
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     logger.debug(`[{0}] Parsing titles to check`, this.name());
-    const elements = document.querySelectorAll(".torrent");
+    const elements = Array.from(document.querySelectorAll(".torrent"));
     yield {
       total: elements.length,
     };
     for (let element of elements) {
+      const torrentTitle = element.querySelector(".name a")!!.childNodes[0].textContent!!;
+      logger.debug("[TL] Checking torrent: {0}", torrentTitle)
       const imdbId = parseImdbIdFromLink(element as HTMLElement);
       const size = parseSize(
         element.querySelector(".td-size")?.textContent as string
@@ -63,14 +65,16 @@ export default class TL implements tracker {
       let year = undefined;
       if (category == Category.MOVIE) {
         ({ title, year } = parseYearAndTitle(element));
-      }
 
+      }
       const request: Request = {
         torrents: [
           {
             size,
-            tags: [],
+            tags: parseTags(torrentTitle),
             dom: element as HTMLElement,
+            resolution: parseResolution(torrentTitle),
+            container: parseCodec(torrentTitle),
           },
         ],
         dom: [element as HTMLElement],

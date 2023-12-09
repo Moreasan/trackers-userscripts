@@ -1,21 +1,10 @@
 import { addToMemoryCache, getFromMemoryCache } from "../utils/cache";
-import {
-  parseImdbIdFromLink,
-  parseResolution,
-  parseSize,
-} from "../utils/utils";
-import {
-  Category,
-  MetaData,
-  Request,
-  SearchResult,
-  toGenerator,
-  Torrent,
-  tracker,
-} from "./tracker";
+import { parseImdbIdFromLink, parseResolution, parseSize } from "../utils/utils";
+import { Category, MetaData, Request, SearchResult, toGenerator, Torrent, tracker } from "./tracker";
 import { findFirst, insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 import { logger } from "common/logger";
+
 
 function isSupportedCategory(category: Category | undefined) {
   return (
@@ -27,7 +16,7 @@ function isSupportedCategory(category: Category | undefined) {
 }
 
 const parseTorrents = (element: HTMLElement) => {
-  const torrents = [];
+  const torrents: Array<Torrent> = [];
   if (element.classList.contains("cover-movie-list__movie")) {
     return [];
   }
@@ -38,7 +27,7 @@ const parseTorrents = (element: HTMLElement) => {
         return;
       }
       const size = parseSize(element.children[2].textContent);
-      let title = element.querySelector(".torrent-info-link").textContent;
+      let title = element.querySelector(".torrent-info-link")!!.textContent!!;
       const resolution = parseResolution(title);
       const tags = [];
       if (title.includes("Remux")) {
@@ -129,7 +118,7 @@ export default class PTP implements tracker {
   }
 
   async search(request: Request): Promise<SearchResult> {
-    if (!isSupportedCategory(request.category)) return SearchResult.NOT_ALLOWED;
+    if (!this.isAllowed(request)) return SearchResult.NOT_ALLOWED;
     let torrents = [];
     let result;
     if (!request.imdbId) {
@@ -146,7 +135,7 @@ export default class PTP implements tracker {
         result = await fetchAndParseHtml(query_url);
         torrents = parseAvailableTorrents(result);
       } else {
-        return SearchResult.NOT_CHECKED
+        return SearchResult.NOT_CHECKED;
       }
     } else {
       torrents = getFromMemoryCache(request.imdbId);
@@ -168,12 +157,12 @@ export default class PTP implements tracker {
         }
       }
       if (request.imdbId) {
-        return SearchResult.NOT_EXIST
+        return SearchResult.NOT_EXIST;
       } else {
-        return SearchResult.MAYBE_NOT_EXIST
+        return SearchResult.MAYBE_NOT_EXIST;
       }
     }
-    let searchResult: SearchResult = SearchResult.EXIST
+    let searchResult: SearchResult = SearchResult.EXIST;
     for (let torrent of request.torrents) {
       if (searchTorrent(torrent, torrents)) {
         searchResult = SearchResult.EXIST_BUT_MISSING_SLOT;
@@ -182,6 +171,12 @@ export default class PTP implements tracker {
       }
     }
     return searchResult;
+  }
+
+  private isAllowed(request: Request) : boolean {
+     if (!isSupportedCategory(request.category)) return false;
+
+     return true
   }
 
   insertTrackersSelect(select: HTMLSelectElement): void {
@@ -247,6 +242,10 @@ function sameResolution(first: Torrent, second: Torrent) {
 }
 
 const searchTorrent = (torrent: Torrent, availableTorrents: Array<Torrent>) => {
+  if (torrent.container == "x265" && torrent.resolution != "2160p" && !torrent.tags?.includes("HDR")) {
+    logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p")
+    return false;
+  }
   const similarTorrents = availableTorrents.filter((e) => {
     return (
       sameResolution(torrent, e) &&
