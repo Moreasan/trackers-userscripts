@@ -47,3 +47,15 @@ export const parseResolution = (text: string) => {
   }
   return null;
 };
+
+export const parseYearAndTitleFromReleaseName = (releaseName: string) => {
+  const regex = /^(.+?)\.(\d{4})\./;
+  const match = releaseName.match(regex);
+
+  if (match) {
+    const title = match[1].replace(/\./g, " ").trim();
+    const year = parseInt(match[2], 10);
+    return { year, title };
+  }
+  return { year: undefined, title: undefined };
+};

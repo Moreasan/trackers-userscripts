@@ -1920,10 +1920,10 @@
       __webpack_require__.d(__webpack_exports__, {
         default: () => TSeeds
       });
-      var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/utils.ts");
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
       var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
-      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
       var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/searcher/index.mjs");
       var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/trackers/index.mjs");
       const parseCategory = element => {
@@ -1936,6 +1936,20 @@
         if (icon.classList.contains("fa-basketball-ball")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.SPORT;
         if (icon.classList.contains("fa-gamepad")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.GAME;
         return;
+      };
+      const parseYearAndTitle = element => {
+        const spans = element.querySelectorAll("h1.movie-heading span");
+        if (1 == spans.length) {
+          const releaseName = element.querySelector('ol li.active span[itemprop="title"]').textContent.trim();
+          return (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseYearAndTitleFromReleaseName)(releaseName);
+        }
+        const title = spans[0].textContent?.trim();
+        let yearText = spans[1].textContent.trim();
+        const year = parseInt(yearText.substring(1, yearText.length - 1), 10);
+        return {
+          title,
+          year
+        };
       };
       class TSeeds {
         canBeUsedAsSource() {
@@ -1950,30 +1964,35 @@
         async* getSearchRequest() {
           let torrentsSelector = "#torrent-list-table tbody tr";
           if (isCategoryPage()) torrentsSelector = ".cat-torrents table tbody tr";
-          let nodes = document.querySelectorAll(torrentsSelector);
+          let nodes = Array.from(document.querySelectorAll(torrentsSelector));
           yield {
             total: nodes.length
           };
           for (const element of nodes) {
             const category = parseCategory(element);
             let imdbId = null;
+            let title;
+            let year;
             if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) {
               const link = element.querySelector('a.view-torrent[href*="/torrents/"]');
-              let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(link.href);
-              imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbIdFromLink)(response);
+              let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(link.href);
+              imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
+              ({title, year} = parseYearAndTitle(response));
             }
             let sizeText = element.querySelector(".torrent-listings-size span")?.textContent;
             if (isCategoryPage()) sizeText = element.children[7]?.textContent?.trim();
-            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(sizeText);
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(sizeText);
             const request = {
               torrents: [ {
                 size,
                 tags: [],
-                dom: element
+                dom: element,
+                resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(element.querySelector("a.view-torrent").textContent)
               } ],
               dom: [ element ],
               imdbId,
-              title: "",
+              title,
+              year,
               category
             };
             yield request;
@@ -2337,7 +2356,8 @@
         parseImdbId: () => parseImdbId,
         parseImdbIdFromLink: () => parseImdbIdFromLink,
         parseResolution: () => parseResolution,
-        parseSize: () => parseSize
+        parseSize: () => parseSize,
+        parseYearAndTitleFromReleaseName: () => parseYearAndTitleFromReleaseName
       });
       const parseSize = text => {
         let size = null;
@@ -2364,6 +2384,22 @@
         const match = text.match(regex);
         if (match) return match[0];
         return null;
+      };
+      const parseYearAndTitleFromReleaseName = releaseName => {
+        const regex = /^(.+?)\.(\d{4})\./;
+        const match = releaseName.match(regex);
+        if (match) {
+          const title = match[1].replace(/\./g, " ").trim();
+          const year = parseInt(match[2], 10);
+          return {
+            year,
+            title
+          };
+        }
+        return {
+          year: void 0,
+          title: void 0
+        };
       };
     },
     "../common/dist/dom/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {

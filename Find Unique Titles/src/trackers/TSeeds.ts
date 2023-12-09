@@ -1,4 +1,8 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
+import {
+  parseImdbIdFromLink, parseResolution,
+  parseSize,
+  parseYearAndTitleFromReleaseName
+} from "../utils/utils";
 import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -17,6 +21,19 @@ const parseCategory = (element: Element): Category | undefined => {
   return undefined;
 };
 
+const parseYearAndTitle = (element: HTMLElement) => {
+  const spans = element.querySelectorAll("h1.movie-heading span");
+  if (spans.length == 1) {
+    const releaseName = element
+      .querySelector('ol li.active span[itemprop="title"]')!!
+      .textContent!!.trim();
+    return parseYearAndTitleFromReleaseName(releaseName);
+  }
+  const title = spans[0].textContent?.trim();
+  let yearText = spans[1].textContent!!.trim();
+  const year = parseInt(yearText.substring(1, yearText.length - 1), 10);
+  return { title, year };
+};
 export default class TSeeds implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
@@ -35,13 +52,15 @@ export default class TSeeds implements tracker {
     if (isCategoryPage()) {
       torrentsSelector = ".cat-torrents table tbody tr";
     }
-    let nodes = document.querySelectorAll(torrentsSelector);
+    let nodes = Array.from(document.querySelectorAll(torrentsSelector));
     yield {
       total: nodes.length,
     };
     for (const element of nodes) {
       const category = parseCategory(element);
       let imdbId = null;
+      let title = undefined;
+      let year = undefined;
       if (category == Category.MOVIE) {
         const link: HTMLAnchorElement | null = element.querySelector(
           'a.view-torrent[href*="/torrents/"]'
@@ -50,6 +69,7 @@ export default class TSeeds implements tracker {
           (link as HTMLAnchorElement).href
         );
         imdbId = parseImdbIdFromLink(response as HTMLElement);
+        ({ title, year } = parseYearAndTitle(response));
       }
       let sizeText = element.querySelector(".torrent-listings-size span")
         ?.textContent as string;
@@ -64,11 +84,13 @@ export default class TSeeds implements tracker {
             size,
             tags: [],
             dom: element as HTMLElement,
+            resolution: parseResolution(element.querySelector('a.view-torrent')!!.textContent!!)
           },
         ],
         dom: [element as HTMLElement],
         imdbId,
-        title: "",
+        title,
+        year,
         category,
       };
       yield request;
