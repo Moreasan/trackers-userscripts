@@ -141,6 +141,7 @@ const main = async function () {
             }
           }
         } catch (e) {
+          console.trace("Error occurred: ", e)
           logger.info("Error occurred when checking {0}, {1]", request, e);
           request.dom[0].setAttribute(
             "title",

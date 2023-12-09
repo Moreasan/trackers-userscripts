@@ -1,8 +1,10 @@
 import { addToMemoryCache, getFromMemoryCache } from "../utils/cache";
 import {
+  parseCodec,
   parseImdbIdFromLink,
   parseResolution,
   parseSize,
+  parseTags,
 } from "../utils/utils";
 import {
   Category,
@@ -71,14 +73,29 @@ const parseCategory = (element: HTMLElement): Category => {
   }
 };
 
-const hasRequests = (element: Element) => {
-  return element
-    .querySelector("#no_results_message")!!
-    .textContent!!.trim()
-    .includes(
-      "Your search did not match any torrents, however it did match these requests."
-    );
+const hasRequests = (element: Element): boolean => {
+  return (
+    element
+      .querySelector("#no_results_message")
+      ?.textContent?.trim()
+      .includes(
+        "Your search did not match any torrents, however it did match these requests."
+      ) === true
+  );
 };
+
+const isAllowedTorrent = (torrent: Torrent) => {
+  if (
+    torrent.container == "x265" &&
+    torrent.resolution != "2160p" &&
+    !isHDR(torrent)
+  ) {
+    logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
+    return false;
+  }
+  return true;
+};
+
 export default class PTP implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
@@ -130,7 +147,13 @@ export default class PTP implements tracker {
 
   async search(request: Request): Promise<SearchResult> {
     if (!this.isAllowed(request)) return SearchResult.NOT_ALLOWED;
-    let torrents = [];
+    if (
+      request.torrents.filter((torrent: Torrent) => isAllowedTorrent(torrent))
+        .length === 0
+    ) {
+      return SearchResult.NOT_ALLOWED;
+    }
+    let torrents: Array<Torrent> = [];
     let result;
     if (!request.imdbId) {
       logger.debug("NO IMDB ID was provided");
@@ -144,7 +167,39 @@ export default class PTP implements tracker {
           request.title
         )}&year=${request.year}`;
         result = await fetchAndParseHtml(query_url);
-        torrents = parseAvailableTorrents(result);
+        let searchResultsCount = result.querySelector(
+          "span.search-form__footer__results"
+        );
+        if (searchResultsCount) {
+          logger.debug(
+            "[PTP] Multiple results found: {0}",
+            searchResultsCount.textContent
+          );
+          const torrentsData = extractJsonData(result);
+          for (let movie of torrentsData["Movies"]) {
+            logger.debug("[PTP] Found search result: {0}", movie);
+            if (
+              movie["Title"].trim() === request.title &&
+              parseInt(movie["Year"].trim()) === request.year
+            ) {
+              logger.debug("[PTP] Found a title with 100% match");
+              for (let group of movie["GroupingQualities"]) {
+                for (let torrent of group["Torrents"]) {
+                  torrents.push({
+                    size: parseSize(torrent["Size"]),
+                    tags: parseTags(torrent["Title"]),
+                    resolution: parseResolution(torrent["Title"]),
+                    container: parseCodec(torrent["Title"]),
+                  });
+                }
+              }
+              logger.debug("[PTP] Parsed torrents: {0}", torrents);
+              break;
+            }
+          }
+        } else {
+          torrents = parseAvailableTorrents(result);
+        }
       } else {
         return SearchResult.NOT_CHECKED;
       }
@@ -198,26 +253,31 @@ export default class PTP implements tracker {
 }
 
 const parseAvailableTorrents = (result: HTMLElement): Array<Torrent> => {
-  const torrents: Array<Torrent> = [];
-  result
-    .querySelectorAll('#torrent-table tr[id^="group_torrent_header_"]')
-    .forEach((line) => {
-      const data = line.children[0]?.textContent?.trim().split("/");
-      const size = parseSize(line.children[1]?.textContent?.trim());
-      const tags = [];
-      if (line.textContent?.includes("Remux")) {
-        tags.push("Remux");
-      }
-      const torrent: Torrent = {
-        container: data[0].split("]")[1].trim(),
-        format: data[1].trim(),
-        resolution: data[3].trim(),
-        tags: tags,
-        size,
-        dom: line as HTMLElement,
-      };
-      torrents.push(torrent);
-    });
+  const lines = Array.from(
+    result.querySelectorAll('#torrent-table tr[id^="group_torrent_header_"]')
+  );
+  return parseTorrentsFromLines(lines);
+};
+
+const parseTorrentsFromLines = (lines: Array<Element>) => {
+  const torrents: Torrent[] = [];
+  for (let line of lines) {
+    const data = line.children[0]?.textContent?.trim().split("/")!!;
+    const size = parseSize(line.children[1]?.textContent?.trim());
+    const tags = [];
+    if (line.textContent?.includes("Remux")) {
+      tags.push("Remux");
+    }
+    const torrent: Torrent = {
+      container: data[0].split("]")[1].trim(),
+      format: data[1].trim(),
+      resolution: data[3].trim(),
+      tags: tags,
+      size,
+      dom: line as HTMLElement,
+    };
+    torrents.push(torrent);
+  }
   return torrents;
 };
 
@@ -252,19 +312,11 @@ function sameResolution(first: Torrent, second: Torrent) {
   if (second.resolution === "SD") return isSD(first.resolution);
 }
 
-function isHDR(torrent: Torrent) {
+const isHDR = (torrent: Torrent) => {
   return torrent.tags?.includes("HDR") || torrent.tags?.includes("DV");
-}
+};
 
 const searchTorrent = (torrent: Torrent, availableTorrents: Array<Torrent>) => {
-  if (
-    torrent.container == "x265" &&
-    torrent.resolution != "2160p" &&
-    !isHDR(torrent)
-  ) {
-    logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
-    return false;
-  }
   const similarTorrents = availableTorrents.filter((e) => {
     return (
       sameResolution(torrent, e) &&
@@ -286,3 +338,28 @@ const searchTorrent = (torrent: Torrent, availableTorrents: Array<Torrent>) => {
   }
   return false;
 };
+
+function extractJsonData(doc: Element) {
+  const scriptElements = Array.from(doc.querySelectorAll("script"));
+
+  for (const scriptElement of scriptElements) {
+    let scriptContent = scriptElement.textContent!!.trim();
+    if (scriptContent.includes("PageData")) {
+      const startIndex = scriptContent.indexOf("var PageData =") + 14;
+      const jsonVariable = scriptContent.substring(
+        startIndex,
+        scriptContent.length - 1
+      );
+
+      try {
+        return JSON.parse(jsonVariable);
+      } catch (error) {
+        console.error("Error extracting JSON:", error);
+        return null;
+      }
+    }
+  }
+
+  console.error(`No script element containing '${variableName}' found.`);
+  return null;
+}
