@@ -1,10 +1,21 @@
 import { addToMemoryCache, getFromMemoryCache } from "../utils/cache";
-import { parseImdbIdFromLink, parseResolution, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, SearchResult, toGenerator, Torrent, tracker } from "./tracker";
+import {
+  parseImdbIdFromLink,
+  parseResolution,
+  parseSize,
+} from "../utils/utils";
+import {
+  Category,
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  Torrent,
+  tracker,
+} from "./tracker";
 import { findFirst, insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 import { logger } from "common/logger";
-
 
 function isSupportedCategory(category: Category | undefined) {
   return (
@@ -173,10 +184,10 @@ export default class PTP implements tracker {
     return searchResult;
   }
 
-  private isAllowed(request: Request) : boolean {
-     if (!isSupportedCategory(request.category)) return false;
+  private isAllowed(request: Request): boolean {
+    if (!isSupportedCategory(request.category)) return false;
 
-     return true
+    return true;
   }
 
   insertTrackersSelect(select: HTMLSelectElement): void {
@@ -241,9 +252,17 @@ function sameResolution(first: Torrent, second: Torrent) {
   if (second.resolution === "SD") return isSD(first.resolution);
 }
 
+function isHDR(torrent: Torrent) {
+  return torrent.tags?.includes("HDR") || torrent.tags?.includes("DV");
+}
+
 const searchTorrent = (torrent: Torrent, availableTorrents: Array<Torrent>) => {
-  if (torrent.container == "x265" && torrent.resolution != "2160p" && !torrent.tags?.includes("HDR")) {
-    logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p")
+  if (
+    torrent.container == "x265" &&
+    torrent.resolution != "2160p" &&
+    !isHDR(torrent)
+  ) {
+    logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
     return false;
   }
   const similarTorrents = availableTorrents.filter((e) => {
