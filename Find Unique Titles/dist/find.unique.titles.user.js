@@ -13,7 +13,7 @@
 // @match https://cinemaz.to/movies*
 // @match https://avistaz.to/movies*
 // @match https://blutopia.cc/torrents?*
-// @match https://aither.cc/torrents*
+// @match https://aither.cc/torrents?*
 // @match https://www.torrentleech.org/torrents/browse*
 // @match https://secret-cinema.pw/torrents.php*
 // @match https://www.clan-sudamerica.net/invision/*
@@ -229,10 +229,20 @@
       __webpack_require__.d(__webpack_exports__, {
         default: () => Aither
       });
-      var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
-      var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
-      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/trackers/index.mjs");
+      const parseCategory = element => {
+        const categoryLink = element.querySelector(".torrent__category-link");
+        if (!categoryLink) return;
+        const categoryName = categoryLink.textContent?.trim();
+        if ("TV" == categoryName) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+        if ("Movie" == categoryName) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        return;
+      };
       class Aither {
         canBeUsedAsSource() {
           return true;
@@ -244,41 +254,56 @@
           return url.includes("aither.cc");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll(".panelV2 tbody tr").forEach((element => {
-            let imdbId = element.querySelector("#imdb_id").textContent.trim();
-            let size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[5].textContent);
+          const elements = Array.from(document.querySelectorAll(".panelV2 tbody tr"));
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
+            let linkElement = element.querySelector(".torrent-search--list__name");
+            const link = linkElement.href;
+            let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(link);
+            const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbIdFromLink)(response);
+            const category = parseCategory(response);
+            let torrentName = linkElement.textContent.trim();
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseYearAndTitle)(torrentName);
+            let size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(element.querySelector(".torrent-search--list__size").textContent.trim());
             const request = {
               torrents: [ {
                 size,
-                tags: [],
-                dom: element
+                tags: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseTags)(torrentName),
+                dom: element,
+                resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseResolution)(torrentName)
               } ],
               dom: [ element ],
               imdbId,
-              title: ""
+              title,
+              year,
+              category
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
+            yield request;
+          }
         }
         name() {
           return "Aither";
         }
         async search(request) {
-          if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
-          const queryUrl = "https://aither.xyz/torrents?perPage=25&imdbId=" + request.imdbId + "&sortField=size";
-          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
-          return result.textContent.includes("There is no result in database for query") ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
+          if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.Aither, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          if (result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.LOGGED_OUT) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_LOGGED_IN;
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND ? _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
         }
         insertTrackersSelect(select) {
           const parent = document.querySelector(".panelV2 .panel__header");
+          if (!parent) return;
           const div = document.createElement("div");
           select.style.width = "170px";
           div.classList.add("form__group");
           select.classList.add("form__select");
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(div, select);
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.insertAfter)(div, parent.querySelector("h2"));
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.addChild)(div, select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.insertAfter)(div, parent.querySelector("h2"));
         }
       }
     },
@@ -2723,11 +2748,20 @@
     },
     "../common/dist/trackers/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
+        Aither: () => Aither,
         KG: () => KG,
         MTV: () => MTV,
         MTV_TV: () => MTV_TV,
         TSeeds: () => TSeeds
       });
+      const Aither = {
+        name: "Aither",
+        searchUrl: "https://aither.cc/torrents?imdbId=%nott%",
+        loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+        matchRegex: /torrent-search--list__overview/,
+        positiveMatch: true,
+        both: true
+      };
       const KG = {
         name: "KG",
         searchUrl: "https://karagarga.in/browse.php?sort=added&search=%nott%&search_type=imdb&d=DESC",
