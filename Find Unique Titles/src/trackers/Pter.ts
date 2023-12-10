@@ -13,7 +13,7 @@ import { fetchAndParseHtml } from "common/http";
 
 function parseTorrent(element: HTMLElement): Torrent {
   const size = parseSize(element.childNodes[6].textContent);
-  const title = element.querySelector(".torrentname a").textContent.trim();
+  const title = element.querySelector(".torrentname a")!!.textContent!!.trim();
   let resolution = parseResolution(title);
 
   return {

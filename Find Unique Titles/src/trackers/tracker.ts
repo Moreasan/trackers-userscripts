@@ -3,8 +3,15 @@ export interface Torrent {
   size: number | null;
   tags: Array<string> | null;
   format?: string | null;
-  resolution?: string | null;
+  resolution?: Resolution;
   dom: HTMLElement;
+}
+
+export enum Resolution {
+  SD = "SD",
+  HD = "HD",
+  FHD = "FHD",
+  UHD = "UHD",
 }
 
 export enum Category {
@@ -46,7 +53,7 @@ export enum SearchResult {
   MAYBE_NOT_EXIST_WITH_REQUEST,
   NOT_CHECKED,
   NOT_LOGGED_IN,
-  NOT_ALLOWED
+  NOT_ALLOWED,
 }
 
 export interface tracker {

@@ -1,3 +1,5 @@
+import { Resolution } from "../trackers/tracker";
+
 export const parseSize = (text: string): number | null => {
   let size: number | null = null;
   text = text.replace("GiB", "GB").replace("MiB", "MB");
@@ -33,30 +35,33 @@ export const parseImdbId = (text: string) => {
   return results[0];
 };
 
-export const parseResolution = (text: string) => {
-  const resolutionsAndAliases: Record<string, string[]> = {
-    "720p": ["720p", "hd"],
-    "1080p": ["1080p", "fhd", "full_hd"],
-    "2160p": ["2160p", "uhd", "4k"],
+export const parseResolution = (text: string): Resolution | undefined => {
+  const resolutionsAndAliases: Record<Resolution, string[]> = {
     SD: ["sd", "pal", "ntsc"],
+    HD: ["720p", "hd"],
+    FHD: ["1080p", "fhd", "full_hd"],
+    UHD: ["2160p", "uhd", "4k"],
   };
-  if (!text) return null;
+  if (!text) return undefined;
   for (let resolution in resolutionsAndAliases) {
-    let aliases = resolutionsAndAliases[resolution];
+    let aliases = resolutionsAndAliases[resolution as keyof typeof Resolution];
     for (let alias of aliases) {
       if (text.includes(alias)) {
-        return resolution;
+        return resolution as Resolution;
       }
     }
-    if (text.includes(resolution)) return resolution;
   }
-  const regex = /\b(\d{3})x(\d{3})\b/;
+  const regex = /\b(\d{3,4})x(\d{3,4})\b/;
   const match = text.match(regex);
 
   if (match) {
-    return match[0];
+    const height = parseInt(match[2]);
+    if (height < 720) return Resolution.SD;
+    if (height < 1080) return Resolution.HD;
+    if (height < 2160) return Resolution.FHD;
+    return Resolution.UHD;
   }
-  return null;
+  return undefined;
 };
 
 export const parseYearAndTitleFromReleaseName = (releaseName: string) => {

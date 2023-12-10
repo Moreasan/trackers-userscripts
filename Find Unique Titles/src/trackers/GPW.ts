@@ -1,5 +1,16 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { MetaData, Request, SearchResult, toGenerator, Torrent, tracker } from "./tracker";
+import {
+  parseImdbIdFromLink,
+  parseResolution,
+  parseSize,
+} from "../utils/utils";
+import {
+  MetaData,
+  Request,
+  SearchResult,
+  toGenerator,
+  Torrent,
+  tracker,
+} from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -16,7 +27,7 @@ export default class GPW implements tracker {
     return url.includes("greatposterwall.com");
   }
 
-async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     document
       .querySelectorAll("#torrent_table tr.TableTorrent-rowMovieInfo")
@@ -46,11 +57,14 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
               container,
               dom: torrentElement,
               format: "",
-              resolution: torrentElement
-                .querySelector("span.TorrentTitle-item.resolution")
-                .textContent.trim(),
+              resolution: parseResolution(
+                torrentElement
+                  .querySelector("span.TorrentTitle-item.resolution")
+                  .textContent.trim()
+              ),
               size: parseSize(
-                torrentElement.querySelector("td.TableTorrent-cellStatSize").textContent
+                torrentElement.querySelector("td.TableTorrent-cellStatSize")
+                  .textContent
               ),
               tags,
             };
@@ -67,7 +81,7 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
         requests.push(request);
       });
 
-    yield* toGenerator(requests)
+    yield* toGenerator(requests);
   }
 
   name(): string {
@@ -80,15 +94,13 @@ async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
 
     const result = await fetchAndParseHtml(queryUrl);
 
-    return result.querySelector(".torrent-listings-no-result") !== null ? SearchResult.NOT_EXIST
+    return result.querySelector(".torrent-listings-no-result") !== null
+      ? SearchResult.NOT_EXIST
       : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    select.classList.add('Input')
-    addChild(
-      document.querySelector(".SearchPageFooter-actions"),
-      select
-    );
+    select.classList.add("Input");
+    addChild(document.querySelector(".SearchPageFooter-actions"), select);
   }
 }

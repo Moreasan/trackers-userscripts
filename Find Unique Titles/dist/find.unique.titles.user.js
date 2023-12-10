@@ -341,12 +341,11 @@
         element.querySelectorAll('tr[id^="resulttorrent"]').forEach((torrentElement => {
           const data = torrentElement.children[0].textContent.trim().split("/");
           const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(torrentElement.children[4].textContent.trim());
-          const tags = [];
-          if (torrentElement.textContent.includes("Remux")) tags.push("Remux");
+          const tags = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseTags)(torrentElement.textContent);
           const torrent = {
             container: data[0].trim(),
             format: data[1].trim(),
-            resolution: data[3].trim(),
+            resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(data[3].trim()),
             tags,
             size,
             dom: torrentElement
@@ -566,9 +565,9 @@
         const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector("td:nth-child(5)")?.textContent);
         let container;
         let format;
-        let resolution = "SD";
+        let resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.SD;
         const text = element.textContent.toLowerCase();
-        if (text.includes("1080p")) resolution = "1080p"; else if (text.includes("720p")) resolution = "720p"; else if (text.includes("dvd-r")) format = "VOB IFO";
+        if (text.includes("1080p")) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.FHD; else if (text.includes("720p")) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.HD; else if (text.includes("dvd-r")) format = "VOB IFO";
         return [ {
           size,
           tags: [],
@@ -867,7 +866,7 @@
                   container,
                   dom: torrentElement,
                   format: "",
-                  resolution: torrentElement.querySelector("span.TorrentTitle-item.resolution").textContent.trim(),
+                  resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(torrentElement.querySelector("span.TorrentTitle-item.resolution").textContent.trim()),
                   size: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(torrentElement.querySelector("td.TableTorrent-cellStatSize").textContent),
                   tags
                 };
@@ -905,8 +904,8 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
       var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
       const isExclusive = element => {
         const exclusiveLink = element.querySelector('a[href="/browse.php?exclusive=1"]');
         return null != exclusiveLink;
@@ -915,8 +914,7 @@
         const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector("td:nth-child(6)")?.textContent);
         const title = element.querySelector(".browse_td_name_cell a").textContent.trim();
         const resolution = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(title);
-        const tags = [];
-        if (element.querySelector("#codec1 .medium5")) tags.push("Remux");
+        const tags = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseTags)(title);
         return {
           size,
           tags,
@@ -1212,9 +1210,9 @@
       const parseTorrent = element => {
         const torrents = [];
         const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector("td:nth-child(11)")?.textContent?.replace(",", ""));
-        let resolution = "SD";
+        let resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.SD;
         let format;
-        if (element.querySelector('td img[src*="hdrip1080.png"]')) resolution = "1080p"; else if (element.querySelector('td img[src*="hdrip720.png"]')) resolution = "720p"; else if (element.querySelector('td img[src*="dvdr.png"]')) format = "VOB IFO"; else if (element.querySelector('td img[src*="bluray.png"]')) format = "m2ts";
+        if (element.querySelector('td img[src*="hdrip1080.png"]')) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.FHD; else if (element.querySelector('td img[src*="hdrip720.png"]')) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.HD; else if (element.querySelector('td img[src*="dvdr.png"]')) format = "VOB IFO"; else if (element.querySelector('td img[src*="bluray.png"]')) format = "m2ts";
         torrents.push({
           size,
           format,
@@ -1510,7 +1508,7 @@
           };
           const hasRequests = element => true === element.querySelector("#no_results_message")?.textContent?.trim().includes("Your search did not match any torrents, however it did match these requests.");
           const isAllowedTorrent = torrent => {
-            if ("x265" == torrent.container && "2160p" != torrent.resolution && !isHDR(torrent)) {
+            if ("x265" == torrent.container && torrent.resolution != _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.UHD && !isHDR(torrent)) {
               common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
               return false;
             }
@@ -1619,7 +1617,7 @@
               const torrent = {
                 container: data[0].split("]")[1].trim(),
                 format: data[1].trim(),
-                resolution: data[3].trim(),
+                resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(data[3].trim()),
                 tags,
                 size,
                 dom: line
@@ -1631,18 +1629,9 @@
           function sameContainer(first, second) {
             return first === second || "H.264" === first && "x264" === second || "x264" === first && "H.264" === second || "H.265" === first && "x265" === second || "x265" === first && "H.265" === second || "UHD100" === first && "BD100" === second || "BD100" === first && "UHD100" === second || "UHD66" === first && "BD66" === second || "BD66" === first && "UHD66" === second;
           }
-          function isSD(resolution) {
-            const sdResolutions = [ "SD", "PAL", "NTSC" ];
-            if (sdResolutions.indexOf(resolution.toUpperCase())) return true;
-            let height = resolution.replace("p", "");
-            if (resolution.includes("x")) height = resolution.split("x")[1];
-            if (parseInt(height) && parseInt(height) < 720) return true;
-          }
           function sameResolution(first, second) {
             if (!first.resolution || !second.resolution) return true;
-            if (first.resolution === second.resolution) return true;
-            if ("SD" === first.resolution) return isSD(second.resolution);
-            if ("SD" === second.resolution) return isSD(first.resolution);
+            return first.resolution === second.resolution;
           }
           const isHDR = torrent => torrent.tags?.includes("HDR") || torrent.tags?.includes("DV");
           const searchTorrent = (torrent, availableTorrents) => {
@@ -1809,18 +1798,18 @@
       function parseTorrent(element) {
         let infos = element.querySelector(".torrent_info .activity_info").querySelectorAll("div");
         let size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(infos[1].textContent);
-        let resolution = infos[0].textContent.trim();
+        let resolution = infos[0]?.textContent?.trim();
         if ("CD" == resolution || "WEB" == resolution) resolution = void 0;
         let format;
         if ("DVD-R" === resolution) {
-          resolution = "SD";
+          resolution = _tracker__WEBPACK_IMPORTED_MODULE_1__.Resolution.SD;
           format = "VOB IFO";
         }
         return {
           size,
           tags: [],
           dom: element,
-          resolution,
+          resolution: resolution ? (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(resolution) : void 0,
           format
         };
       }
@@ -1892,13 +1881,15 @@
       var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
       var common_logger__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/logger/index.mjs");
       const parseCategory = element => {
-        const category = element.querySelector(".info a.category").getAttribute("data-ccid");
+        let categoryLink = element.querySelector(".info a.category");
+        const category = categoryLink.getAttribute("data-ccid");
         if ("animation" == category) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.ANIME;
         if ("tv" == category) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
         if ("music" == category) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
         if ("games" == category) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.GAME;
         if ("movies" == category) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
         if ("books" == category) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.BOOK;
+        if (categoryLink.textContent.trim().includes("TV")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
       };
       const parseYearAndTitle = element => {
         const name = element.querySelector(".name a").childNodes[0].textContent;
@@ -2270,24 +2261,32 @@
     "./src/trackers/tracker.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         Category: () => Category,
+        Resolution: () => Resolution,
         SearchResult: () => SearchResult,
         toGenerator: () => toGenerator
       });
+      let Resolution = function(Resolution) {
+        Resolution.SD = "SD";
+        Resolution.HD = "HD";
+        Resolution.FHD = "FHD";
+        Resolution.UHD = "UHD";
+        return Resolution;
+      }({});
       let Category = function(Category) {
-        Category[Category.TV = 0] = "TV";
-        Category[Category.MOVIE = 1] = "MOVIE";
-        Category[Category.MUSIC = 2] = "MUSIC";
-        Category[Category.BOOK = 3] = "BOOK";
-        Category[Category.AUDIOBOOK = 4] = "AUDIOBOOK";
-        Category[Category.SPORT = 5] = "SPORT";
-        Category[Category.ANIME = 6] = "ANIME";
-        Category[Category.MV = 7] = "MV";
-        Category[Category.LIVE_PERFORMANCE = 8] = "LIVE_PERFORMANCE";
-        Category[Category.STAND_UP = 9] = "STAND_UP";
-        Category[Category.DOCUMENTARY = 10] = "DOCUMENTARY";
-        Category[Category.GAME = 11] = "GAME";
-        Category[Category.XXX = 12] = "XXX";
-        Category[Category.OTHER = 13] = "OTHER";
+        Category.TV = "TV";
+        Category.MOVIE = "MOVIE";
+        Category.MUSIC = "MUSIC";
+        Category.BOOK = "BOOK";
+        Category.AUDIOBOOK = "AUDIOBOOK";
+        Category.SPORT = "SPORT";
+        Category.ANIME = "ANIME";
+        Category.MV = "MV";
+        Category.LIVE_PERFORMANCE = "PERFORMANCE";
+        Category.STAND_UP = "UP";
+        Category.DOCUMENTARY = "DOCUMENTARY";
+        Category.GAME = "GAME";
+        Category.XXX = "XXX";
+        Category.OTHER = "OTHER";
         return Category;
       }({});
       let SearchResult = function(SearchResult) {
@@ -2418,6 +2417,7 @@
         parseTags: () => parseTags,
         parseYearAndTitleFromReleaseName: () => parseYearAndTitleFromReleaseName
       });
+      var _trackers_tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
       const parseSize = text => {
         let size = null;
         text = text.replace("GiB", "GB").replace("MiB", "MB");
@@ -2437,21 +2437,26 @@
       };
       const parseResolution = text => {
         const resolutionsAndAliases = {
-          "720p": [ "720p", "hd" ],
-          "1080p": [ "1080p", "fhd", "full_hd" ],
-          "2160p": [ "2160p", "uhd", "4k" ],
-          SD: [ "sd", "pal", "ntsc" ]
+          SD: [ "sd", "pal", "ntsc" ],
+          HD: [ "720p", "hd" ],
+          FHD: [ "1080p", "fhd", "full_hd" ],
+          UHD: [ "2160p", "uhd", "4k" ]
         };
-        if (!text) return null;
+        if (!text) return;
         for (let resolution in resolutionsAndAliases) {
           let aliases = resolutionsAndAliases[resolution];
           for (let alias of aliases) if (text.includes(alias)) return resolution;
-          if (text.includes(resolution)) return resolution;
         }
-        const regex = /\b(\d{3})x(\d{3})\b/;
+        const regex = /\b(\d{3,4})x(\d{3,4})\b/;
         const match = text.match(regex);
-        if (match) return match[0];
-        return null;
+        if (match) {
+          const height = parseInt(match[2]);
+          if (height < 720) return _trackers_tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.SD;
+          if (height < 1080) return _trackers_tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.HD;
+          if (height < 2160) return _trackers_tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.FHD;
+          return _trackers_tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.UHD;
+        }
+        return;
       };
       const parseYearAndTitleFromReleaseName = releaseName => {
         const regex = /^(.+?)\.(\d{4})\./;

@@ -10,6 +10,7 @@ import {
   Category,
   MetaData,
   Request,
+  Resolution,
   SearchResult,
   toGenerator,
   Torrent,
@@ -87,7 +88,7 @@ const hasRequests = (element: Element): boolean => {
 const isAllowedTorrent = (torrent: Torrent) => {
   if (
     torrent.container == "x265" &&
-    torrent.resolution != "2160p" &&
+    torrent.resolution != Resolution.UHD &&
     !isHDR(torrent)
   ) {
     logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
@@ -271,7 +272,7 @@ const parseTorrentsFromLines = (lines: Array<Element>) => {
     const torrent: Torrent = {
       container: data[0].split("]")[1].trim(),
       format: data[1].trim(),
-      resolution: data[3].trim(),
+      resolution: parseResolution(data[3].trim()),
       tags: tags,
       size,
       dom: line as HTMLElement,
@@ -295,21 +296,13 @@ function sameContainer(first: string, second: string) {
   );
 }
 
-function isSD(resolution: string) {
-  const sdResolutions = ["SD", "PAL", "NTSC"];
-  if (sdResolutions.indexOf(resolution.toUpperCase())) return true;
-  let height = resolution.replace("p", "");
-  if (resolution.includes("x")) {
-    height = resolution.split("x")[1];
-  }
-  if (parseInt(height) && parseInt(height) < 720) return true;
-}
+const isSD = (resolution: Resolution) => {
+  return resolution === Resolution.SD;
+};
 
 function sameResolution(first: Torrent, second: Torrent) {
   if (!first.resolution || !second.resolution) return true;
-  if (first.resolution === second.resolution) return true;
-  if (first.resolution === "SD") return isSD(second.resolution);
-  if (second.resolution === "SD") return isSD(first.resolution);
+  return first.resolution === second.resolution;
 }
 
 const isHDR = (torrent: Torrent) => {

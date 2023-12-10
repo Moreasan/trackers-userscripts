@@ -1,7 +1,7 @@
 import {
   parseImdbIdFromLink,
   parseResolution,
-  parseSize,
+  parseSize, parseTags
 } from "../utils/utils";
 import {
   Category,
@@ -22,14 +22,11 @@ const parseTorrents = (element: HTMLElement): Array<Torrent> => {
     .forEach((torrentElement) => {
       const data = torrentElement.children[0].textContent.trim().split("/");
       const size = parseSize(torrentElement.children[4].textContent.trim());
-      const tags = [];
-      if (torrentElement.textContent.includes("Remux")) {
-        tags.push("Remux");
-      }
+      const tags = parseTags(torrentElement.textContent);
       const torrent: Torrent = {
         container: data[0].trim(),
         format: data[1].trim(),
-        resolution: data[3].trim(),
+        resolution: parseResolution(data[3].trim()),
         tags: tags,
         size,
         dom: torrentElement as HTMLElement,

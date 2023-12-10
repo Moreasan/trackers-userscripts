@@ -1,8 +1,9 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
+import { parseImdbIdFromLink, parseResolution, parseSize } from "../utils/utils";
 import {
   Category,
   MetaData,
   Request,
+  Resolution,
   SearchResult,
   Torrent,
   tracker,
@@ -15,20 +16,20 @@ function parseTorrent(element: HTMLElement): Torrent {
     .querySelector(".torrent_info .activity_info")!!
     .querySelectorAll("div");
   let size = parseSize(infos[1].textContent as string);
-  let resolution: string | undefined = infos[0].textContent.trim();
+  let resolution: string | undefined = infos[0]?.textContent?.trim();
   if (resolution == "CD" || resolution == "WEB") {
     resolution = undefined;
   }
   let format = undefined;
   if (resolution === "DVD-R") {
-    resolution = "SD";
+    resolution = Resolution.SD;
     format = "VOB IFO";
   }
   return {
     size,
     tags: [],
     dom: element,
-    resolution,
+    resolution: resolution ? parseResolution(resolution) : undefined,
     format,
   };
 }

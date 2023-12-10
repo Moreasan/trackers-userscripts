@@ -2,6 +2,7 @@ import {
   parseImdbId,
   parseResolution,
   parseSize,
+  parseTags,
 } from "../utils/utils";
 import {
   tracker,
@@ -9,10 +10,11 @@ import {
   toGenerator,
   MetaData,
   Torrent,
-  Category, SearchResult
+  Category,
+  SearchResult,
 } from "./tracker";
-import { fetchAndParseHtml } from "common/http";
 import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 const isExclusive = (element: HTMLElement) => {
   const exclusiveLink = element.querySelector(
@@ -26,13 +28,10 @@ function parseTorrent(element: HTMLElement): Torrent {
     element.querySelector("td:nth-child(6)")?.textContent as string
   );
   const title = element
-    .querySelector(".browse_td_name_cell a")
-    .textContent.trim();
+    .querySelector(".browse_td_name_cell a")!!
+    .textContent!!.trim();
   const resolution = parseResolution(title);
-  const tags = [];
-  if (element.querySelector("#codec1 .medium5")) {
-    tags.push("Remux");
-  }
+  const tags = parseTags(title);
 
   return {
     size,
@@ -121,7 +120,8 @@ export default class HDB implements tracker {
 
     return result
       .querySelector("#resultsarea")
-      .textContent.includes("Nothing here!") ? SearchResult.NOT_EXIST
+      .textContent.includes("Nothing here!")
+      ? SearchResult.NOT_EXIST
       : SearchResult.EXIST;
   }
 

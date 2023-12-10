@@ -10,8 +10,9 @@ import { addChild } from "common/dom";
 import { logger } from "common/logger";
 
 const parseCategory = (element: Element) => {
-  const category = element
-    .querySelector(".info a.category")!!
+  let categoryLink = element
+    .querySelector(".info a.category")!!;
+  const category = categoryLink
     .getAttribute("data-ccid");
   if (category == "animation") return Category.ANIME;
   if (category == "tv") return Category.TV;
@@ -19,6 +20,7 @@ const parseCategory = (element: Element) => {
   if (category == "games") return Category.GAME;
   if (category == "movies") return Category.MOVIE;
   if (category == "books") return Category.BOOK;
+  if (categoryLink.textContent!!.trim().includes("TV")) return Category.TV
 };
 const parseYearAndTitle = (element: Element) => {
   const name = element.querySelector(".name a")!!.childNodes[0].textContent!!;

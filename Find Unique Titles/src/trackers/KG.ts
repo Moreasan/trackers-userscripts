@@ -3,6 +3,7 @@ import {
   Category,
   MetaData,
   Request,
+  Resolution,
   SearchResult,
   Torrent,
   tracker,
@@ -32,12 +33,12 @@ const parseTorrent = (element: HTMLElement): Array<Torrent> => {
       .querySelector("td:nth-child(11)")
       ?.textContent?.replace(",", "") as string
   );
-  let resolution = "SD";
+  let resolution = Resolution.SD;
   let format = undefined;
   if (element.querySelector('td img[src*="hdrip1080.png"]')) {
-    resolution = "1080p";
+    resolution = Resolution.FHD;
   } else if (element.querySelector('td img[src*="hdrip720.png"]')) {
-    resolution = "720p";
+    resolution = Resolution.HD;
   } else if (element.querySelector('td img[src*="dvdr.png"]')) {
     format = "VOB IFO";
   } else if (element.querySelector('td img[src*="bluray.png"]')) {

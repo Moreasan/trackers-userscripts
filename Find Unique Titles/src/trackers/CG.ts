@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, SearchResult, toGenerator, tracker } from "./tracker";
+import { Category, MetaData, Request, Resolution, SearchResult, toGenerator, tracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -18,12 +18,12 @@ function parseTorrents(element: HTMLElement) {
   );
   let container = undefined;
   let format = undefined;
-  let resolution = "SD";
-  const text = element.textContent.toLowerCase();
+  let resolution = Resolution.SD;
+  const text = element.textContent!!.toLowerCase();
   if (text.includes("1080p")) {
-    resolution = "1080p";
+    resolution = Resolution.FHD;
   } else if (text.includes("720p")) {
-    resolution = "720p";
+    resolution = Resolution.HD;
   } else if (text.includes("dvd-r")) {
     format = "VOB IFO";
   }

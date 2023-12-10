@@ -22,7 +22,7 @@ const createMessageBox = () => {
   div = document.createElement("div");
   div.id = "message-box";
   addStyle(div);
-  div.addEventListener("click", () => (div.style.display = "none"));
+  div.addEventListener("click", () => (div!!.style.display = "none"));
   document.body.appendChild(div);
   return div;
 };
@@ -46,12 +46,6 @@ const addStyle = (messageBox: HTMLElement) => {
   messageBox.style.cursor = "pointer";
   messageBox.style.border = "2px solid #111";
   messageBox.style.zIndex = "4591363";
-};
-export const hideMessageBox = () => {
-  let messageBox = document.getElementById("message-box");
-  if (messageBox) {
-    messageBox.style.display = "none";
-  }
 };
 export const updateCount = (count: number) => {
   document.querySelector(".checked_count")!!.textContent = String(count);

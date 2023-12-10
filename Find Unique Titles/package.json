@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "webpack server --node-env development --config config/webpack.config.ts",
     "build": "webpack --node-env production --progress --config config/webpack.config.ts",
-    "format": "prettier --write --ignore-unknown src"
+    "format": "prettier --write --ignore-unknown src",
+    "check-types": "tsc --noEmit"
   },
   "repository": {
     "type": "git",

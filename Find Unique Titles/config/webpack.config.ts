@@ -2,7 +2,6 @@ import { UserScriptConfig } from "./userscript.config";
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import path from "path";
 import TerserPlugin from "terser-webpack-plugin";
-import url from "url";
 import * as webpack from "webpack";
 import "webpack-dev-server";
 import WebpackUserscript from "webpack-userscript";
