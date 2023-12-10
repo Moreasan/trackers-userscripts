@@ -8,20 +8,20 @@ export interface Torrent {
 }
 
 export enum Category {
-  TV,
-  MOVIE,
-  MUSIC,
-  BOOK,
-  AUDIOBOOK,
-  SPORT,
-  ANIME,
-  MV,
-  LIVE_PERFORMANCE,
-  STAND_UP,
-  DOCUMENTARY,
-  GAME,
-  XXX,
-  OTHER,
+  TV = "TV",
+  MOVIE = "MOVIE",
+  MUSIC = "MUSIC",
+  BOOK = "BOOK",
+  AUDIOBOOK = "AUDIOBOOK",
+  SPORT = "SPORT",
+  ANIME = "ANIME",
+  MV = "MV",
+  LIVE_PERFORMANCE = "PERFORMANCE",
+  STAND_UP = "UP",
+  DOCUMENTARY = "DOCUMENTARY",
+  GAME = "GAME",
+  XXX = "XXX",
+  OTHER = "OTHER",
 }
 
 export interface Request {
