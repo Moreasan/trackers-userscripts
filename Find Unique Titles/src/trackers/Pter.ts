@@ -1,4 +1,4 @@
-import { parseResolution, parseSize } from "../utils/utils";
+import { parseResolution, parseSize, parseYearAndTitle } from "../utils/utils";
 import {
   Category,
   MetaData,
@@ -26,7 +26,7 @@ function parseTorrent(element: HTMLElement): Torrent {
 
 function parseCategory(element: HTMLElement) {
   let linkElement = element.querySelector('a[href^="?cat"]');
-  let hrefValue = linkElement ? linkElement.getAttribute("href").trim() : null;
+  let hrefValue = linkElement ? linkElement.getAttribute("href")!!.trim() : null;
   if (hrefValue) {
     hrefValue = hrefValue.replace("?cat=", "");
   }
@@ -91,36 +91,41 @@ export default class Pter implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    const elements = document.querySelectorAll("#torrenttable > tbody > tr");
-    Array.from(elements)
-      .slice(1)
-      .forEach((element: HTMLElement) => {
-        if (isExclusive(element)) {
-          element.style.display = "none";
-          return;
-        }
-        const spanElement = element.querySelector("span[data-imdbid]");
-        let imdbId = spanElement
-          ? spanElement.getAttribute("data-imdbid").trim()
-          : null;
-        if (imdbId) {
-          imdbId = "tt" + imdbId;
-        } else {
-          imdbId = null;
-        }
+    const elements = Array.from(
+      document.querySelectorAll("#torrenttable > tbody > tr")
+    ).slice(1) as HTMLElement[];
+    yield {
+      total: elements.length,
+    };
+    for (let element of elements) {
+      if (isExclusive(element)) {
+        element.style.display = "none";
+        continue;
+      }
+      const spanElement = element.querySelector("span[data-imdbid]");
+      let imdbId = spanElement
+        ? spanElement.getAttribute("data-imdbid")!!.trim()
+        : null;
+      if (imdbId) {
+        imdbId = "tt" + imdbId;
+      } else {
+        imdbId = null;
+      }
 
-        const request: Request = {
-          torrents: [parseTorrent(element)],
-          dom: [element],
-          imdbId,
-          title: "",
-          category: parseCategory(element),
-        };
-        requests.push(request);
-      });
+      const { title, year } = parseYearAndTitle(
+        element.querySelector(".torrentname a")!!.textContent!!.trim()
+      );
 
-    yield* toGenerator(requests);
+      const request: Request = {
+        torrents: [parseTorrent(element)],
+        dom: [element],
+        imdbId,
+        title,
+        year,
+        category: parseCategory(element),
+      };
+      yield request;
+    }
   }
 
   name(): string {
@@ -140,10 +145,11 @@ export default class Pter implements tracker {
     const targetLine = document.querySelector(
       ".searchbox > tbody:last-child table tr"
     );
+    if (!targetLine) return
     const td = document.createElement("td");
     td.classList.add("embedded");
     td.appendChild(select);
 
-    addChild(targetLine, td);
+    addChild(targetLine as HTMLElement, td);
   }
 }

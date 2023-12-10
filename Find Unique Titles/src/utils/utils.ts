@@ -103,3 +103,17 @@ export const parseTags = (title: string) => {
 
   return tags;
 };
+
+export const parseYearAndTitle = (title: string) => {
+  const regex = /^(.*?)\s+(\d{4})\s+(.*)$/;
+  const match = title.match(regex);
+
+  if (match) {
+    const title = match[1].trim();
+    const year = parseInt(match[2], 10);
+
+    return { title, year };
+  }
+
+  return { title: undefined, year: undefined };
+};

@@ -1210,9 +1210,15 @@
       const parseTorrent = element => {
         const torrents = [];
         const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector("td:nth-child(11)")?.textContent?.replace(",", ""));
-        let resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.SD;
+        let resolution;
         let format;
-        if (element.querySelector('td img[src*="hdrip1080.png"]')) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.FHD; else if (element.querySelector('td img[src*="hdrip720.png"]')) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.HD; else if (element.querySelector('td img[src*="dvdr.png"]')) format = "VOB IFO"; else if (element.querySelector('td img[src*="bluray.png"]')) format = "m2ts";
+        if (element.querySelector('td img[src*="hdrip1080.png"]')) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.FHD; else if (element.querySelector('td img[src*="hdrip720.png"]')) resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.HD; else if (element.querySelector('td img[src*="dvdr.png"]')) {
+          resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.SD;
+          format = "VOB IFO";
+        } else if (element.querySelector('td img[src*="bluray.png"]')) {
+          resolution = _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.FHD;
+          format = "m2ts";
+        }
         torrents.push({
           size,
           format,
@@ -1748,26 +1754,29 @@
           return url.includes("pterclub.com");
         }
         async* getSearchRequest() {
-          const requests = [];
-          const elements = document.querySelectorAll("#torrenttable > tbody > tr");
-          Array.from(elements).slice(1).forEach((element => {
+          const elements = Array.from(document.querySelectorAll("#torrenttable > tbody > tr")).slice(1);
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
             if (isExclusive(element)) {
               element.style.display = "none";
-              return;
+              continue;
             }
             const spanElement = element.querySelector("span[data-imdbid]");
             let imdbId = spanElement ? spanElement.getAttribute("data-imdbid").trim() : null;
             if (imdbId) imdbId = "tt" + imdbId; else imdbId = null;
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseYearAndTitle)(element.querySelector(".torrentname a").textContent.trim());
             const request = {
               torrents: [ parseTorrent(element) ],
               dom: [ element ],
               imdbId,
-              title: "",
+              title,
+              year,
               category: parseCategory(element)
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
+            yield request;
+          }
         }
         name() {
           return "Pter";
@@ -1780,6 +1789,7 @@
         }
         insertTrackersSelect(select) {
           const targetLine = document.querySelector(".searchbox > tbody:last-child table tr");
+          if (!targetLine) return;
           const td = document.createElement("td");
           td.classList.add("embedded");
           td.appendChild(select);
@@ -1891,23 +1901,6 @@
         if ("books" == category) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.BOOK;
         if (categoryLink.textContent.trim().includes("TV")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
       };
-      const parseYearAndTitle = element => {
-        const name = element.querySelector(".name a").childNodes[0].textContent;
-        const regex = /^(.*?)\s+(\d{4})\s+(.*)$/;
-        const match = name.match(regex);
-        if (match) {
-          const title = match[1].trim();
-          const year = parseInt(match[2], 10);
-          return {
-            title,
-            year
-          };
-        }
-        return {
-          title: void 0,
-          year: void 0
-        };
-      };
       class TL {
         canBeUsedAsSource() {
           return true;
@@ -1932,7 +1925,8 @@
             const category = parseCategory(element);
             let title;
             let year;
-            if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) ({title, year} = parseYearAndTitle(element));
+            if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) ({title, year} = (0, 
+            _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseYearAndTitle)(element.querySelector(".name a").childNodes[0].textContent));
             const request = {
               torrents: [ {
                 size,
@@ -2415,6 +2409,7 @@
         parseResolution: () => parseResolution,
         parseSize: () => parseSize,
         parseTags: () => parseTags,
+        parseYearAndTitle: () => parseYearAndTitle,
         parseYearAndTitleFromReleaseName: () => parseYearAndTitleFromReleaseName
       });
       var _trackers_tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
@@ -2492,6 +2487,22 @@
         if (title.replaceAll(new RegExp("HDRip", "gi"), "").includes("HDR")) tags.push("HDR");
         if (title.includes("DV")) tags.push("DV");
         return tags;
+      };
+      const parseYearAndTitle = title => {
+        const regex = /^(.*?)\s+(\d{4})\s+(.*)$/;
+        const match = title.match(regex);
+        if (match) {
+          const title = match[1].trim();
+          const year = parseInt(match[2], 10);
+          return {
+            title,
+            year
+          };
+        }
+        return {
+          title: void 0,
+          year: void 0
+        };
       };
     },
     "../common/dist/dom/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {

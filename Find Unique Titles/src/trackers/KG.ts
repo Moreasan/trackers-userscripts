@@ -33,15 +33,17 @@ const parseTorrent = (element: HTMLElement): Array<Torrent> => {
       .querySelector("td:nth-child(11)")
       ?.textContent?.replace(",", "") as string
   );
-  let resolution = Resolution.SD;
+  let resolution = undefined;
   let format = undefined;
   if (element.querySelector('td img[src*="hdrip1080.png"]')) {
     resolution = Resolution.FHD;
   } else if (element.querySelector('td img[src*="hdrip720.png"]')) {
     resolution = Resolution.HD;
   } else if (element.querySelector('td img[src*="dvdr.png"]')) {
+    resolution = Resolution.SD
     format = "VOB IFO";
   } else if (element.querySelector('td img[src*="bluray.png"]')) {
+    resolution = Resolution.FHD
     format = "m2ts";
   }
   torrents.push({

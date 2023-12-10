@@ -3,7 +3,7 @@ import {
   parseImdbIdFromLink,
   parseResolution,
   parseSize,
-  parseTags,
+  parseTags, parseYearAndTitle
 } from "../utils/utils";
 import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
 import { addChild } from "common/dom";
@@ -21,20 +21,6 @@ const parseCategory = (element: Element) => {
   if (category == "movies") return Category.MOVIE;
   if (category == "books") return Category.BOOK;
   if (categoryLink.textContent!!.trim().includes("TV")) return Category.TV
-};
-const parseYearAndTitle = (element: Element) => {
-  const name = element.querySelector(".name a")!!.childNodes[0].textContent!!;
-  const regex = /^(.*?)\s+(\d{4})\s+(.*)$/;
-  const match = name.match(regex);
-
-  if (match) {
-    const title = match[1].trim();
-    const year = parseInt(match[2], 10);
-
-    return { title, year };
-  }
-
-  return { title: undefined, year: undefined };
 };
 export default class TL implements tracker {
   canBeUsedAsSource(): boolean {
@@ -66,7 +52,7 @@ export default class TL implements tracker {
       let title;
       let year = undefined;
       if (category == Category.MOVIE) {
-        ({ title, year } = parseYearAndTitle(element));
+        ({ title, year } = parseYearAndTitle(element.querySelector(".name a")!!.childNodes[0].textContent!!));
 
       }
       const request: Request = {
