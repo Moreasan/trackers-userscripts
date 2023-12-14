@@ -96,6 +96,7 @@ export const parseCodec = (title: string) => {
 
 export const parseTags = (title: string) => {
   const tags: string[] = [];
+  if (!title) return tags
   if (title.toLowerCase().includes("remux")) tags.push("Remux");
   if (title.replaceAll(new RegExp("HDRip", "gi"), "").includes("HDR"))
     tags.push("HDR");

@@ -3,6 +3,7 @@ import {
   parseResolution,
   parseSize,
   parseTags,
+  parseYearAndTitle,
 } from "../utils/utils";
 import {
   tracker,
@@ -28,8 +29,8 @@ function parseTorrent(element: HTMLElement): Torrent {
     element.querySelector("td:nth-child(6)")?.textContent as string
   );
   const title = element
-    .querySelector(".browse_td_name_cell a")!!
-    .textContent!!.trim();
+    .querySelector(".browse_td_name_cell a")
+    ?.textContent!!.trim();
   const resolution = parseResolution(title);
   const tags = parseTags(title);
 
@@ -78,31 +79,36 @@ export default class HDB implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    document
-      .querySelectorAll("#torrent-list > tbody tr")
-      ?.forEach((element: HTMLElement) => {
-        if (isExclusive(element)) {
-          element.style.display = "none";
-          return;
-        }
-        const imdbId = parseImdbId(
-          element
-            .querySelector("a[data-imdb-link]")
-            ?.getAttribute("data-imdb-link")
-        );
+    const elements = Array.from(
+      document.querySelectorAll("#torrent-list > tbody tr")
+    ) as Array<HTMLElement>;
+    yield {
+      total: elements.length,
+    };
+    for (let element of elements) {
+      if (isExclusive(element)) {
+        element.style.display = "none";
+        yield null;
+      }
+      const imdbId = parseImdbId(
+        element
+          .querySelector("a[data-imdb-link]")
+          ?.getAttribute("data-imdb-link")
+      );
 
-        const request: Request = {
-          torrents: [parseTorrent(element)],
-          dom: [element as HTMLElement],
-          imdbId,
-          title: "",
-          category: parseCategory(element),
-        };
-        requests.push(request);
-      });
+      const { title, year } = parseYearAndTitle(
+        element.children[2].querySelector("a")!!.textContent
+      );
 
-    yield* toGenerator(requests);
+      yield {
+        torrents: [parseTorrent(element)],
+        dom: [element as HTMLElement],
+        imdbId,
+        title,
+        year,
+        category: parseCategory(element),
+      };
+    }
   }
 
   name(): string {

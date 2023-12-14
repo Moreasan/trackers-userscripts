@@ -93,6 +93,7 @@
                 (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateTotalCount)(metadata.total);
                 common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("[{0}] Parsing titles to check", sourceTracker.name());
                 for await (const item of requestGenerator) {
+                  if (null == item) continue;
                   const request = item;
                   common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("[{0}] Search request: {1}", sourceTracker.name(), request);
                   try {
@@ -937,7 +938,7 @@
       };
       function parseTorrent(element) {
         const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector("td:nth-child(6)")?.textContent);
-        const title = element.querySelector(".browse_td_name_cell a").textContent.trim();
+        const title = element.querySelector(".browse_td_name_cell a")?.textContent.trim();
         const resolution = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(title);
         const tags = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseTags)(title);
         return {
@@ -981,23 +982,26 @@
           return url.includes("hdbits.org");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll("#torrent-list > tbody tr")?.forEach((element => {
+          const elements = Array.from(document.querySelectorAll("#torrent-list > tbody tr"));
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
             if (isExclusive(element)) {
               element.style.display = "none";
-              return;
+              yield null;
             }
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbId)(element.querySelector("a[data-imdb-link]")?.getAttribute("data-imdb-link"));
-            const request = {
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseYearAndTitle)(element.children[2].querySelector("a").textContent);
+            yield {
               torrents: [ parseTorrent(element) ],
               dom: [ element ],
               imdbId,
-              title: "",
+              title,
+              year,
               category: parseCategory(element)
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
+          }
         }
         name() {
           return "HDB";
@@ -2508,6 +2512,7 @@
       };
       const parseTags = title => {
         const tags = [];
+        if (!title) return tags;
         if (title.toLowerCase().includes("remux")) tags.push("Remux");
         if (title.replaceAll(new RegExp("HDRip", "gi"), "").includes("HDR")) tags.push("HDR");
         if (title.includes("DV")) tags.push("DV");

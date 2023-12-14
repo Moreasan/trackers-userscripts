@@ -69,6 +69,7 @@ const main = async function () {
       updateTotalCount(metadata.total);
       logger.debug(`[{0}] Parsing titles to check`, sourceTracker!!.name());
       for await (const item of requestGenerator) {
+        if (item == null) continue;
         const request = item as Request;
         logger.debug(
           `[{0}] Search request: {1}`,
