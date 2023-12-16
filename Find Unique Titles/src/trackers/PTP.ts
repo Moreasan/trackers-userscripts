@@ -4,7 +4,7 @@ import {
   parseImdbIdFromLink,
   parseResolution,
   parseSize,
-  parseTags,
+  parseTags
 } from "../utils/utils";
 import {
   Category,
@@ -14,7 +14,7 @@ import {
   SearchResult,
   toGenerator,
   Torrent,
-  tracker,
+  tracker
 } from "./tracker";
 import { findFirst, insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -51,7 +51,7 @@ const parseTorrents = (element: HTMLElement) => {
         dom: [element],
         size,
         tags,
-        resolution,
+        resolution
       };
       torrents.push(torrent);
     });
@@ -110,7 +110,7 @@ export default class PTP implements tracker {
     return url.includes("passthepopcorn.me");
   }
 
-  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
+  async* getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
     const nodes = findFirst(
       document,
@@ -134,7 +134,7 @@ export default class PTP implements tracker {
         dom: [element as HTMLElement],
         imdbId,
         title: "",
-        category: parseCategory(element),
+        category: parseCategory(element)
       };
       requests.push(request);
     });
@@ -171,7 +171,7 @@ export default class PTP implements tracker {
         let searchResultsCount = result.querySelector(
           "span.search-form__footer__results"
         );
-        if (searchResultsCount) {
+        if (searchResultsCount && searchResultsCount.textContent?.trim()?.split(" ")[0] !== "0") {
           logger.debug(
             "[PTP] Multiple results found: {0}",
             searchResultsCount.textContent
@@ -190,7 +190,7 @@ export default class PTP implements tracker {
                     size: parseSize(torrent["Size"]),
                     tags: parseTags(torrent["Title"]),
                     resolution: parseResolution(torrent["Title"]),
-                    container: parseCodec(torrent["Title"]),
+                    container: parseCodec(torrent["Title"])
                   });
                 }
               }
@@ -255,7 +255,7 @@ export default class PTP implements tracker {
 
 const parseAvailableTorrents = (result: HTMLElement): Array<Torrent> => {
   const lines = Array.from(
-    result.querySelectorAll('#torrent-table tr[id^="group_torrent_header_"]')
+    result.querySelectorAll("#torrent-table tr[id^=\"group_torrent_header_\"]")
   );
   return parseTorrentsFromLines(lines);
 };
@@ -275,7 +275,7 @@ const parseTorrentsFromLines = (lines: Array<Element>) => {
       resolution: parseResolution(data[3].trim()),
       tags: tags,
       size,
-      dom: line as HTMLElement,
+      dom: line as HTMLElement
     };
     torrents.push(torrent);
   }
@@ -353,6 +353,6 @@ function extractJsonData(doc: Element) {
     }
   }
 
-  console.error(`No script element containing '${variableName}' found.`);
+  console.error(`No script element containing PageData found.`);
   return null;
 }

@@ -69,7 +69,10 @@ const main = async function () {
       updateTotalCount(metadata.total);
       logger.debug(`[{0}] Parsing titles to check`, sourceTracker!!.name());
       for await (const item of requestGenerator) {
-        if (item == null) continue;
+        if (item == null) {
+          updateCount(i++);
+          continue;
+        }
         const request = item as Request;
         logger.debug(
           `[{0}] Search request: {1}`,
@@ -88,7 +91,7 @@ const main = async function () {
             continue;
           }
           const response = await targetTracker.search(request);
-          updateCount(i++);
+          logger.debug("Search response: {0}", response)
           if (
             response == SearchResult.EXIST ||
             response == SearchResult.NOT_ALLOWED
@@ -149,6 +152,8 @@ const main = async function () {
             "Title was not checked due to an error"
           );
           request.dom[0].style.border = "2px solid red";
+        } finally {
+          updateCount(i++);
         }
       }
       clearMemoryCache();

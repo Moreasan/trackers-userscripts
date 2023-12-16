@@ -106,7 +106,7 @@ export const parseTags = (title: string) => {
 };
 
 export const parseYearAndTitle = (title: string) => {
-  const regex = /^(.*?)\s+(\d{4})\s+(.*)$/;
+  const regex = /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/;
   const match = title.match(regex);
 
   if (match) {

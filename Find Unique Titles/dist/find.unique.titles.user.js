@@ -93,7 +93,10 @@
                 (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateTotalCount)(metadata.total);
                 common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("[{0}] Parsing titles to check", sourceTracker.name());
                 for await (const item of requestGenerator) {
-                  if (null == item) continue;
+                  if (null == item) {
+                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateCount)(i++);
+                    continue;
+                  }
                   const request = item;
                   common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("[{0}] Search request: {1}", sourceTracker.name(), request);
                   try {
@@ -104,7 +107,7 @@
                       continue;
                     }
                     const response = await targetTracker.search(request);
-                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateCount)(i++);
+                    common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("Search response: {0}", response);
                     if (response == _trackers_tracker__WEBPACK_IMPORTED_MODULE_5__.SearchResult.EXIST || response == _trackers_tracker__WEBPACK_IMPORTED_MODULE_5__.SearchResult.NOT_ALLOWED) {
                       if (request.imdbId) await (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.addToCache)(targetTracker.name(), request.imdbId);
                       hideTorrents(request);
@@ -139,6 +142,8 @@
                     common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.info("Error occurred when checking {0}, {1]", request, e);
                     request.dom[0].setAttribute("title", "Title was not checked due to an error");
                     request.dom[0].style.border = "2px solid red";
+                  } finally {
+                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateCount)(i++);
                   }
                 }
                 (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.clearMemoryCache)();
@@ -718,26 +723,36 @@
           return url.includes("www.clan-sudamerica.net/invision/") && !url.includes("forums/topic/");
         }
         async* getSearchRequest() {
-          const topics = document.querySelectorAll('div[data-tableid="topics"] table');
+          const topics = Array.from(document.querySelectorAll('div[data-tableid="topics"] table')).filter((topic => {
+            if (null != topic.getAttribute("bgColor") && null != !topic.getAttribute("bgcolor")) return false;
+            if (0 === topic.querySelectorAll("img").length) return false;
+            if (3 != topic.querySelectorAll("img").length) return false;
+            if ("peliscr.jpg" !== topic.querySelectorAll("img")[2].alt) {
+              topic.style.display = "none";
+              return false;
+            }
+            return true;
+          }));
           yield {
             total: topics.length
           };
           for (const topic of topics) {
-            if (null != topic.getAttribute("bgColor") && null != !topic.getAttribute("bgcolor")) continue;
-            if (0 === topic.querySelectorAll("img").length) continue;
-            if (3 != topic.querySelectorAll("img").length) continue;
-            if ("peliscr.jpg" !== topic.querySelectorAll("img")[2].alt) {
-              topic.style.display = "none";
-              continue;
-            }
             const link = topic.querySelector("a").href;
             let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_0__.fetchAndParseHtml)(link);
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
+            const fullTitle = topic.querySelectorAll("tr td")[1]?.textContent?.trim()?.split("\n")[0];
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseYearAndTitle)(fullTitle);
             const request = {
-              torrents: [],
+              torrents: [ {
+                resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(fullTitle),
+                tags: [],
+                dom: topic
+              } ],
               dom: [ topic ],
               imdbId,
-              title: ""
+              title,
+              year,
+              category: _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE
             };
             yield request;
           }
@@ -749,7 +764,8 @@
           return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_CHECKED;
         }
         insertTrackersSelect(select) {
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.insertBefore)(select, document.querySelector('div[data-tableid="topics"]'));
+          const parent = document.querySelector('div[data-tableid="topics"]');
+          if (parent) (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.insertBefore)(select, parent);
         }
       }
     },
@@ -1591,7 +1607,7 @@
                   const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(request.title)}&year=${request.year}`;
                   result = await (0, common_http__WEBPACK_IMPORTED_MODULE_4__.fetchAndParseHtml)(query_url);
                   let searchResultsCount = result.querySelector("span.search-form__footer__results");
-                  if (searchResultsCount) {
+                  if (searchResultsCount && "0" !== searchResultsCount.textContent?.trim()?.split(" ")[0]) {
                     common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[PTP] Multiple results found: {0}", searchResultsCount.textContent);
                     const torrentsData = extractJsonData(result);
                     for (let movie of torrentsData.Movies) {
@@ -1690,7 +1706,7 @@
                 }
               }
             }
-            console.error(`No script element containing '${variableName}' found.`);
+            console.error("No script element containing PageData found.");
             return null;
           }
           __webpack_async_result__();
@@ -2313,15 +2329,15 @@
         return Category;
       }({});
       let SearchResult = function(SearchResult) {
-        SearchResult[SearchResult.EXIST = 0] = "EXIST";
-        SearchResult[SearchResult.EXIST_BUT_MISSING_SLOT = 1] = "EXIST_BUT_MISSING_SLOT";
-        SearchResult[SearchResult.NOT_EXIST = 2] = "NOT_EXIST";
-        SearchResult[SearchResult.MAYBE_NOT_EXIST = 3] = "MAYBE_NOT_EXIST";
-        SearchResult[SearchResult.NOT_EXIST_WITH_REQUEST = 4] = "NOT_EXIST_WITH_REQUEST";
-        SearchResult[SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST = 5] = "MAYBE_NOT_EXIST_WITH_REQUEST";
-        SearchResult[SearchResult.NOT_CHECKED = 6] = "NOT_CHECKED";
-        SearchResult[SearchResult.NOT_LOGGED_IN = 7] = "NOT_LOGGED_IN";
-        SearchResult[SearchResult.NOT_ALLOWED = 8] = "NOT_ALLOWED";
+        SearchResult.EXIST = "EXIST";
+        SearchResult.EXIST_BUT_MISSING_SLOT = "EXIST_BUT_MISSING_SLOT";
+        SearchResult.NOT_EXIST = "NOT_EXIST";
+        SearchResult.MAYBE_NOT_EXIST = "MAYBE_NOT_EXIST";
+        SearchResult.NOT_EXIST_WITH_REQUEST = "NOT_EXIST_WITH_REQUEST";
+        SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST = "MAYBE_NOT_EXIST_WITH_REQUEST";
+        SearchResult.NOT_CHECKED = "NOT_CHECKED";
+        SearchResult.NOT_LOGGED_IN = "NOT_LOGGED_IN";
+        SearchResult.NOT_ALLOWED = "NOT_ALLOWED";
         return SearchResult;
       }({});
       const toGenerator = async function*(requests) {
@@ -2519,7 +2535,7 @@
         return tags;
       };
       const parseYearAndTitle = title => {
-        const regex = /^(.*?)\s+(\d{4})\s+(.*)$/;
+        const regex = /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/;
         const match = title.match(regex);
         if (match) {
           const title = match[1].trim();

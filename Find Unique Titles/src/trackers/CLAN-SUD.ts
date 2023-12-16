@@ -1,5 +1,5 @@
-import { parseImdbIdFromLink } from "../utils/utils";
-import { MetaData, Request, SearchResult, tracker } from "./tracker";
+import { parseImdbIdFromLink, parseResolution, parseYearAndTitle } from "../utils/utils";
+import { MetaData, Request, SearchResult, tracker, Category } from "./tracker";
 import { insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -20,35 +20,53 @@ export default class CLANSUD implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    const topics = document.querySelectorAll(
-      'div[data-tableid="topics"] table'
-    );
-    yield {
-      total: topics.length,
-    };
-    for (const topic of topics) {
+    const topics = (
+      Array.from(
+        document.querySelectorAll('div[data-tableid="topics"] table')
+      ) as Array<HTMLElement>
+    ).filter((topic) => {
       if (
         topic.getAttribute("bgColor") != null &&
         !topic.getAttribute("bgcolor") != null
       ) {
-        continue;
+        return false;
       }
-      if (topic.querySelectorAll("img").length === 0) continue;
+      if (topic.querySelectorAll("img").length === 0) {
+        return false;
+      }
 
-      if (topic.querySelectorAll("img").length != 3) continue;
-      if (topic.querySelectorAll("img")[2].alt !== "peliscr.jpg") {
-        (topic as HTMLElement).style.display = "none";
-        continue;
+      if (topic.querySelectorAll("img").length != 3) {
+        return false;
       }
+      if (topic.querySelectorAll("img")[2].alt !== "peliscr.jpg") {
+        topic.style.display = "none";
+        return false;
+      }
+      return true;
+    });
+    yield {
+      total: topics.length,
+    };
+    for (const topic of topics) {
       const link = (topic.querySelector("a") as HTMLAnchorElement).href;
       let response = await fetchAndParseHtml(link);
       const imdbId = parseImdbIdFromLink(response);
+      const fullTitle = topic
+        .querySelectorAll("tr td")!![1]
+        ?.textContent?.trim()
+        ?.split("\n")[0];
+      const { title, year } = parseYearAndTitle(fullTitle);
       const request: Request = {
-        torrents: [],
-        dom: [topic as HTMLElement],
+        torrents: [{
+          resolution: parseResolution(fullTitle),
+          tags: [],
+          dom: topic
+        }],
+        dom: [topic],
         imdbId,
-        title: "",
+        title,
+        year,
+        category: Category.MOVIE,
       };
       yield request;
     }
@@ -63,9 +81,9 @@ export default class CLANSUD implements tracker {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    insertBefore(
-      select,
-      document.querySelector('div[data-tableid="topics"]') as HTMLElement
-    );
+    const parent = document.querySelector(
+      'div[data-tableid="topics"]'
+    ) as HTMLElement;
+    if (parent) insertBefore(select, parent);
   }
 }
