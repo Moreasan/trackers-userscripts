@@ -1428,9 +1428,22 @@
       __webpack_require__.d(__webpack_exports__, {
         default: () => MTeam
       });
-      var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
-      var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
       var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
+      const isTV = title => {
+        const tvPatterns = [ /S\d{2}E\d{2}/i, /S\d{2}/i, /EP\d{2,3}/i ];
+        return tvPatterns.some((pattern => pattern.test(title)));
+      };
+      const getCategory = element => {
+        let categoryTitle = element.querySelector("img")?.getAttribute("title")?.toLocaleLowerCase();
+        if (categoryTitle?.includes("anime")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.ANIME;
+        if (categoryTitle?.includes("misc")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.OTHER;
+        const title = element.querySelector(".torrentname a")?.getAttribute("title");
+        let category = _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        if (title && isTV(title)) category = _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+        return category;
+      };
       class MTeam {
         canBeUsedAsSource() {
           return true;
@@ -1442,34 +1455,42 @@
           return url.includes("https://kp.m-team.cc") && (url.includes("torrents.php") || url.includes("movie.php"));
         }
         async* getSearchRequest() {
-          const requests = [];
-          for (const element of document.querySelectorAll(".torrents")[0].children[0].children) {
-            if (!element.querySelector(".torrentname")) continue;
-            const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element.querySelector(".torrentname"));
-            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[6]?.textContent);
+          let elements = Array.from(document.querySelectorAll(".torrents")[0].children[0].children).filter((element => element.querySelector(".torrentname")));
+          yield {
+            total: elements.length
+          };
+          for (const element of elements) {
+            let imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element.querySelector(".torrentname"));
+            if (imdbId) imdbId = imdbId.replace("tt0", "tt");
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[6]?.textContent);
+            const fullTitle = element.querySelector(".torrentname a")?.getAttribute("title");
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseYearAndTitle)(fullTitle);
+            let category = getCategory(element);
             const request = {
               torrents: [ {
                 size,
-                tags: [],
+                tags: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseTags)(fullTitle),
+                resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(fullTitle),
                 dom: element
               } ],
               dom: [ element ],
               imdbId,
-              title: ""
+              title,
+              year,
+              category
             };
-            requests.push(request);
+            yield request;
           }
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
         }
         name() {
           return "M-Team";
         }
         async search(request) {
-          return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
+          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
         }
         insertTrackersSelect(select) {
-          const element = document.querySelector(".searchbox").children[2].querySelector("td td.rowfollow tr");
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.addChild)(element, select);
+          const element = document.querySelector(".searchbox")?.children[2].querySelector("td td.rowfollow tr");
+          if (element) (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.addChild)(element, select);
         }
       }
     },
