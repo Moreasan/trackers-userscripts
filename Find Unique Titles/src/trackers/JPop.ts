@@ -1,4 +1,4 @@
-import { parseSize } from "../utils/utils";
+import { parseContainerAndFormat, parseSize } from "../utils/utils";
 import { Category, MetaData, MusicReleaseType, MusicRequest, Request, SearchResult, Torrent, tracker } from "./tracker";
 import { insertBefore } from "common/dom";
 
@@ -15,36 +15,11 @@ const parseType = (element: HTMLElement) => {
 
   return null;
 };
-const parseContainer = (
-  element: HTMLElement
-): { container?: string; format?: string } => {
-  const text = element.textContent!!.trim();
-  const containers = ["FLAC", "MP3"];
-  const formats = ["Lossless", "320", "V0"];
-  let result = {};
-  for (let container of containers) {
-    if (text.includes(container)) {
-      result = {
-        container,
-      };
-    }
-  }
-  for (let format of formats) {
-    if (text.includes(format)) {
-      result = {
-        ...result,
-        format,
-      };
-    }
-  }
-
-  return result;
-};
 const parseTorrents = (element: HTMLElement): Array<Torrent> => {
   if (element.classList.contains("torrent_redline")) {
     const size = parseSize(element.children[6].textContent);
-    const { format, container } = parseContainer(
-      element.children[3]!! as HTMLElement
+    const { format, container } = parseContainerAndFormat(
+      element.children[3]!!.textContent!!.trim()
     );
     return [
       {
@@ -61,8 +36,8 @@ const parseTorrents = (element: HTMLElement): Array<Torrent> => {
     return Array.from(document.querySelectorAll(`tr.groupid_${groupId}`)).map(
       (element) => {
         const size = parseSize(element.children[3].textContent);
-        const { format, container } = parseContainer(
-          element.children[0] as HTMLElement
+        const { format, container } = parseContainerAndFormat(
+          element.children[0].textContent!!.trim()
         );
         return {
           size,

@@ -44,6 +44,9 @@ export default class RED implements tracker {
       return SearchResult.NOT_CHECKED;
     for (let artist of musicRequest.artists) {
       for (let title of musicRequest.titles) {
+        if (artist === "VA") {
+          artist = ""
+        }
         const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(
           artist
         )}&groupname=${encodeURIComponent(title)}&year=${

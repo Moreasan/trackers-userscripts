@@ -118,3 +118,28 @@ export const parseYearAndTitle = (title: string) => {
 
   return { title: undefined, year: undefined };
 };
+
+export const parseContainerAndFormat = (
+  text: string
+): { container?: string; format?: string } => {
+  const containers = ["FLAC", "MP3"];
+  const formats = ["Lossless", "320", "V0"];
+  let result = {};
+  for (let container of containers) {
+    if (text.includes(container)) {
+      result = {
+        container,
+      };
+    }
+  }
+  for (let format of formats) {
+    if (text.includes(format)) {
+      result = {
+        ...result,
+        format,
+      };
+    }
+  }
+
+  return result;
+};

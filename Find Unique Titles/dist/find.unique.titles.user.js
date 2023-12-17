@@ -22,7 +22,7 @@
 // @match https://filelist.io/browse.php*
 // @match https://jptv.club/torrents*
 // @match https://hd-torrents.org/torrents.php*
-// @match https://iptorrents.com/movies*
+// @match https://iptorrents.com/t?*
 // @match https://kp.m-team.cc/*
 // @match https://ncore.pro/torrents.php*
 // @match https://greatposterwall.com/torrents.php*
@@ -1138,9 +1138,23 @@
       __webpack_require__.d(__webpack_exports__, {
         default: () => CG
       });
-      var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
-      var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
+      const parseCategory = element => {
+        let categoryImg = element.children[0].querySelector("img");
+        const categoryLogo = categoryImg.src;
+        const alt = categoryImg.alt;
+        if (categoryLogo.includes("Movies-") || alt.includes("Movie")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        if (categoryLogo.includes("TV-")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+        if (categoryLogo.includes("Music-")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
+      };
+      const parseYear = title => {
+        const regex = /-(\d{4})-/;
+        const match = title.match(regex);
+        if (match) return match[1];
+      };
       class CG {
         canBeUsedAsSource() {
           return true;
@@ -1149,32 +1163,69 @@
           return false;
         }
         canRun(url) {
-          return url.includes("iptorrents.com/movies");
+          return url.includes("ptorrents.com/t?");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll(".mBox table")?.forEach((element => {
-            const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
-            const request = {
-              torrents: [],
-              dom: [ element.parentElement ],
-              imdbId,
-              title: ""
+          const elements = Array.from(document.querySelectorAll("#torrents tbody tr"));
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
+            const category = parseCategory(element);
+            let request = {
+              dom: [ element ],
+              category
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
+            const link = element.children[1].querySelector("a");
+            const torrentTitle = link?.textContent;
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[5].textContent);
+            if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) {
+              let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(link.href);
+              const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
+              const {year, title} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseYearAndTitle)(torrentTitle);
+              request = {
+                ...request,
+                torrents: [ {
+                  dom: element,
+                  size,
+                  resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(torrentTitle),
+                  tags: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseTags)(torrentTitle)
+                } ],
+                year,
+                imdbId,
+                title
+              };
+            } else if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC) {
+              const splittedTitle = torrentTitle.split("-");
+              const artists = [ splittedTitle[0] ];
+              const titles = [ splittedTitle[1] ];
+              const year = parseYear(torrentTitle);
+              const {container, format} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseContainerAndFormat)(torrentTitle);
+              request = {
+                ...request,
+                torrents: [ {
+                  dom: element,
+                  size,
+                  format,
+                  container
+                } ],
+                artists,
+                titles,
+                year,
+                type: _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.ALBUM
+              };
+            }
+            yield request;
+          }
         }
         name() {
           return "IPT";
         }
         async search(request) {
-          return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
+          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
         }
         insertTrackersSelect(select) {
-          const element = document.createElement("p");
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.addChild)(element, select);
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.insertAfter)(element, document.querySelector('.mBox form input[name="q"]').closest("p"));
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.insertAfter)(select, document.querySelector('input[name="q"]'));
         }
       }
     },
@@ -1246,24 +1297,10 @@
         if ("TV-Music" == type) return _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.TV_MUSIC;
         return null;
       };
-      const parseContainer = element => {
-        const text = element.textContent.trim();
-        const containers = [ "FLAC", "MP3" ];
-        const formats = [ "Lossless", "320", "V0" ];
-        let result = {};
-        for (let container of containers) if (text.includes(container)) result = {
-          container
-        };
-        for (let format of formats) if (text.includes(format)) result = {
-          ...result,
-          format
-        };
-        return result;
-      };
       const parseTorrents = element => {
         if (element.classList.contains("torrent_redline")) {
           const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[6].textContent);
-          const {format, container} = parseContainer(element.children[3]);
+          const {format, container} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseContainerAndFormat)(element.children[3].textContent.trim());
           return [ {
             size,
             dom: element,
@@ -1274,7 +1311,7 @@
           const groupId = element.querySelector('a[title*="View Torrent"]').href.split("id=")[1];
           return Array.from(document.querySelectorAll(`tr.groupid_${groupId}`)).map((element => {
             const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[3].textContent);
-            const {format, container} = parseContainer(element.children[0]);
+            const {format, container} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseContainerAndFormat)(element.children[0].textContent.trim());
             return {
               size,
               dom: element,
@@ -2012,6 +2049,7 @@
           if (musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.ALBUM && musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.SINGLE) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
           if (!musicRequest.artists || !musicRequest.titles || !musicRequest.year) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
           for (let artist of musicRequest.artists) for (let title of musicRequest.titles) {
+            if ("VA" === artist) artist = "";
             const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(artist)}&groupname=${encodeURIComponent(title)}&year=${musicRequest.year}&order_by=time&order_way=desc&group_results=1&filter_cat%5B1%5D=1&action=advanced&searchsubmit=1`;
             const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(queryUrl);
             if (!result.textContent?.includes("Your search did not match anything.")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
@@ -2639,6 +2677,7 @@
     "./src/utils/utils.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         parseCodec: () => parseCodec,
+        parseContainerAndFormat: () => parseContainerAndFormat,
         parseImdbId: () => parseImdbId,
         parseImdbIdFromLink: () => parseImdbIdFromLink,
         parseResolution: () => parseResolution,
@@ -2739,6 +2778,19 @@
           title: void 0,
           year: void 0
         };
+      };
+      const parseContainerAndFormat = text => {
+        const containers = [ "FLAC", "MP3" ];
+        const formats = [ "Lossless", "320", "V0" ];
+        let result = {};
+        for (let container of containers) if (text.includes(container)) result = {
+          container
+        };
+        for (let format of formats) if (text.includes(format)) result = {
+          ...result,
+          format
+        };
+        return result;
       };
     },
     "../common/dist/dom/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
