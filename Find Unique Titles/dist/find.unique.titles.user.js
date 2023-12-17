@@ -1597,9 +1597,11 @@
               return url.includes("passthepopcorn.me");
             }
             async* getSearchRequest() {
-              const requests = [];
               const nodes = (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.findFirst)(document, "#torrents-movie-view table.torrent_table > tbody", "table.torrent_table > tbody tr.basic-movie-list__details-row", ".cover-movie-list__movie");
-              nodes?.forEach((element => {
+              yield {
+                total: nodes.length
+              };
+              for (let element of nodes) {
                 let elements = (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.findFirst)(element, ".basic-movie-list__movie__ratings-and-tags", ".cover-movie-list__movie__rating-and-tags");
                 const imdbId = elements ? (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(elements[0]) : null;
                 const request = {
@@ -1609,9 +1611,8 @@
                   title: "",
                   category: parseCategory(element)
                 };
-                requests.push(request);
-              }));
-              yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_0__.toGenerator)(requests);
+                yield request;
+              }
             }
             name() {
               return "PTP";
@@ -1621,11 +1622,12 @@
               if (0 === request.torrents.filter((torrent => isAllowedTorrent(torrent))).length) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
               let torrents = [];
               let result;
-              if (!request.imdbId) {
+              const moviesRequest = request;
+              if (!moviesRequest.imdbId) {
                 common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("NO IMDB ID was provided");
-                if (request.title && request.year) {
-                  common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("Searching by title and year: {0} - {1}", request.title, request.year);
-                  const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(request.title)}&year=${request.year}`;
+                if (moviesRequest.title && moviesRequest.year) {
+                  common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("Searching by title and year: {0} - {1}", moviesRequest.title, moviesRequest.year);
+                  const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(moviesRequest.title)}&year=${moviesRequest.year}`;
                   result = await (0, common_http__WEBPACK_IMPORTED_MODULE_4__.fetchAndParseHtml)(query_url);
                   let searchResultsCount = result.querySelector("span.search-form__footer__results");
                   if (searchResultsCount && "0" !== searchResultsCount.textContent?.trim()?.split(" ")[0]) {
@@ -1633,7 +1635,7 @@
                     const torrentsData = extractJsonData(result);
                     for (let movie of torrentsData.Movies) {
                       common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[PTP] Found search result: {0}", movie);
-                      if (movie.Title.trim() === request.title && parseInt(movie.Year.trim()) === request.year) {
+                      if (movie.Title.trim() === moviesRequest.title && parseInt(movie.Year.trim()) === moviesRequest.year) {
                         common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[PTP] Found a title with 100% match");
                         for (let group of movie.GroupingQualities) for (let torrent of group.Torrents) torrents.push({
                           size: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(torrent.Size),
@@ -1648,21 +1650,21 @@
                   } else torrents = parseAvailableTorrents(result);
                 } else return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
               } else {
-                torrents = (0, _utils_cache__WEBPACK_IMPORTED_MODULE_5__.getFromMemoryCache)(request.imdbId);
+                torrents = (0, _utils_cache__WEBPACK_IMPORTED_MODULE_5__.getFromMemoryCache)(moviesRequest.imdbId);
                 if (!torrents) {
-                  const query_url = "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
+                  const query_url = "https://passthepopcorn.me/torrents.php?imdb=" + moviesRequest.imdbId;
                   result = await (0, common_http__WEBPACK_IMPORTED_MODULE_4__.fetchAndParseHtml)(query_url);
                   torrents = parseAvailableTorrents(result);
-                  (0, _utils_cache__WEBPACK_IMPORTED_MODULE_5__.addToMemoryCache)(request.imdbId, torrents);
+                  (0, _utils_cache__WEBPACK_IMPORTED_MODULE_5__.addToMemoryCache)(moviesRequest.imdbId, torrents);
                 }
               }
               let notFound = !torrents.length;
               if (notFound) {
-                if (result && hasRequests(result)) if (request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST_WITH_REQUEST; else return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST;
-                if (request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST; else return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.MAYBE_NOT_EXIST;
+                if (result && hasRequests(result)) if (moviesRequest.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST_WITH_REQUEST; else return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST;
+                if (moviesRequest.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST; else return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.MAYBE_NOT_EXIST;
               }
               let searchResult = _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
-              for (let torrent of request.torrents) if (searchTorrent(torrent, torrents)) searchResult = _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST_BUT_MISSING_SLOT; else torrent.dom.style.display = "none";
+              for (let torrent of moviesRequest.torrents) if (searchTorrent(torrent, torrents)) searchResult = _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST_BUT_MISSING_SLOT; else torrent.dom.style.display = "none";
               return searchResult;
             }
             isAllowed(request) {
@@ -2612,9 +2614,9 @@
       const findFirst = (element, ...selectors) => {
         for (let selector of selectors) {
           let elements = element.querySelectorAll(selector);
-          if (elements.length > 0) return elements;
+          if (elements.length > 0) return Array.from(elements);
         }
-        return null;
+        return [];
       };
     },
     "../common/dist/http/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {

@@ -40,12 +40,12 @@ export const showError = (message: string) => {
   element.parentElement!.style.display = "block";
 };
 
-export const findFirst = (element: Element, ...selectors: string[]) => {
+export const findFirst = (element: Element, ...selectors: string[]) : Array<HTMLElement> => {
   for (let selector of selectors) {
     let elements = element.querySelectorAll(selector);
     if (elements.length > 0) {
-      return elements;
+      return Array.from(elements) as Array<HTMLElement>;
     }
   }
-  return null;
+  return [];
 };
