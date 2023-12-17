@@ -40,17 +40,23 @@ export default class RED implements tracker {
       musicRequest.type != MusicReleaseType.SINGLE
     )
       return SearchResult.NOT_ALLOWED;
-    if (!musicRequest.artist || !musicRequest.title || !musicRequest.year)
+    if (!musicRequest.artists || !musicRequest.titles || !musicRequest.year)
       return SearchResult.NOT_CHECKED;
-    const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(
-      musicRequest.artist
-    )}&groupname=${encodeURIComponent(musicRequest.title)}&year=${
-      musicRequest.year
-    }&order_by=time&order_way=desc&group_results=1&filter_cat%5B1%5D=1&action=advanced&searchsubmit=1`;
-
-    const result = await fetchAndParseHtml(queryUrl);
-    if (result.textContent?.includes("Your search did not match anything."))
-      return SearchResult.NOT_EXIST;
+    for (let artist of musicRequest.artists) {
+      for (let title of musicRequest.titles) {
+        const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(
+          artist
+        )}&groupname=${encodeURIComponent(title)}&year=${
+          musicRequest.year
+        }&order_by=time&order_way=desc&group_results=1&filter_cat%5B1%5D=1&action=advanced&searchsubmit=1`;
+        const result = await fetchAndParseHtml(queryUrl);
+        if (
+          !result.textContent?.includes("Your search did not match anything.")
+        )
+          return SearchResult.EXIST;
+      }
+    }
+    return SearchResult.NOT_EXIST;
 
     return SearchResult.EXIST;
   }

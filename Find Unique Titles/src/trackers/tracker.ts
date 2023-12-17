@@ -51,8 +51,8 @@ export interface TVRequest extends Request<Category.TV> {
 }
 
 export interface MusicRequest extends Request<Category.MUSIC> {
-  title?: string;
-  artist?: string;
+  titles?: string[];
+  artists?: string[];
   type?: MusicReleaseType;
 }
 

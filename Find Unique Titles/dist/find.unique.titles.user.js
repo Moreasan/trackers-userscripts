@@ -1237,7 +1237,7 @@
       var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
       const parseYear = element => {
         const text = element.children[3].textContent.trim();
-        const match = text.match(/(\d{4})\.\d{2}\.\d{2}/);
+        const match = text.match(/\[(\d{4})(\.\d{2}\.\d{2})?]/);
         return match ? parseInt(match[1]) : null;
       };
       const parseType = element => {
@@ -1284,6 +1284,20 @@
           }));
         }
       };
+      const parseArtist = element => {
+        const artists = new Set;
+        artists.add(element.textContent?.trim());
+        const title = element.getAttribute("title").split(" (View Artist)");
+        if (2 == title.length) artists.add(title[0].trim());
+        return Array.from(artists);
+      };
+      const parseAlbum = element => {
+        const titles = new Set;
+        titles.add(element.textContent?.trim());
+        const title = element.getAttribute("title").split(" (View Torrent)");
+        if (2 == title.length) titles.add(title[0].trim());
+        return Array.from(titles);
+      };
       class JPop {
         canBeUsedAsSource() {
           return true;
@@ -1300,16 +1314,16 @@
             total: elements.length
           };
           for (const element of elements) {
-            const artist = element.querySelector('a[title*="View Artist"]')?.textContent?.trim();
-            const title = element.querySelector('a[title*="View Torrent"]')?.textContent?.trim();
+            const artists = parseArtist(element.querySelector('a[title*="View Artist"]'));
+            const titles = parseAlbum(element.querySelector('a[title*="View Torrent"]'));
             const year = parseYear(element);
             const type = parseType(element);
             const torrents = parseTorrents(element);
             const request = {
               torrents,
               dom: [ element ],
-              title,
-              artist,
+              titles,
+              artists,
               type,
               year,
               category: _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC
@@ -1996,11 +2010,13 @@
           if (request.category != _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
           const musicRequest = request;
           if (musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.ALBUM && musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.SINGLE) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
-          if (!musicRequest.artist || !musicRequest.title || !musicRequest.year) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
-          const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(musicRequest.artist)}&groupname=${encodeURIComponent(musicRequest.title)}&year=${musicRequest.year}&order_by=time&order_way=desc&group_results=1&filter_cat%5B1%5D=1&action=advanced&searchsubmit=1`;
-          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(queryUrl);
-          if (result.textContent?.includes("Your search did not match anything.")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST;
-          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
+          if (!musicRequest.artists || !musicRequest.titles || !musicRequest.year) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+          for (let artist of musicRequest.artists) for (let title of musicRequest.titles) {
+            const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(artist)}&groupname=${encodeURIComponent(title)}&year=${musicRequest.year}&order_by=time&order_way=desc&group_results=1&filter_cat%5B1%5D=1&action=advanced&searchsubmit=1`;
+            const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(queryUrl);
+            if (!result.textContent?.includes("Your search did not match anything.")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
+          }
+          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST;
         }
         insertTrackersSelect(select) {}
       }

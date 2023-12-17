@@ -1,19 +1,11 @@
 import { parseSize } from "../utils/utils";
-import {
-  Category,
-  MetaData,
-  MusicReleaseType,
-  MusicRequest,
-  Request,
-  SearchResult,
-  Torrent,
-  tracker,
-} from "./tracker";
+import { Category, MetaData, MusicReleaseType, MusicRequest, Request, SearchResult, Torrent, tracker } from "./tracker";
 import { insertBefore } from "common/dom";
+
 
 const parseYear = (element: HTMLElement) => {
   const text = element.children[3]!!.textContent!!.trim();
-  const match = text.match(/(\d{4})\.\d{2}\.\d{2}/);
+  const match = text.match(/\[(\d{4})(\.\d{2}\.\d{2})?]/);
   return match ? parseInt(match[1]) : null;
 };
 const parseType = (element: HTMLElement) => {
@@ -82,6 +74,27 @@ const parseTorrents = (element: HTMLElement): Array<Torrent> => {
     );
   }
 };
+const parseArtist = (element: Element): string[] => {
+  const artists = new Set<string>();
+  artists.add(element.textContent?.trim()!!);
+  const title = element.getAttribute("title")!!.split(" (View Artist)");
+  if (title.length == 2) {
+    artists.add(title[0].trim());
+  }
+
+  return Array.from(artists);
+};
+
+const parseAlbum = (element: Element): string[] => {
+  const titles = new Set<string>();
+  titles.add(element.textContent?.trim()!!);
+  const title = element.getAttribute("title")!!.split(" (View Torrent)");
+  if (title.length == 2) {
+    titles.add(title[0].trim());
+  }
+
+  return Array.from(titles);
+};
 export default class JPop implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
@@ -103,12 +116,12 @@ export default class JPop implements tracker {
       total: elements.length,
     };
     for (const element of elements) {
-      const artist = element
-        .querySelector('a[title*="View Artist"]')
-        ?.textContent?.trim();
-      const title = element
-        .querySelector('a[title*="View Torrent"]')
-        ?.textContent?.trim();
+      const artists = parseArtist(
+        element.querySelector('a[title*="View Artist"]')!!
+      );
+      const titles = parseAlbum(
+        element.querySelector('a[title*="View Torrent"]')!!
+      );
       const year = parseYear(element);
       const type = parseType(element);
       const torrents = parseTorrents(element);
@@ -116,8 +129,8 @@ export default class JPop implements tracker {
       const request: MusicRequest = {
         torrents,
         dom: [element],
-        title,
-        artist,
+        titles,
+        artists,
         type,
         year,
         category: Category.MUSIC,
