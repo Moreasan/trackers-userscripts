@@ -31,13 +31,35 @@ export enum Category {
   OTHER = "OTHER",
 }
 
-export interface Request {
-  imdbId: string | null;
-  title?: string;
+export interface Request<Category> {
   year?: number;
   torrents: Array<Torrent>;
   dom: Array<HTMLElement>;
   category?: Category;
+}
+
+export interface MovieRequest extends Request<Category.MOVIE> {
+  imdbId: string | null;
+  title?: string;
+}
+
+export interface TVRequest extends Request<Category.TV> {
+  imdbId: string | null;
+  title?: string;
+  season?: string;
+  episode?: string;
+}
+
+export interface MusicRequest extends Request<Category.MUSIC> {
+  title?: string;
+  artist?: string;
+  type?: MusicReleaseType;
+}
+
+export enum MusicReleaseType {
+  ALBUM = "ALBUM",
+  SINGLE = "SINGLE",
+  TV_MUSIC = "TV_MUSIC",
 }
 
 export interface MetaData {

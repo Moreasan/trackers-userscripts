@@ -34,6 +34,7 @@
 // @match https://torrentseeds.org/torrents*
 // @match https://torrentseeds.org/categories/*
 // @match https://www.morethantv.me/torrents/browse*
+// @match https://jpopsuki.eu/torrents.php*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -293,6 +294,7 @@
           return "Aither";
         }
         async search(request) {
+          if (request.category !== _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE && request.category !== _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
           if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
           const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.Aither, {
             movie_title: "",
@@ -1226,6 +1228,107 @@
         }
       }
     },
+    "./src/trackers/JPop.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        default: () => JPop
+      });
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
+      const parseYear = element => {
+        const text = element.children[3].textContent.trim();
+        const match = text.match(/(\d{4})\.\d{2}\.\d{2}/);
+        return match ? parseInt(match[1]) : null;
+      };
+      const parseType = element => {
+        const type = element.children[1].textContent.trim();
+        if ("Album" == type) return _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.ALBUM;
+        if ("TV-Music" == type) return _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.TV_MUSIC;
+        return null;
+      };
+      const parseContainer = element => {
+        const text = element.textContent.trim();
+        const containers = [ "FLAC", "MP3" ];
+        const formats = [ "Lossless", "320", "V0" ];
+        let result = {};
+        for (let container of containers) if (text.includes(container)) result = {
+          container
+        };
+        for (let format of formats) if (text.includes(format)) result = {
+          ...result,
+          format
+        };
+        return result;
+      };
+      const parseTorrents = element => {
+        if (element.classList.contains("torrent_redline")) {
+          const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[6].textContent);
+          const {format, container} = parseContainer(element.children[3]);
+          return [ {
+            size,
+            dom: element,
+            format,
+            container
+          } ];
+        } else {
+          const groupId = element.querySelector('a[title*="View Torrent"]').href.split("id=")[1];
+          return Array.from(document.querySelectorAll(`tr.groupid_${groupId}`)).map((element => {
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.children[3].textContent);
+            const {format, container} = parseContainer(element.children[0]);
+            return {
+              size,
+              dom: element,
+              format,
+              container
+            };
+          }));
+        }
+      };
+      class JPop {
+        canBeUsedAsSource() {
+          return true;
+        }
+        canBeUsedAsTarget() {
+          return false;
+        }
+        canRun(url) {
+          return url.includes("jpopsuki.eu");
+        }
+        async* getSearchRequest() {
+          const elements = Array.from(document.querySelectorAll(".group_redline, .torrent_redline"));
+          yield {
+            total: elements.length
+          };
+          for (const element of elements) {
+            const artist = element.querySelector('a[title*="View Artist"]')?.textContent?.trim();
+            const title = element.querySelector('a[title*="View Torrent"]')?.textContent?.trim();
+            const year = parseYear(element);
+            const type = parseType(element);
+            const torrents = parseTorrents(element);
+            const request = {
+              torrents,
+              dom: [ element ],
+              title,
+              artist,
+              type,
+              year,
+              category: _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC
+            };
+            yield request;
+          }
+        }
+        name() {
+          return "JPop";
+        }
+        async search(request) {
+          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+        }
+        insertTrackersSelect(select) {
+          const element = document.querySelector('div.submit input[type="submit"]');
+          if (element) (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.insertBefore)(select, element);
+        }
+      }
+    },
     "./src/trackers/KG.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         default: () => KG
@@ -1865,6 +1968,43 @@
         }
       }
     },
+    "./src/trackers/RED.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        default: () => RED
+      });
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      class RED {
+        canBeUsedAsSource() {
+          return false;
+        }
+        canBeUsedAsTarget() {
+          return true;
+        }
+        canRun(url) {
+          return url.includes("redacted.ch");
+        }
+        async* getSearchRequest() {
+          yield {
+            total: 0
+          };
+        }
+        name() {
+          return "RED";
+        }
+        async search(request) {
+          if (request.category != _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
+          const musicRequest = request;
+          if (musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.ALBUM && musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.SINGLE) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
+          if (!musicRequest.artist || !musicRequest.title || !musicRequest.year) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+          const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(musicRequest.artist)}&groupname=${encodeURIComponent(musicRequest.title)}&year=${musicRequest.year}&order_by=time&order_way=desc&group_results=1&filter_cat%5B1%5D=1&action=advanced&searchsubmit=1`;
+          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(queryUrl);
+          if (result.textContent?.includes("Your search did not match anything.")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST;
+          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
+        }
+        insertTrackersSelect(select) {}
+      }
+    },
     "./src/trackers/SC.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         default: () => SC
@@ -2225,12 +2365,14 @@
             HDT: () => _HDT__WEBPACK_IMPORTED_MODULE_5__.default,
             IPT: () => _IPT__WEBPACK_IMPORTED_MODULE_6__.default,
             JPTV: () => _JPTV__WEBPACK_IMPORTED_MODULE_13__.default,
+            JPop: () => _JPop__WEBPACK_IMPORTED_MODULE_27__.default,
             KG: () => _KG__WEBPACK_IMPORTED_MODULE_3__.default,
             MTV: () => _MTV__WEBPACK_IMPORTED_MODULE_26__.default,
             MTeam: () => _MTeam__WEBPACK_IMPORTED_MODULE_19__.default,
             NewInsane: () => _NewInsane__WEBPACK_IMPORTED_MODULE_9__.default,
             PTP: () => _PTP__WEBPACK_IMPORTED_MODULE_0__.default,
             Pter: () => _Pter__WEBPACK_IMPORTED_MODULE_24__.default,
+            RED: () => _RED__WEBPACK_IMPORTED_MODULE_28__.default,
             SC: () => _SC__WEBPACK_IMPORTED_MODULE_1__.default,
             TL: () => _TL__WEBPACK_IMPORTED_MODULE_17__.default,
             TSeeds: () => _TSeeds__WEBPACK_IMPORTED_MODULE_25__.default,
@@ -2264,6 +2406,8 @@
           var _Pter__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("./src/trackers/Pter.ts");
           var _TSeeds__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("./src/trackers/TSeeds.ts");
           var _MTV__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("./src/trackers/MTV.ts");
+          var _JPop__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__("./src/trackers/JPop.ts");
+          var _RED__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__("./src/trackers/RED.ts");
           var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_0__ ]);
           _PTP__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           __webpack_async_result__();
@@ -2323,6 +2467,7 @@
     "./src/trackers/tracker.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         Category: () => Category,
+        MusicReleaseType: () => MusicReleaseType,
         Resolution: () => Resolution,
         SearchResult: () => SearchResult,
         toGenerator: () => toGenerator
@@ -2350,6 +2495,12 @@
         Category.XXX = "XXX";
         Category.OTHER = "OTHER";
         return Category;
+      }({});
+      let MusicReleaseType = function(MusicReleaseType) {
+        MusicReleaseType.ALBUM = "ALBUM";
+        MusicReleaseType.SINGLE = "SINGLE";
+        MusicReleaseType.TV_MUSIC = "TV_MUSIC";
+        return MusicReleaseType;
       }({});
       let SearchResult = function(SearchResult) {
         SearchResult.EXIST = "EXIST";

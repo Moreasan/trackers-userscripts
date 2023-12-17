@@ -87,6 +87,8 @@ export default class Aither implements tracker {
   }
 
   async search(request: Request): Promise<SearchResult> {
+    if (request.category !== Category.MOVIE && request.category !== Category.TV)
+      return SearchResult.NOT_CHECKED;
     if (!request.imdbId) return SearchResult.NOT_CHECKED;
 
     const result = await search(AitherTracker, {

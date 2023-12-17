@@ -25,6 +25,8 @@ import HDSky from "./HDSky";
 import Pter from "./Pter";
 import TSeeds from "./TSeeds";
 import MTV from "./MTV";
+import JPop from "./JPop";
+import RED from "./RED";
 
 export {
   PTP,
@@ -54,4 +56,6 @@ export {
   Pter,
   TSeeds,
   MTV,
+  JPop,
+  RED,
 };

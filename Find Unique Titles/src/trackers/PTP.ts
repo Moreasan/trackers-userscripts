@@ -9,6 +9,7 @@ import {
 import {
   Category,
   MetaData,
+  MovieRequest,
   Request,
   Resolution,
   SearchResult,
@@ -156,22 +157,26 @@ export default class PTP implements tracker {
     }
     let torrents: Array<Torrent> = [];
     let result;
-    if (!request.imdbId) {
+    const moviesRequest = request as MovieRequest;
+    if (!moviesRequest.imdbId) {
       logger.debug("NO IMDB ID was provided");
-      if (request.title && request.year) {
+      if (moviesRequest.title && moviesRequest.year) {
         logger.debug(
           "Searching by title and year: {0} - {1}",
-          request.title,
-          request.year
+          moviesRequest.title,
+          moviesRequest.year
         );
         const query_url = `https://passthepopcorn.me/torrents.php?action=advanced&searchstr=${encodeURIComponent(
-          request.title
-        )}&year=${request.year}`;
+          moviesRequest.title
+        )}&year=${moviesRequest.year}`;
         result = await fetchAndParseHtml(query_url);
         let searchResultsCount = result.querySelector(
           "span.search-form__footer__results"
         );
-        if (searchResultsCount && searchResultsCount.textContent?.trim()?.split(" ")[0] !== "0") {
+        if (
+          searchResultsCount &&
+          searchResultsCount.textContent?.trim()?.split(" ")[0] !== "0"
+        ) {
           logger.debug(
             "[PTP] Multiple results found: {0}",
             searchResultsCount.textContent
@@ -180,8 +185,8 @@ export default class PTP implements tracker {
           for (let movie of torrentsData["Movies"]) {
             logger.debug("[PTP] Found search result: {0}", movie);
             if (
-              movie["Title"].trim() === request.title &&
-              parseInt(movie["Year"].trim()) === request.year
+              movie["Title"].trim() === moviesRequest.title &&
+              parseInt(movie["Year"].trim()) === moviesRequest.year
             ) {
               logger.debug("[PTP] Found a title with 100% match");
               for (let group of movie["GroupingQualities"]) {
@@ -190,7 +195,7 @@ export default class PTP implements tracker {
                     size: parseSize(torrent["Size"]),
                     tags: parseTags(torrent["Title"]),
                     resolution: parseResolution(torrent["Title"]),
-                    container: parseCodec(torrent["Title"])
+                    container: parseCodec(torrent["Title"]),
                   });
                 }
               }
@@ -205,32 +210,32 @@ export default class PTP implements tracker {
         return SearchResult.NOT_CHECKED;
       }
     } else {
-      torrents = getFromMemoryCache(request.imdbId);
+      torrents = getFromMemoryCache(moviesRequest.imdbId);
       if (!torrents) {
         const query_url =
-          "https://passthepopcorn.me/torrents.php?imdb=" + request.imdbId;
+          "https://passthepopcorn.me/torrents.php?imdb=" + moviesRequest.imdbId;
         result = await fetchAndParseHtml(query_url);
         torrents = parseAvailableTorrents(result);
-        addToMemoryCache(request.imdbId, torrents);
+        addToMemoryCache(moviesRequest.imdbId, torrents);
       }
     }
     let notFound = !torrents.length;
     if (notFound) {
       if (result && hasRequests(result)) {
-        if (request.imdbId) {
+        if (moviesRequest.imdbId) {
           return SearchResult.NOT_EXIST_WITH_REQUEST;
         } else {
           return SearchResult.MAYBE_NOT_EXIST_WITH_REQUEST;
         }
       }
-      if (request.imdbId) {
+      if (moviesRequest.imdbId) {
         return SearchResult.NOT_EXIST;
       } else {
         return SearchResult.MAYBE_NOT_EXIST;
       }
     }
     let searchResult: SearchResult = SearchResult.EXIST;
-    for (let torrent of request.torrents) {
+    for (let torrent of moviesRequest.torrents) {
       if (searchTorrent(torrent, torrents)) {
         searchResult = SearchResult.EXIST_BUT_MISSING_SLOT;
       } else {
