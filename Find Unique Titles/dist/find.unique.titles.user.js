@@ -94,17 +94,13 @@
                 (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateTotalCount)(metadata.total);
                 common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("[{0}] Parsing titles to check", sourceTracker.name());
                 for await (const item of requestGenerator) {
-                  if (null == item) {
-                    (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateCount)(i++);
-                    continue;
-                  }
+                  if (null == item) continue;
                   const request = item;
                   common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("[{0}] Search request: {1}", sourceTracker.name(), request);
                   try {
                     if (settings.useCache && request.imdbId && (0, _utils_cache__WEBPACK_IMPORTED_MODULE_4__.existsInCache)(targetTracker.name(), request.imdbId)) {
                       common_logger__WEBPACK_IMPORTED_MODULE_0__.logger.debug("Title exists in target tracker, found using cache");
                       hideTorrents(request);
-                      (0, _utils_dom__WEBPACK_IMPORTED_MODULE_3__.updateCount)(i++);
                       continue;
                     }
                     const response = await targetTracker.search(request);
@@ -948,8 +944,9 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
-      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_logger__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/logger/index.mjs");
       const isExclusive = element => {
         const exclusiveLink = element.querySelector('a[href="/browse.php?exclusive=1"]');
         return null != exclusiveLink;
@@ -1004,7 +1001,7 @@
           yield {
             total: elements.length
           };
-          for (let element of elements) {
+          for (let element of elements) try {
             if (isExclusive(element)) {
               element.style.display = "none";
               yield null;
@@ -1019,6 +1016,10 @@
               year,
               category: parseCategory(element)
             };
+          } catch (e) {
+            console.trace(e);
+            common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.info("{0} Error occurred while parsing torrent: " + e, this.name());
+            yield null;
           }
         }
         name() {
@@ -1027,12 +1028,12 @@
         async search(request) {
           if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
           const queryUrl = "https://hdbits.org/browse.php?c3=1&c1=1&c2=1&tagsearchtype=or&imdb=" + request.imdbId + "&sort=size&h=8&d=DESC";
-          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
+          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_3__.fetchAndParseHtml)(queryUrl);
           return result.querySelector("#resultsarea").textContent.includes("Nothing here!") ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
         }
         insertTrackersSelect(select) {
           document.querySelector("#moresearch3 > td:nth-child(2)").innerHTML += "<br><br>Find unique for:<br>";
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelector("#moresearch3 > td:nth-child(2)"), select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(document.querySelector("#moresearch3 > td:nth-child(2)"), select);
         }
       }
     },

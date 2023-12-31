@@ -70,7 +70,6 @@ const main = async function () {
       logger.debug(`[{0}] Parsing titles to check`, sourceTracker!!.name());
       for await (const item of requestGenerator) {
         if (item == null) {
-          updateCount(i++);
           continue;
         }
         const request = item as Request;
@@ -87,7 +86,6 @@ const main = async function () {
           ) {
             logger.debug("Title exists in target tracker, found using cache");
             hideTorrents(request);
-            updateCount(i++);
             continue;
           }
           const response = await targetTracker.search(request);

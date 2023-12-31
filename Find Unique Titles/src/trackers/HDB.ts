@@ -6,16 +6,16 @@ import {
   parseYearAndTitle,
 } from "../utils/utils";
 import {
-  tracker,
-  Request,
-  toGenerator,
-  MetaData,
-  Torrent,
   Category,
+  MetaData,
+  Request,
   SearchResult,
+  Torrent,
+  tracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
+import { logger } from "common/logger";
 
 const isExclusive = (element: HTMLElement) => {
   const exclusiveLink = element.querySelector(
@@ -86,28 +86,37 @@ export default class HDB implements tracker {
       total: elements.length,
     };
     for (let element of elements) {
-      if (isExclusive(element)) {
-        element.style.display = "none";
+      try {
+        if (isExclusive(element)) {
+          element.style.display = "none";
+          yield null;
+        }
+        const imdbId = parseImdbId(
+          element
+            .querySelector("a[data-imdb-link]")
+            ?.getAttribute("data-imdb-link")
+        );
+
+        const { title, year } = parseYearAndTitle(
+          element.children[2].querySelector("a")!!.textContent
+        );
+
+        yield {
+          torrents: [parseTorrent(element)],
+          dom: [element as HTMLElement],
+          imdbId,
+          title,
+          year,
+          category: parseCategory(element),
+        };
+      } catch (e) {
+        console.trace(e);
+        logger.info(
+          "{0} Error occurred while parsing torrent: " + e,
+          this.name()
+        );
         yield null;
       }
-      const imdbId = parseImdbId(
-        element
-          .querySelector("a[data-imdb-link]")
-          ?.getAttribute("data-imdb-link")
-      );
-
-      const { title, year } = parseYearAndTitle(
-        element.children[2].querySelector("a")!!.textContent
-      );
-
-      yield {
-        torrents: [parseTorrent(element)],
-        dom: [element as HTMLElement],
-        imdbId,
-        title,
-        year,
-        category: parseCategory(element),
-      };
     }
   }
 
