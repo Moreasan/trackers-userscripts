@@ -1006,6 +1006,7 @@
             if (isExclusive(element)) {
               element.style.display = "none";
               yield null;
+              continue;
             }
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbId)(element.querySelector("a[data-imdb-link]")?.getAttribute("data-imdb-link"));
             const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseYearAndTitle)(element.children[2].querySelector("a")?.textContent);
@@ -1020,7 +1021,10 @@
           } catch (e) {
             console.trace(e);
             common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.info("[{0}] Error occurred while parsing torrent: " + e, this.name());
-            yield null;
+            yield {
+              torrents: [],
+              dom: [ element ]
+            };
           }
         }
         name() {

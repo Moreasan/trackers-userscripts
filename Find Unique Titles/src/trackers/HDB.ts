@@ -91,6 +91,7 @@ export default class HDB implements tracker {
         if (isExclusive(element)) {
           element.style.display = "none";
           yield null;
+          continue;
         }
         const imdbId = parseImdbId(
           element
@@ -116,7 +117,10 @@ export default class HDB implements tracker {
           "[{0}] Error occurred while parsing torrent: " + e,
           this.name()
         );
-        yield null;
+        yield {
+          torrents: [],
+          dom: [element as HTMLElement],
+        };
       }
     }
   }
