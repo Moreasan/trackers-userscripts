@@ -944,16 +944,17 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
-      var common_http__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
       var common_logger__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/logger/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/trackers/index.mjs");
       const isExclusive = element => {
         const exclusiveLink = element.querySelector('a[href="/browse.php?exclusive=1"]');
         return null != exclusiveLink;
       };
       function parseTorrent(element) {
         const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector("td:nth-child(6)")?.textContent);
-        const title = element.querySelector(".browse_td_name_cell a")?.textContent.trim();
+        const title = element.querySelector(".browse_td_name_cell a")?.textContent?.trim();
         const resolution = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseResolution)(title);
         const tags = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseTags)(title);
         return {
@@ -964,7 +965,7 @@
         };
       }
       function parseCategory(element) {
-        const category = element.querySelector(".catcell a").getAttribute("href").replace("?cat=", "");
+        const category = element.querySelector(".catcell a")?.getAttribute("href")?.replace("?cat=", "");
         switch (category) {
          case "1":
           return _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE;
@@ -1007,7 +1008,7 @@
               yield null;
             }
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbId)(element.querySelector("a[data-imdb-link]")?.getAttribute("data-imdb-link"));
-            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseYearAndTitle)(element.children[2].querySelector("a").textContent);
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseYearAndTitle)(element.children[2].querySelector("a")?.textContent);
             yield {
               torrents: [ parseTorrent(element) ],
               dom: [ element ],
@@ -1018,7 +1019,7 @@
             };
           } catch (e) {
             console.trace(e);
-            common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.info("{0} Error occurred while parsing torrent: " + e, this.name());
+            common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.info("[{0}] Error occurred while parsing torrent: " + e, this.name());
             yield null;
           }
         }
@@ -1027,13 +1028,19 @@
         }
         async search(request) {
           if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
-          const queryUrl = "https://hdbits.org/browse.php?c3=1&c1=1&c2=1&tagsearchtype=or&imdb=" + request.imdbId + "&sort=size&h=8&d=DESC";
-          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_3__.fetchAndParseHtml)(queryUrl);
-          return result.querySelector("#resultsarea").textContent.includes("Nothing here!") ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.HDb, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          if (result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.LOGGED_OUT) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_LOGGED_IN;
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
         }
         insertTrackersSelect(select) {
-          document.querySelector("#moresearch3 > td:nth-child(2)").innerHTML += "<br><br>Find unique for:<br>";
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(document.querySelector("#moresearch3 > td:nth-child(2)"), select);
+          const targetElement = document.querySelector("#moresearch3 > td:nth-child(2)");
+          if (targetElement) {
+            targetElement.innerHTML += "<br><br>Find unique for:<br>";
+            (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.addChild)(targetElement, select);
+          } else common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.info("[{0}] Can add search select", this.name());
         }
       }
     },
@@ -2706,13 +2713,13 @@
         return results[0];
       };
       const parseResolution = text => {
+        if (!text) return;
         const resolutionsAndAliases = {
           SD: [ "sd", "pal", "ntsc" ],
           HD: [ "720p", "hd" ],
           FHD: [ "1080p", "fhd", "full_hd" ],
           UHD: [ "2160p", "uhd", "4k" ]
         };
-        if (!text) return;
         for (let resolution in resolutionsAndAliases) {
           let aliases = resolutionsAndAliases[resolution];
           for (let alias of aliases) if (text.includes(alias)) return resolution;
@@ -2765,6 +2772,10 @@
         return tags;
       };
       const parseYearAndTitle = title => {
+        if (!title) return {
+          title: void 0,
+          year: void 0
+        };
         const regex = /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/;
         const match = title.match(regex);
         if (match) {
@@ -3013,6 +3024,7 @@
     "../common/dist/trackers/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         Aither: () => Aither,
+        HDb: () => HDb,
         KG: () => KG,
         MTV: () => MTV,
         MTV_TV: () => MTV_TV,
@@ -3024,6 +3036,13 @@
         loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
         matchRegex: /torrent-search--list__overview/,
         positiveMatch: true,
+        both: true
+      };
+      const HDb = {
+        name: "HDb",
+        searchUrl: "https://hdbits.org/browse.php?c1=1&c2=1&c3=1&c4=1&c5=1&c7=1&c8=1&imdb=%tt%",
+        loggedOutRegex: /Make sure your passcode generating|nginx/,
+        matchRegex: /Nothing here!/,
         both: true
       };
       const KG = {

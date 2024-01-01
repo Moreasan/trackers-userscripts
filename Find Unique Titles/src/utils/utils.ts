@@ -36,13 +36,13 @@ export const parseImdbId = (text: string) => {
 };
 
 export const parseResolution = (text: string): Resolution | undefined => {
+  if (!text) return undefined;
   const resolutionsAndAliases: Record<Resolution, string[]> = {
     SD: ["sd", "pal", "ntsc"],
     HD: ["720p", "hd"],
     FHD: ["1080p", "fhd", "full_hd"],
     UHD: ["2160p", "uhd", "4k"],
   };
-  if (!text) return undefined;
   for (let resolution in resolutionsAndAliases) {
     let aliases = resolutionsAndAliases[resolution as keyof typeof Resolution];
     for (let alias of aliases) {
@@ -96,7 +96,7 @@ export const parseCodec = (title: string) => {
 
 export const parseTags = (title: string) => {
   const tags: string[] = [];
-  if (!title) return tags
+  if (!title) return tags;
   if (title.toLowerCase().includes("remux")) tags.push("Remux");
   if (title.replaceAll(new RegExp("HDRip", "gi"), "").includes("HDR"))
     tags.push("HDR");
@@ -105,7 +105,8 @@ export const parseTags = (title: string) => {
   return tags;
 };
 
-export const parseYearAndTitle = (title: string) => {
+export const parseYearAndTitle = (title: string | undefined) => {
+  if (!title) return { title: undefined, year: undefined };
   const regex = /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/;
   const match = title.match(regex);
 

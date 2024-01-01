@@ -14,8 +14,9 @@ import {
   tracker,
 } from "./tracker";
 import { addChild } from "common/dom";
-import { fetchAndParseHtml } from "common/http";
 import { logger } from "common/logger";
+import { search, SearchResult as SR } from "common/searcher";
+import { HDb as HDBTracker } from "common/trackers";
 
 const isExclusive = (element: HTMLElement) => {
   const exclusiveLink = element.querySelector(
@@ -30,7 +31,7 @@ function parseTorrent(element: HTMLElement): Torrent {
   );
   const title = element
     .querySelector(".browse_td_name_cell a")
-    ?.textContent!!.trim();
+    ?.textContent?.trim();
   const resolution = parseResolution(title);
   const tags = parseTags(title);
 
@@ -45,8 +46,8 @@ function parseTorrent(element: HTMLElement): Torrent {
 function parseCategory(element: HTMLElement) {
   const category = element
     .querySelector(".catcell a")
-    .getAttribute("href")
-    .replace("?cat=", "");
+    ?.getAttribute("href")
+    ?.replace("?cat=", "");
   switch (category) {
     case "1":
       return Category.MOVIE;
@@ -98,7 +99,7 @@ export default class HDB implements tracker {
         );
 
         const { title, year } = parseYearAndTitle(
-          element.children[2].querySelector("a")!!.textContent
+          element.children[2].querySelector("a")?.textContent
         );
 
         yield {
@@ -112,7 +113,7 @@ export default class HDB implements tracker {
       } catch (e) {
         console.trace(e);
         logger.info(
-          "{0} Error occurred while parsing torrent: " + e,
+          "[{0}] Error occurred while parsing torrent: " + e,
           this.name()
         );
         yield null;
@@ -126,26 +127,23 @@ export default class HDB implements tracker {
 
   async search(request: Request): Promise<SearchResult> {
     if (!request.imdbId) return SearchResult.NOT_CHECKED;
-    const queryUrl =
-      "https://hdbits.org/browse.php?c3=1&c1=1&c2=1&tagsearchtype=or&imdb=" +
-      request.imdbId +
-      "&sort=size&h=8&d=DESC";
-
-    const result = await fetchAndParseHtml(queryUrl);
-
-    return result
-      .querySelector("#resultsarea")
-      .textContent.includes("Nothing here!")
-      ? SearchResult.NOT_EXIST
-      : SearchResult.EXIST;
+    const result = await search(HDBTracker, {
+      movie_title: "",
+      movie_imdb_id: request.imdbId,
+    });
+    if (result == SR.LOGGED_OUT) return SearchResult.NOT_LOGGED_IN;
+    return result == SR.NOT_FOUND ? SearchResult.NOT_EXIST : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    document.querySelector("#moresearch3 > td:nth-child(2)").innerHTML +=
-      "<br><br>Find unique for:<br>";
-    addChild(
-      document.querySelector("#moresearch3 > td:nth-child(2)") as HTMLElement,
-      select
+    const targetElement = document.querySelector(
+      "#moresearch3 > td:nth-child(2)"
     );
+    if (targetElement) {
+      targetElement.innerHTML += "<br><br>Find unique for:<br>";
+      addChild(targetElement as HTMLElement, select);
+    } else {
+      logger.info("[{0}] Can add search select", this.name());
+    }
   }
 }
