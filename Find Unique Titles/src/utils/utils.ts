@@ -107,14 +107,16 @@ export const parseTags = (title: string) => {
 
 export const parseYearAndTitle = (title: string | undefined) => {
   if (!title) return { title: undefined, year: undefined };
-  const regex = /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/;
-  const match = title.match(regex);
+  const regexes = [/^(.*?)\s+\(?(\d{4})\)?\s+(.*)/, /(.+?)\.(\d\d\d\d)/];
+  for (let regex of regexes) {
+    const match = title.match(regex);
 
-  if (match) {
-    const title = match[1].trim();
-    const year = parseInt(match[2], 10);
+    if (match) {
+      const title = match[1].trim();
+      const year = parseInt(match[2], 10);
 
-    return { title, year };
+      return { title, year };
+    }
   }
 
   return { title: undefined, year: undefined };
@@ -143,4 +145,10 @@ export const parseContainerAndFormat = (
   }
 
   return result;
+};
+
+export const parseYear = (title: string) => {
+  const regex = /-(\d{4})-/;
+  const match = title.match(regex);
+  if (match) return parseInt(match[1], 10);
 };

@@ -35,6 +35,7 @@
 // @match https://torrentseeds.org/categories/*
 // @match https://www.morethantv.me/torrents/browse*
 // @match https://jpopsuki.eu/torrents.php*
+// @match https://tntracker.org/*/?perPage=*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -1162,11 +1163,6 @@
         if (categoryLogo.includes("TV-")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
         if (categoryLogo.includes("Music-")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
       };
-      const parseYear = title => {
-        const regex = /-(\d{4})-/;
-        const match = title.match(regex);
-        if (match) return match[1];
-      };
       class CG {
         canBeUsedAsSource() {
           return true;
@@ -1211,7 +1207,7 @@
               const splittedTitle = torrentTitle.split("-");
               const artists = [ splittedTitle[0] ];
               const titles = [ splittedTitle[1] ];
-              const year = parseYear(torrentTitle);
+              const year = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseYear)(torrentTitle);
               const {container, format} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseContainerAndFormat)(torrentTitle);
               request = {
                 ...request,
@@ -2036,7 +2032,25 @@
         default: () => RED
       });
       var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_logger__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/logger/index.mjs");
+      const parseTorrents = html => {
+        const groups = Array.from(html.querySelectorAll(".group_info strong"));
+        const torrents = [];
+        for (let group of groups) {
+          const yearAndTitle = group?.textContent?.split(" - ");
+          if (yearAndTitle) torrents.push({
+            year: parseInt(yearAndTitle[0], 10),
+            title: yearAndTitle[1]
+          });
+        }
+        return torrents;
+      };
+      function titlesAreEqual(first, second) {
+        first = first.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        second = second.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return first.toLowerCase() == second.toLowerCase();
+      }
       class RED {
         canBeUsedAsSource() {
           return false;
@@ -2059,12 +2073,20 @@
           if (request.category != _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
           const musicRequest = request;
           if (musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.ALBUM && musicRequest.type != _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.SINGLE) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_ALLOWED;
-          if (!musicRequest.artists || !musicRequest.titles || !musicRequest.year) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+          if (!musicRequest.artists || !musicRequest.titles || !musicRequest.year) {
+            common_logger__WEBPACK_IMPORTED_MODULE_1__.logger.debug("[{0}] Not enough data to check request: {1}", this.name(), request);
+            return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+          }
           for (let artist of musicRequest.artists) for (let title of musicRequest.titles) {
             if ("VA" === artist) artist = "";
-            const queryUrl = `https://redacted.ch/torrents.php?artistname=${encodeURIComponent(artist)}&groupname=${encodeURIComponent(title)}&year=${musicRequest.year}&order_by=time&order_way=desc&group_results=1&filter_cat%5B1%5D=1&action=advanced&searchsubmit=1`;
-            const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(queryUrl);
-            if (!result.textContent?.includes("Your search did not match anything.")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
+            if (artist) {
+              const queryUrl = `https://redacted.ch/artist.php?artistname=${encodeURIComponent(artist)}`;
+              const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
+              if (result.textContent?.includes("Your search did not match anything.") || result.querySelector("#search_terms")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST;
+              const torrents = parseTorrents(result);
+              common_logger__WEBPACK_IMPORTED_MODULE_1__.logger.debug("[{0}] Parsed following torrents for artist: {1}: {2}", this.name(), artist, torrents);
+              for (let torrent of torrents) if (torrent.year == request.year && titlesAreEqual(title, torrent.title)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.EXIST;
+            }
           }
           return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_EXIST;
         }
@@ -2229,6 +2251,121 @@
           select.style.padding = "2px 2px 3px 2px";
           select.style.color = "#111";
           (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelector(".sub-navbar"), select);
+        }
+      }
+    },
+    "./src/trackers/TNT.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        default: () => TNT
+      });
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_logger__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/logger/index.mjs");
+      const parseCategory = category => {
+        if ([ 24, 18, 17, 20, 19, 34, 36, 45, 22, 37, 35, 43, 38, 39, 46 ].includes(category)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        if ([ 27, 28, 16, 2, 29, 40, 41, 42 ].includes(category)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+        if ([ 10, 12, 13, 14 ].includes(category)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.GAME;
+        if ([ 1 ].includes(category)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.AUDIOBOOK;
+        if ([ 8 ].includes(category)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.BOOK;
+        if ([ 2, 41 ].includes(category)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.ANIME;
+        if ([ 44, 25, 26 ].includes(category)) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC;
+      };
+      const getTorrentTitle = element => {
+        const h5 = element.children[1].querySelector("h5");
+        const newTag = h5.querySelector(".newTag");
+        if (newTag) h5.removeChild(newTag);
+        return h5.textContent;
+      };
+      class TNT {
+        canBeUsedAsSource() {
+          return true;
+        }
+        canBeUsedAsTarget() {
+          return false;
+        }
+        canRun(url) {
+          return url.includes("tntracker.org") && url.includes("/?perPage=");
+        }
+        async* getSearchRequest() {
+          common_logger__WEBPACK_IMPORTED_MODULE_1__.logger.debug("[{0}] Parsing titles to check", this.name());
+          const elements = Array.from(document.querySelectorAll("#table_gen_wrapper .sTable tbody tr"));
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
+            const torrentTitle = getTorrentTitle(element);
+            common_logger__WEBPACK_IMPORTED_MODULE_1__.logger.debug("[TNT] Checking torrent: {0}", torrentTitle);
+            const torrentId = element.children[1].querySelector("a").href.split("/").pop();
+            const token = JSON.parse(localStorage.getItem("ngStorage-token"));
+            const data = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseJson)(`https://tntracker.org/api/torrent?id=${torrentId}`, {
+              headers: {
+                Authorization: token
+              }
+            });
+            const imdbId = "tt" + data.imdb;
+            const size = data.size / 1024 / 1024;
+            const category = parseCategory(data.category);
+            let title;
+            let year;
+            let request = {
+              dom: [ element ],
+              category
+            };
+            if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE) {
+              ({title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_3__.parseYearAndTitle)(torrentTitle));
+              request = {
+                ...request,
+                torrents: [ {
+                  size,
+                  tags: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_3__.parseTags)(torrentTitle),
+                  dom: element,
+                  resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_3__.parseResolution)(torrentTitle),
+                  container: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_3__.parseCodec)(torrentTitle)
+                } ],
+                year,
+                title: title?.replace(".", " "),
+                imdbId
+              };
+            } else if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MUSIC) {
+              const splittedTitle = torrentTitle.split("-");
+              const artists = [ splittedTitle[0].replaceAll("_", " ") ];
+              const titles = [ splittedTitle[1].replaceAll("_", " ") ];
+              const year = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_3__.parseYear)(torrentTitle);
+              const {container, format} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_3__.parseContainerAndFormat)(torrentTitle);
+              request = {
+                ...request,
+                torrents: [ {
+                  dom: element,
+                  size,
+                  format,
+                  container
+                } ],
+                artists,
+                titles,
+                year,
+                type: _tracker__WEBPACK_IMPORTED_MODULE_0__.MusicReleaseType.ALBUM
+              };
+            }
+            yield request;
+          }
+        }
+        name() {
+          return "TNT";
+        }
+        async search(request) {
+          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+        }
+        async insertTrackersSelect(select) {
+          await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.sleep)(3e3);
+          if (document.getElementById("find-unique-titles")) return;
+          const form = document.getElementById("search").parentElement;
+          const wrapper = document.createElement("div");
+          wrapper.classList.add("selector");
+          wrapper.id = "find-unique-titles";
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(wrapper, select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(form, wrapper);
         }
       }
     },
@@ -2441,6 +2578,7 @@
             RED: () => _RED__WEBPACK_IMPORTED_MODULE_28__.default,
             SC: () => _SC__WEBPACK_IMPORTED_MODULE_1__.default,
             TL: () => _TL__WEBPACK_IMPORTED_MODULE_17__.default,
+            TNT: () => _TNT__WEBPACK_IMPORTED_MODULE_29__.default,
             TSeeds: () => _TSeeds__WEBPACK_IMPORTED_MODULE_25__.default,
             TiK: () => _TiK__WEBPACK_IMPORTED_MODULE_23__.default,
             nCore: () => _nCore__WEBPACK_IMPORTED_MODULE_20__.default
@@ -2451,29 +2589,30 @@
           var _BLU__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/trackers/BLU.ts");
           var _BTarg__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/trackers/BTarg.ts");
           var _CG__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/trackers/CG.ts");
+          var _CHD__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./src/trackers/CHD.ts");
           var _CLAN_SUD__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/trackers/CLAN-SUD.ts");
           var _CinemaZ__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./src/trackers/CinemaZ.ts");
           var _FL__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./src/trackers/FL.ts");
           var _GPW__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./src/trackers/GPW.ts");
           var _HDB__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./src/trackers/HDB.ts");
+          var _HDSky__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./src/trackers/HDSky.ts");
           var _HDT__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/trackers/HDT.ts");
           var _IPT__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/trackers/IPT.ts");
           var _JPTV__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./src/trackers/JPTV.ts");
+          var _JPop__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__("./src/trackers/JPop.ts");
           var _KG__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/trackers/KG.ts");
+          var _MTV__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("./src/trackers/MTV.ts");
+          var _MTeam__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./src/trackers/MTeam.ts");
           var _NewInsane__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/trackers/NewInsane.ts");
           var _PTP__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/PTP.ts");
-          var _SC__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/SC.ts");
-          var _TiK__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("./src/trackers/TiK.ts");
-          var _TL__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./src/trackers/TL.ts");
-          var _MTeam__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./src/trackers/MTeam.ts");
-          var _nCore__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./src/trackers/nCore.ts");
-          var _CHD__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./src/trackers/CHD.ts");
-          var _HDSky__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./src/trackers/HDSky.ts");
           var _Pter__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("./src/trackers/Pter.ts");
-          var _TSeeds__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("./src/trackers/TSeeds.ts");
-          var _MTV__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("./src/trackers/MTV.ts");
-          var _JPop__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__("./src/trackers/JPop.ts");
           var _RED__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__("./src/trackers/RED.ts");
+          var _SC__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/SC.ts");
+          var _TL__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./src/trackers/TL.ts");
+          var _TNT__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__("./src/trackers/TNT.ts");
+          var _TSeeds__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("./src/trackers/TSeeds.ts");
+          var _TiK__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("./src/trackers/TiK.ts");
+          var _nCore__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./src/trackers/nCore.ts");
           var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_0__ ]);
           _PTP__WEBPACK_IMPORTED_MODULE_0__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           __webpack_async_result__();
@@ -2695,6 +2834,7 @@
         parseResolution: () => parseResolution,
         parseSize: () => parseSize,
         parseTags: () => parseTags,
+        parseYear: () => parseYear,
         parseYearAndTitle: () => parseYearAndTitle,
         parseYearAndTitleFromReleaseName: () => parseYearAndTitleFromReleaseName
       });
@@ -2780,15 +2920,17 @@
           title: void 0,
           year: void 0
         };
-        const regex = /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/;
-        const match = title.match(regex);
-        if (match) {
-          const title = match[1].trim();
-          const year = parseInt(match[2], 10);
-          return {
-            title,
-            year
-          };
+        const regexes = [ /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/, /(.+?)\.(\d\d\d\d)/ ];
+        for (let regex of regexes) {
+          const match = title.match(regex);
+          if (match) {
+            const title = match[1].trim();
+            const year = parseInt(match[2], 10);
+            return {
+              title,
+              year
+            };
+          }
         }
         return {
           title: void 0,
@@ -2807,6 +2949,11 @@
           format
         };
         return result;
+      };
+      const parseYear = title => {
+        const regex = /-(\d{4})-/;
+        const match = title.match(regex);
+        if (match) return parseInt(match[1], 10);
       };
     },
     "../common/dist/dom/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
@@ -2857,11 +3004,12 @@
     "../common/dist/http/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         fetchAndParseHtml: () => fetchAndParseHtml,
+        fetchAndParseJson: () => fetchAndParseJson,
         fetchUrl: () => fetchUrl,
         sleep: () => sleep
       });
-      var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
       var _logger_index_mjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../common/dist/logger/index.mjs");
+      var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
       const parser = new DOMParser;
       const fetchUrl = async (input, options = {}, wait = 1e3) => {
         await sleep(wait);
@@ -2872,6 +3020,10 @@
       const fetchAndParseHtml = async query_url => {
         const response = await fetchUrl(query_url);
         return parser.parseFromString(response, "text/html").body;
+      };
+      const fetchAndParseJson = async (query_url, options = {}) => {
+        const response = await fetchUrl(query_url, options);
+        return JSON.parse(response);
       };
       const sleep = ms => new Promise((resolve => setTimeout(resolve, ms)));
     },
@@ -2907,8 +3059,20 @@
         return `${logger.prefix} ${levelPrefix} "` + message.replace(/{(\d+)}/g, ((match, index) => {
           const argIndex = parseInt(index, 10);
           const argValue = args[argIndex];
-          return "object" == typeof argValue ? JSON.stringify(argValue) : argValue;
+          return "object" == typeof argValue ? stringifyWithoutDOM(argValue) : argValue;
         })).trim();
+      };
+      const stringifyWithoutDOM = obj => {
+        const seen = new WeakSet;
+        function replacer(key, value) {
+          if (value instanceof Node) return;
+          if ("object" == typeof value && null !== value) {
+            if (seen.has(value)) return "[Circular Reference]";
+            seen.add(value);
+          }
+          return value;
+        }
+        return JSON.stringify(obj, replacer);
       };
     },
     "../common/dist/searcher/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {

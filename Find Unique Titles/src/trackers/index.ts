@@ -4,29 +4,30 @@ import BHD from "./BHD";
 import BLU from "./BLU";
 import BTarg from "./BTarg";
 import CG from "./CG";
+import CHD from "./CHD";
 import CLANSUD from "./CLAN-SUD";
 import CinemaZ from "./CinemaZ";
 import FL from "./FL";
 import GPW from "./GPW";
 import HDB from "./HDB";
+import HDSky from "./HDSky";
 import HDT from "./HDT";
 import IPT from "./IPT";
 import JPTV from "./JPTV";
+import JPop from "./JPop";
 import KG from "./KG";
+import MTV from "./MTV";
+import MTeam from "./MTeam";
 import NewInsane from "./NewInsane";
 import PTP from "./PTP";
-import SC from "./SC";
-import TiK from "./TiK";
-import TL from "./TL";
-import MTeam from "./MTeam";
-import nCore from "./nCore";
-import CHD from "./CHD";
-import HDSky from "./HDSky";
 import Pter from "./Pter";
-import TSeeds from "./TSeeds";
-import MTV from "./MTV";
-import JPop from "./JPop";
 import RED from "./RED";
+import SC from "./SC";
+import TL from "./TL";
+import TNT from "./TNT";
+import TSeeds from "./TSeeds";
+import TiK from "./TiK";
+import nCore from "./nCore";
 
 export {
   PTP,
@@ -58,4 +59,5 @@ export {
   MTV,
   JPop,
   RED,
+  TNT,
 };

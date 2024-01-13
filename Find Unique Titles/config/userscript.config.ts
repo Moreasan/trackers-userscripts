@@ -60,6 +60,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://torrentseeds.org/categories/*",
       "https://www.morethantv.me/torrents/browse*",
       "https://jpopsuki.eu/torrents.php*",
+      "https://tntracker.org/*",
     ],
     require: [
       `https://cdn.jsdelivr.net/npm/jquery@${pkg.dependencies.jquery}/dist/jquery.min.js`,

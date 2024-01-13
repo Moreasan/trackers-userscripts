@@ -43,9 +43,33 @@ const formatMessage = (level: LEVEL, message: string, args: any[]): string => {
         const argValue = args[argIndex];
 
         return typeof argValue === "object"
-          ? JSON.stringify(argValue)
+          ? stringifyWithoutDOM(argValue)
           : argValue;
       })
       .trim()
   );
+};
+
+const stringifyWithoutDOM = (obj) => {
+  const seen = new WeakSet(); // Use a WeakSet to track visited objects
+
+  function replacer(key, value) {
+    if (value instanceof Node) {
+      // Ignore DOM elements
+      return undefined;
+    }
+
+    if (typeof value === "object" && value !== null) {
+      // Check for circular references
+      if (seen.has(value)) {
+        return "[Circular Reference]";
+      }
+
+      seen.add(value);
+    }
+
+    return value;
+  }
+
+  return JSON.stringify(obj, replacer);
 };

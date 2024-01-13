@@ -4,6 +4,7 @@ import {
   parseResolution,
   parseSize,
   parseTags,
+  parseYear,
   parseYearAndTitle,
 } from "../utils/utils";
 import {
@@ -20,15 +21,11 @@ import { fetchAndParseHtml } from "common/http";
 const parseCategory = (element: HTMLElement): Category => {
   let categoryImg = element.children[0].querySelector("img")!!;
   const categoryLogo = categoryImg.src!!;
-  const alt = categoryImg.alt
-  if (categoryLogo.includes("Movies-") || alt.includes("Movie")) return Category.MOVIE;
+  const alt = categoryImg.alt;
+  if (categoryLogo.includes("Movies-") || alt.includes("Movie"))
+    return Category.MOVIE;
   if (categoryLogo.includes("TV-")) return Category.TV;
   if (categoryLogo.includes("Music-")) return Category.MUSIC;
-};
-const parseYear = (title: string) => {
-  const regex = /-(\d{4})-/;
-  const match = title.match(regex);
-  if (match) return match[1];
 };
 export default class CG implements tracker {
   canBeUsedAsSource(): boolean {
