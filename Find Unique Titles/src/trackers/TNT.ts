@@ -52,7 +52,7 @@ export default class TNT implements tracker {
   }
 
   canRun(url: string): boolean {
-    return url.includes("tntracker.org") && url.includes('/?perPage=');
+    return url.includes("tntracker.org") && url.includes("/?perPage=");
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
