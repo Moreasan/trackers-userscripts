@@ -1,35 +1,16 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
+import { parseSize } from "../utils/utils";
 import { MetaData, Request, SearchResult, tracker } from "./tracker";
-import { insertBefore } from "common/dom";
+import { search, SearchResult as SR } from "common/searcher";
+import { Tik as TikTracker } from "common/trackers";
+import { addChild } from "common/dom";
 
-const findTorrentsTable = () => {
-  let tables = document.querySelectorAll("table");
-
-  for (let table of tables) {
-    let firstRow = table.querySelector("tr");
-    let cells = firstRow.querySelectorAll("td");
-
-    if (
-      cells[0] &&
-      cells[0].innerText === "Type" &&
-      cells[1] &&
-      cells[1].innerText === "Name" &&
-      cells[2] &&
-      cells[3].innerText === "Director"
-    ) {
-      return table;
-    }
-  }
-  console.log("No torrents table found.");
-  return undefined;
-};
 export default class TiK implements tracker {
   canBeUsedAsSource(): boolean {
     return true;
   }
 
   canBeUsedAsTarget(): boolean {
-    return false;
+    return true;
   }
 
   canRun(url: string): boolean {
@@ -37,31 +18,18 @@ export default class TiK implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const torrentsTable = findTorrentsTable();
-    if (!torrentsTable) {
-      yield {
-        total: 0,
-      };
-      return;
-    }
-    let nodes = torrentsTable.querySelectorAll("tr");
+    let elements = Array.from(
+      document.querySelectorAll(".torrent-search--list__results tbody tr")
+    ) as Array<HTMLElement>;
     yield {
-      total: nodes.length - 1,
+      total: elements.length,
     };
-    for (let i = 1; i < nodes.length; i++) {
-      const element = nodes[i];
-      const link: HTMLAnchorElement | null = element.querySelector(
-        'a[href*="details.php?id"]'
-      );
-      if (!link) {
-        continue;
-      }
-      let response = await fetchAndParseHtml(
-        (link as HTMLAnchorElement).href
-      );
-      const imdbId = parseImdbIdFromLink(response as HTMLElement);
-      const size = parseSize(element.children[6].textContent as string);
+    for (let element of elements) {
+      let imdbId = "tt" + element.getAttribute("data-imdb-id");
 
+      let size = parseSize(
+        element.querySelector(".torrent-search--list__size")!.textContent!
+      );
       const request: Request = {
         torrents: [
           {
@@ -70,11 +38,11 @@ export default class TiK implements tracker {
             dom: element,
           },
         ],
-        dom: [element as HTMLElement],
+        dom: element,
         imdbId,
-        title: "",
+        query: "",
       };
-      yield request
+      yield request;
     }
   }
 
@@ -83,13 +51,20 @@ export default class TiK implements tracker {
   }
 
   async search(request: Request): Promise<SearchResult> {
-    return SearchResult.NOT_CHECKED;
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
+    const result = await search(TikTracker, {
+      movie_title: "",
+      movie_imdb_id: request.imdbId,
+    });
+    if (result == SR.LOGGED_OUT) return SearchResult.NOT_LOGGED_IN;
+    return result == SR.NOT_FOUND ? SearchResult.NOT_EXIST : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    const stateSelect = document.getElementById("incldead");
-    const td = document.createElement("td");
-    td.appendChild(select);
-    insertBefore(td, stateSelect.parentElement);
+    select.classList.add("form__select");
+    addChild(
+      document.querySelectorAll(".panel__actions")[1] as HTMLElement,
+      select
+    );
   }
 }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
-// @version 0.0.8
+// @version 0.0.9
 // @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
@@ -2496,55 +2496,36 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
-      const findTorrentsTable = () => {
-        let tables = document.querySelectorAll("table");
-        for (let table of tables) {
-          let firstRow = table.querySelector("tr");
-          let cells = firstRow.querySelectorAll("td");
-          if (cells[0] && "Type" === cells[0].innerText && cells[1] && "Name" === cells[1].innerText && cells[2] && "Director" === cells[3].innerText) return table;
-        }
-        console.log("No torrents table found.");
-        return;
-      };
+      var common_searcher__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/trackers/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
       class TiK {
         canBeUsedAsSource() {
           return true;
         }
         canBeUsedAsTarget() {
-          return false;
+          return true;
         }
         canRun(url) {
           return url.includes("cinematik.net");
         }
         async* getSearchRequest() {
-          const torrentsTable = findTorrentsTable();
-          if (!torrentsTable) {
-            yield {
-              total: 0
-            };
-            return;
-          }
-          let nodes = torrentsTable.querySelectorAll("tr");
+          let elements = Array.from(document.querySelectorAll(".torrent-search--list__results tbody tr"));
           yield {
-            total: nodes.length - 1
+            total: elements.length
           };
-          for (let i = 1; i < nodes.length; i++) {
-            const element = nodes[i];
-            const link = element.querySelector('a[href*="details.php?id"]');
-            if (!link) continue;
-            let response = await fetchAndParseHtml(link.href);
-            const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(response);
-            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[6].textContent);
+          for (let element of elements) {
+            let imdbId = "tt" + element.getAttribute("data-imdb-id");
+            let size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.querySelector(".torrent-search--list__size").textContent);
             const request = {
               torrents: [ {
                 size,
                 tags: [],
                 dom: element
               } ],
-              dom: [ element ],
+              dom: element,
               imdbId,
-              title: ""
+              query: ""
             };
             yield request;
           }
@@ -2553,13 +2534,17 @@
           return "TiK";
         }
         async search(request) {
-          return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
+          if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_2__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_3__.Tik, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          if (result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.LOGGED_OUT) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_LOGGED_IN;
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_FOUND ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
         }
         insertTrackersSelect(select) {
-          const stateSelect = document.getElementById("incldead");
-          const td = document.createElement("td");
-          td.appendChild(select);
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.insertBefore)(td, stateSelect.parentElement);
+          select.classList.add("form__select");
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(document.querySelectorAll(".panel__actions")[1], select);
         }
       }
     },
@@ -3212,7 +3197,8 @@
         KG: () => KG,
         MTV: () => MTV,
         MTV_TV: () => MTV_TV,
-        TSeeds: () => TSeeds
+        TSeeds: () => TSeeds,
+        Tik: () => Tik
       });
       const Aither = {
         name: "Aither",
@@ -3253,6 +3239,14 @@
         matchRegex: /action=download/,
         positiveMatch: true,
         TV: true
+      };
+      const Tik = {
+        name: "Tik",
+        searchUrl: "https://www.cinematik.net/browse.php?cat=0&incldead=1&srchdtls=1&search=%tt%",
+        loggedOutRegex: /Not logged in!|Ray ID/,
+        matchRegex: /Nothing found!/,
+        rateLimit: 125,
+        both: true
       };
       const TSeeds = {
         name: "TSeeds",
