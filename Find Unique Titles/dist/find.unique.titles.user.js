@@ -1064,7 +1064,8 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
       class HDSky {
         canBeUsedAsSource() {
           return true;
@@ -1076,8 +1077,8 @@
           return url.includes("hdsky.me");
         }
         async* getSearchRequest() {
-          const requests = [];
-          for (const element of document.querySelectorAll(".torrents")[0].children[0].children) {
+          let elements = Array.from(document.querySelectorAll(".torrents")[0].children[0].children);
+          for (const element of elements) {
             if (!element.querySelector(".torrentname")) continue;
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element.querySelector(".torrentname"));
             const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseSize)(element.children[6]?.textContent);
@@ -1091,19 +1092,25 @@
               imdbId,
               title: ""
             };
-            requests.push(request);
+            yield request;
           }
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
         }
         name() {
           return "HDSky";
         }
         async search(request) {
-          return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
+          if (request.category === _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE) {
+            const movieRequest = request;
+            const queryUrl = "https://hdsky.me/torrents.php?seeders=&medium13=1&medium1=1&incldead=0&spstate=0&inclbookmarked=0&search=" + movieRequest.imdbId + "&search_area=4&search_mode=0";
+            const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
+            let notFound = null === result.querySelector(".torrentname");
+            if (notFound) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST;
+            return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
+          }
         }
         insertTrackersSelect(select) {
           const element = document.querySelector(".searchbox").children[2].querySelector("td td.rowfollow tr");
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.addChild)(element, select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(element, select);
         }
       }
     },

@@ -1,12 +1,14 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
 import {
+  Category,
   MetaData,
+  MovieRequest,
   Request,
   SearchResult,
-  toGenerator,
   tracker,
 } from "./tracker";
 import { addChild } from "common/dom";
+import { fetchAndParseHtml } from "common/http";
 
 export default class HDSky implements tracker {
   canBeUsedAsSource(): boolean {
@@ -21,17 +23,22 @@ export default class HDSky implements tracker {
     return url.includes("hdsky.me");
   }
 
-  async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    for (const element of document.querySelectorAll(".torrents")[0].children[0]
-      .children) {
+  async *getSearchRequest(): AsyncGenerator<
+    MetaData | Request<any>,
+    void,
+    void
+  > {
+    let elements = Array.from(
+      document.querySelectorAll(".torrents")[0].children[0].children
+    ) as Array<HTMLElement>;
+    for (const element of elements) {
       if (!element.querySelector(".torrentname")) {
         continue;
       }
       const imdbId = parseImdbIdFromLink(element.querySelector(".torrentname"));
       const size = parseSize(element.children[6]?.textContent as string);
 
-      const request: Request = {
+      const request: MovieRequest = {
         torrents: [
           {
             size,
@@ -43,18 +50,29 @@ export default class HDSky implements tracker {
         imdbId,
         title: "",
       };
-      requests.push(request);
+      yield request;
     }
-
-    yield* toGenerator(requests);
   }
 
   name(): string {
     return "HDSky";
   }
 
-  async search(request: Request): Promise<SearchResult> {
-    return SearchResult.NOT_CHECKED;
+  async search(request: Request<any>): Promise<SearchResult> {
+    if (request.category === Category.MOVIE) {
+      const movieRequest = request as MovieRequest;
+      const queryUrl =
+        "https://hdsky.me/torrents.php?seeders=&medium13=1&medium1=1&incldead=0&spstate=0&inclbookmarked=0&search=" +
+        movieRequest.imdbId +
+        "&search_area=4&search_mode=0";
+
+      const result = await fetchAndParseHtml(queryUrl);
+      let notFound = result.querySelector(".torrentname") === null;
+      if (notFound) {
+        return SearchResult.NOT_EXIST;
+      }
+      return SearchResult.EXIST;
+    }
   }
 
   insertTrackersSelect(select: HTMLElement): void {
