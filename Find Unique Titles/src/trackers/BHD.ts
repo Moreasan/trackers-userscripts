@@ -1,7 +1,8 @@
 import {
   parseImdbIdFromLink,
   parseResolution,
-  parseSize, parseTags
+  parseSize,
+  parseTags,
 } from "../utils/utils";
 import {
   Category,
@@ -44,10 +45,9 @@ const parseCategory = (element: Element) => {
 };
 
 const parseTorrentsFromTorrentsPage = (): Array<Request> => {
-  const requests = [];
-  document
-    .querySelectorAll('tr[id^="torrentposter"]')
-    .forEach((element: HTMLElement) => {
+  const requests: Array<Request<any>> = [];
+  Array.from(document.querySelectorAll('tr[id^="torrentposter"]')).forEach(
+    (element) => {
       let imdbId = null;
       let libraryId = element.getAttribute("library");
       if (libraryId) {
@@ -58,7 +58,7 @@ const parseTorrentsFromTorrentsPage = (): Array<Request> => {
       }
       const tags = [];
       const torrentName =
-        element.children[1].querySelector('a[id^="torrent"]').textContent;
+        element.children[1].querySelector('a[id^="torrent"]')!!.textContent!!;
       if (torrentName.toUpperCase().includes("REMUX")) {
         tags.push("Remux");
       }
@@ -78,11 +78,12 @@ const parseTorrentsFromTorrentsPage = (): Array<Request> => {
         category: parseCategory(element),
       };
       requests.push(request);
-    });
+    }
+  );
   return requests;
 };
 
-const parseTorrentsFromMoviesPage = (): Array<Request> => {
+const parseTorrentsFromLibraryPage = (): Array<Request> => {
   const requests: Array<Request> = [];
   document.querySelectorAll(".bhd-meta-box").forEach((element) => {
     let imdbId = parseImdbIdFromLink(element as HTMLElement);
@@ -98,8 +99,8 @@ const parseTorrentsFromMoviesPage = (): Array<Request> => {
   return requests;
 };
 
-const isMoviesPage = () => {
-  return window.location.href.includes("/movies");
+const isLibraryPage = () => {
+  return window.location.href.includes("/library");
 };
 const isTorrentsPage = () => {
   return window.location.href.includes("/torrents");
@@ -120,8 +121,8 @@ export default class BHD implements tracker {
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     let requests: Array<Request> = [];
-    if (isMoviesPage()) {
-      requests = parseTorrentsFromMoviesPage();
+    if (isLibraryPage()) {
+      requests = parseTorrentsFromLibraryPage();
     } else if (isTorrentsPage()) {
       requests = parseTorrentsFromTorrentsPage();
     }

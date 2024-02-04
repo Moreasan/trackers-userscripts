@@ -8,7 +8,7 @@
 // @match https://hdbits.org/browse.php*
 // @match https://passthepopcorn.me/torrents.php*
 // @match https://passthepopcorn.me/torrents.php?type=seeding
-// @match https://beyond-hd.me/library/movies*
+// @match https://beyond-hd.me/library/*
 // @match https://beyond-hd.me/torrents*
 // @match https://cinemaz.to/movies*
 // @match https://avistaz.to/movies*
@@ -22,7 +22,7 @@
 // @match https://filelist.io/browse.php*
 // @match https://jptv.club/torrents*
 // @match https://hd-torrents.org/torrents.php*
-// @match https://iptorrents.com/t?*
+// @match https://iptorrents.com/t*
 // @match https://kp.m-team.cc/*
 // @match https://ncore.pro/torrents.php*
 // @match https://greatposterwall.com/torrents.php*
@@ -35,7 +35,7 @@
 // @match https://torrentseeds.org/categories/*
 // @match https://www.morethantv.me/torrents/browse*
 // @match https://jpopsuki.eu/torrents.php*
-// @match https://tntracker.org/*/?perPage=*
+// @match https://tntracker.org/*
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue
@@ -391,7 +391,7 @@
       };
       const parseTorrentsFromTorrentsPage = () => {
         const requests = [];
-        document.querySelectorAll('tr[id^="torrentposter"]').forEach((element => {
+        Array.from(document.querySelectorAll('tr[id^="torrentposter"]')).forEach((element => {
           let imdbId = null;
           let libraryId = element.getAttribute("library");
           if (libraryId) {
@@ -419,7 +419,7 @@
         }));
         return requests;
       };
-      const parseTorrentsFromMoviesPage = () => {
+      const parseTorrentsFromLibraryPage = () => {
         const requests = [];
         document.querySelectorAll(".bhd-meta-box").forEach((element => {
           let imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
@@ -433,7 +433,7 @@
         }));
         return requests;
       };
-      const isMoviesPage = () => window.location.href.includes("/movies");
+      const isLibraryPage = () => window.location.href.includes("/library");
       const isTorrentsPage = () => window.location.href.includes("/torrents");
       class BHD {
         canBeUsedAsSource() {
@@ -447,7 +447,7 @@
         }
         async* getSearchRequest() {
           let requests = [];
-          if (isMoviesPage()) requests = parseTorrentsFromMoviesPage(); else if (isTorrentsPage()) requests = parseTorrentsFromTorrentsPage();
+          if (isLibraryPage()) requests = parseTorrentsFromLibraryPage(); else if (isTorrentsPage()) requests = parseTorrentsFromTorrentsPage();
           yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
         }
         name() {
