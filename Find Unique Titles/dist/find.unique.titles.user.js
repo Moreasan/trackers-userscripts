@@ -36,6 +36,7 @@
 // @match https://www.morethantv.me/torrents/browse*
 // @match https://jpopsuki.eu/torrents.php*
 // @match https://tntracker.org/*
+// @downloadURL https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
 // @grant GM.getValue

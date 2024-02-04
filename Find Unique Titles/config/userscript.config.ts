@@ -74,5 +74,7 @@ export const UserScriptConfig: IWebpackUserScript = {
     ],
     updateURL:
       "https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js",
+    downloadURL:
+      "https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js",
   },
 };
