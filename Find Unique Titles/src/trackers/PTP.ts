@@ -87,8 +87,8 @@ const hasRequests = (element: Element): boolean => {
 
 const isAllowedTorrent = (torrent: Torrent) => {
   if (
-    torrent.container == "x265" &&
-    torrent.resolution != Resolution.UHD &&
+    torrent.container === "x265" &&
+    torrent.resolution !== Resolution.UHD &&
     !isHDR(torrent)
   ) {
     logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
@@ -320,7 +320,7 @@ const searchTorrent = (torrent: Torrent, availableTorrents: Array<Torrent>) => {
       sameResolution(torrent, e) &&
       (torrent.container === undefined ||
         sameContainer(e.container, torrent.container)) &&
-      (!torrent.tags.includes("Remux") || e.tags.includes("Remux"))
+      (!torrent.tags?.includes("Remux") || e.tags?.includes("Remux"))
     );
   });
   if (similarTorrents.length == 0 && torrent.resolution && torrent.container) {

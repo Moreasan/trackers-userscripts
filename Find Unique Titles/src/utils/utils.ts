@@ -107,7 +107,11 @@ export const parseTags = (title: string) => {
 
 export const parseYearAndTitle = (title: string | undefined) => {
   if (!title) return { title: undefined, year: undefined };
-  const regexes = [/^(.*?)\s+\(?(\d{4})\)?\s+(.*)/, /(.+?)\.(\d\d\d\d)/];
+  const regexes = [
+    /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/,
+    /(.+?)\.(\d\d\d\d)/,
+    /(.+?) \((\d\d\d\d)\)/,
+  ];
   for (let regex of regexes) {
     const match = title.match(regex);
 

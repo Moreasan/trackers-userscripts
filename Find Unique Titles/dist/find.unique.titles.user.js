@@ -319,8 +319,9 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
-      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/trackers/index.mjs");
       class AvistaZ {
         canBeUsedAsSource() {
           return true;
@@ -332,30 +333,40 @@
           return url.includes("avistaz.to");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll("#content-area > div.block > .row")?.forEach((element => {
+          const elements = Array.from(document.querySelector("#content-area > div.block > .row").children);
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseYearAndTitle)(element.querySelector("a")?.getAttribute("title"));
             const request = {
-              torrents: [],
+              torrents: [ {
+                dom: element
+              } ],
               dom: [ element ],
               imdbId,
-              title: ""
+              title,
+              year,
+              category: _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
+            yield request;
+          }
         }
         name() {
           return "AvistaZ";
         }
         async search(request) {
           if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
-          const queryUrl = "https://avistaz.to/movies?search=&imdb=" + request.imdbId;
-          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
-          return result.textContent?.includes("No Movie found!") ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_2__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_3__.AT, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          if (result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.LOGGED_OUT) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_LOGGED_IN;
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_FOUND ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
         }
         insertTrackersSelect(select) {
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelector("#content-area > div.well.well-sm"), select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(document.querySelector("#content-area > div.well.well-sm"), select);
         }
       }
     },
@@ -1758,7 +1769,7 @@
           };
           const hasRequests = element => true === element.querySelector("#no_results_message")?.textContent?.trim().includes("Your search did not match any torrents, however it did match these requests.");
           const isAllowedTorrent = torrent => {
-            if ("x265" == torrent.container && torrent.resolution != _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.UHD && !isHDR(torrent)) {
+            if ("x265" === torrent.container && torrent.resolution !== _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.UHD && !isHDR(torrent)) {
               common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
               return false;
             }
@@ -1887,7 +1898,7 @@
           }
           const isHDR = torrent => torrent.tags?.includes("HDR") || torrent.tags?.includes("DV");
           const searchTorrent = (torrent, availableTorrents) => {
-            const similarTorrents = availableTorrents.filter((e => sameResolution(torrent, e) && (void 0 === torrent.container || sameContainer(e.container, torrent.container)) && (!torrent.tags.includes("Remux") || e.tags.includes("Remux"))));
+            const similarTorrents = availableTorrents.filter((e => sameResolution(torrent, e) && (void 0 === torrent.container || sameContainer(e.container, torrent.container)) && (!torrent.tags?.includes("Remux") || e.tags?.includes("Remux"))));
             if (0 == similarTorrents.length && torrent.resolution && torrent.container) return true;
             if (1 == similarTorrents.length) if (torrent.size > 1.5 * similarTorrents[0].size || similarTorrents[0].size > 1.5 * torrent.size) return true;
             return false;
@@ -2921,7 +2932,7 @@
           title: void 0,
           year: void 0
         };
-        const regexes = [ /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/, /(.+?)\.(\d\d\d\d)/ ];
+        const regexes = [ /^(.*?)\s+\(?(\d{4})\)?\s+(.*)/, /(.+?)\.(\d\d\d\d)/, /(.+?) \((\d\d\d\d)\)/ ];
         for (let regex of regexes) {
           const match = title.match(regex);
           if (match) {
@@ -3192,6 +3203,7 @@
     },
     "../common/dist/trackers/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
+        AT: () => AT,
         Aither: () => Aither,
         HDb: () => HDb,
         KG: () => KG,
@@ -3207,6 +3219,13 @@
         matchRegex: /torrent-search--list__overview/,
         positiveMatch: true,
         both: true
+      };
+      const AT = {
+        name: "AT",
+        searchUrl: "https://avistaz.to/movies?search=&imdb=%tt%",
+        loggedOutRegex: /Forgot Your Password/,
+        matchRegex: /class="overlay-container"|class="movie-poster/,
+        positiveMatch: true
       };
       const HDb = {
         name: "HDb",

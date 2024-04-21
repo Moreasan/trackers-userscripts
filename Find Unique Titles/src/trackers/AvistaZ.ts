@@ -1,7 +1,9 @@
-import { parseImdbIdFromLink } from "../utils/utils";
-import { tracker, Request, MetaData, toGenerator, SearchResult } from "./tracker";
+import { parseImdbIdFromLink, parseYearAndTitle } from "../utils/utils";
+import { tracker, Request, MetaData, SearchResult, Category } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
+import { search, SearchResult as SR } from "common/searcher";
+import { AT as ATTracker } from "common/trackers";
 
 export default class AvistaZ implements tracker {
   canBeUsedAsSource(): boolean {
@@ -17,37 +19,46 @@ export default class AvistaZ implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    document
-      .querySelectorAll("#content-area > div.block > .row")
-      ?.forEach((element: HTMLElement) => {
-        const imdbId = parseImdbIdFromLink(element);
+    const elements = Array.from(
+      document.querySelector("#content-area > div.block > .row")!!.children
+    );
+    yield {
+      total: elements.length,
+    };
+    for (let element of elements) {
+      const imdbId = parseImdbIdFromLink(element);
+      const { title, year } = parseYearAndTitle(
+        element.querySelector("a")?.getAttribute("title")
+      );
 
-        const request: Request = {
-          torrents: [],
-          dom: [element],
-          imdbId,
-          title: "",
-        };
-        requests.push(request);
-      });
-
-    yield* toGenerator(requests);
+      const request: Request = {
+        torrents: [
+          {
+            dom: element,
+          },
+        ],
+        dom: [element],
+        imdbId,
+        title,
+        year,
+        category: Category.MOVIE,
+      };
+      yield request;
+    }
   }
 
   name(): string {
     return "AvistaZ";
   }
 
-  async search(request: Request) : Promise<SearchResult> {
+  async search(request: Request): Promise<SearchResult> {
     if (!request.imdbId) return SearchResult.NOT_CHECKED;
-    const queryUrl = "https://avistaz.to/movies?search=&imdb=" + request.imdbId;
-
-    const result = await fetchAndParseHtml(queryUrl);
-
-    return result.textContent?.includes("No Movie found!")
-      ? SearchResult.NOT_EXIST
-      : SearchResult.EXIST;
+    const result = await search(ATTracker, {
+      movie_title: "",
+      movie_imdb_id: request.imdbId,
+    });
+    if (result == SR.LOGGED_OUT) return SearchResult.NOT_LOGGED_IN;
+    return result == SR.NOT_FOUND ? SearchResult.NOT_EXIST : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
