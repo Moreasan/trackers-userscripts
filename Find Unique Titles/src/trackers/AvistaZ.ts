@@ -19,9 +19,11 @@ export default class AvistaZ implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const elements = Array.from(
-      document.querySelector("#content-area > div.block > .row")!!.children
-    );
+    const rows = document.querySelectorAll("#content-area > div.block > .row");
+    let elements = Array.from(rows);
+    if (rows.length === 1) {
+      elements = Array.from(rows.item(0)!!.children);
+    }
     yield {
       total: elements.length,
     };

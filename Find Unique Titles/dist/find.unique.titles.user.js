@@ -333,7 +333,9 @@
           return url.includes("avistaz.to");
         }
         async* getSearchRequest() {
-          const elements = Array.from(document.querySelector("#content-area > div.block > .row").children);
+          const rows = document.querySelectorAll("#content-area > div.block > .row");
+          let elements = Array.from(rows);
+          if (1 === rows.length) elements = Array.from(rows.item(0).children);
           yield {
             total: elements.length
           };
