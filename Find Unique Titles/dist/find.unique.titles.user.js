@@ -796,8 +796,9 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
-      var common_http__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/trackers/index.mjs");
       class CinemaZ {
         canBeUsedAsSource() {
           return true;
@@ -809,30 +810,42 @@
           return url.includes("cinemaz.to");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll("#content-area > div.block > .row")?.forEach((element => {
+          const rows = document.querySelectorAll("#content-area > div.block > .row");
+          let elements = Array.from(rows);
+          if (1 === rows.length) elements = Array.from(rows.item(0).children);
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseImdbIdFromLink)(element);
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_0__.parseYearAndTitle)(element.querySelector("a")?.getAttribute("title"));
             const request = {
-              torrents: [],
+              torrents: [ {
+                dom: element
+              } ],
               dom: [ element ],
               imdbId,
-              title: ""
+              title,
+              year,
+              category: _tracker__WEBPACK_IMPORTED_MODULE_1__.Category.MOVIE
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_1__.toGenerator)(requests);
+            yield request;
+          }
         }
         name() {
           return "CinemaZ";
         }
         async search(request) {
           if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_CHECKED;
-          const queryUrl = "https://cinemaz.to/movies?search=&imdb=" + request.imdbId;
-          const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_2__.fetchAndParseHtml)(queryUrl);
-          return result.textContent.includes("No Movie found!") ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_2__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_3__.CZ, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          if (result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.LOGGED_OUT) return _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_LOGGED_IN;
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_FOUND ? _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_1__.SearchResult.EXIST;
         }
         insertTrackersSelect(select) {
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelector("#content-area > div.well.well-sm"), select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(document.querySelector("#content-area > div.well.well-sm"), select);
         }
       }
     },
@@ -3207,6 +3220,7 @@
       __webpack_require__.d(__webpack_exports__, {
         AT: () => AT,
         Aither: () => Aither,
+        CZ: () => CZ,
         HDb: () => HDb,
         KG: () => KG,
         MTV: () => MTV,
@@ -3225,6 +3239,14 @@
       const AT = {
         name: "AT",
         searchUrl: "https://avistaz.to/movies?search=&imdb=%tt%",
+        loggedOutRegex: /Forgot Your Password/,
+        matchRegex: /class="overlay-container"|class="movie-poster/,
+        positiveMatch: true
+      };
+      const CZ = {
+        name: "CZ",
+        searchUrl: "https://cinemaz.to/movies?search=&imdb=%tt%",
+        configName: "ET",
         loggedOutRegex: /Forgot Your Password/,
         matchRegex: /class="overlay-container"|class="movie-poster/,
         positiveMatch: true

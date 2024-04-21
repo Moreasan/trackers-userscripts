@@ -1,13 +1,14 @@
-import { parseImdbIdFromLink } from "../utils/utils";
+import { parseImdbIdFromLink, parseYearAndTitle } from "../utils/utils";
 import {
   tracker,
   Request,
-  toGenerator,
   MetaData,
   SearchResult,
+  Category,
 } from "./tracker";
 import { addChild } from "common/dom";
-import { fetchAndParseHtml } from "common/http";
+import { search, SearchResult as SR } from "common/searcher";
+import { CZ as CZTracker } from "common/trackers";
 
 export default class CinemaZ implements tracker {
   canBeUsedAsSource(): boolean {
@@ -23,22 +24,34 @@ export default class CinemaZ implements tracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    document
-      .querySelectorAll("#content-area > div.block > .row")
-      ?.forEach((element: HTMLElement) => {
-        const imdbId = parseImdbIdFromLink(element);
+    const rows = document.querySelectorAll("#content-area > div.block > .row");
+    let elements = Array.from(rows);
+    if (rows.length === 1) {
+      elements = Array.from(rows.item(0)!!.children);
+    }
+    yield {
+      total: elements.length,
+    };
+    for (let element of elements) {
+      const imdbId = parseImdbIdFromLink(element);
+      const { title, year } = parseYearAndTitle(
+        element.querySelector("a")?.getAttribute("title")
+      );
 
-        const request: Request = {
-          torrents: [],
-          dom: [element],
-          imdbId,
-          title: "",
-        };
-        requests.push(request);
-      });
-
-    yield* toGenerator(requests);
+      const request: Request = {
+        torrents: [
+          {
+            dom: element,
+          },
+        ],
+        dom: [element],
+        imdbId,
+        title,
+        year,
+        category: Category.MOVIE,
+      };
+      yield request;
+    }
   }
 
   name(): string {
@@ -47,13 +60,13 @@ export default class CinemaZ implements tracker {
 
   async search(request: Request): Promise<SearchResult> {
     if (!request.imdbId) return SearchResult.NOT_CHECKED;
-    const queryUrl = "https://cinemaz.to/movies?search=&imdb=" + request.imdbId;
+    const result = await search(CZTracker, {
+      movie_title: "",
+      movie_imdb_id: request.imdbId,
+    });
+    if (result == SR.LOGGED_OUT) return SearchResult.NOT_LOGGED_IN;
+    return result == SR.NOT_FOUND ? SearchResult.NOT_EXIST : SearchResult.EXIST;
 
-    const result = await fetchAndParseHtml(queryUrl);
-
-    return result.textContent!!.includes("No Movie found!")
-      ? SearchResult.NOT_EXIST
-      : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {

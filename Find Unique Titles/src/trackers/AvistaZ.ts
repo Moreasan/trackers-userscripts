@@ -1,7 +1,6 @@
 import { parseImdbIdFromLink, parseYearAndTitle } from "../utils/utils";
 import { tracker, Request, MetaData, SearchResult, Category } from "./tracker";
 import { addChild } from "common/dom";
-import { fetchAndParseHtml } from "common/http";
 import { search, SearchResult as SR } from "common/searcher";
 import { AT as ATTracker } from "common/trackers";
 
