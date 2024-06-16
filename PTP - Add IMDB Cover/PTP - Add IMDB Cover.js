@@ -169,10 +169,7 @@ await (async function () {
       if (imdbId.startsWith("http"))
         imdbId = "tt" + imdbId.split("/tt")[1].split("/")[0];
       let url = await fetchCover(imdbId);
-      console.log(url);
-      if (!url || (await isSmall(url))) {
-        url = await fetchCoverFromMainPage(imdbId);
-      }
+      console.log("Fetched cover: " + url);
       coverInput.value = await uploadToPtpimg(url, apiToken);
       coverInput.dispatchEvent(new Event("change"));
     } catch (err) {
