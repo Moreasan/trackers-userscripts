@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PTP - Add IMDB Cover
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @author       Mea01
 // @match        https://passthepopcorn.me/upload.php?*
 // @match        https://passthepopcorn.me/upload.php
@@ -11,6 +11,8 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM.getValue
 // @grant        GM.setValue
+// @downloadURL  https://raw.githubusercontent.com/Moreasan/trackers-userscripts/master/PTP%20-%20Add%20IMDB%20Cover/PTP%20-%20Add%20IMDB%20Cover.js
+// @updateURL    https://raw.githubusercontent.com/Moreasan/trackers-userscripts/master/PTP%20-%20Add%20IMDB%20Cover/PTP%20-%20Add%20IMDB%20Cover.js
 // ==/UserScript==
 
 await (async function () {
@@ -46,110 +48,6 @@ await (async function () {
       });
     }
   };
-
-  const scrapeAndSetCover = (cover_page, thumb_url) => {
-    return new Promise((resolve, reject) => {
-      GM_xmlhttpRequest({
-        url: cover_page,
-        method: "GET",
-        timeout: 10000,
-        onload: function (response) {
-          if (response.status === 200) {
-            const parser = new DOMParser();
-            const result = parser.parseFromString(
-              response.responseText,
-              "text/html"
-            );
-            let thumb_search = thumb_url.split("/images/M/")[1].split(".")[0];
-            let cover_url;
-            result.querySelectorAll("img").forEach((img) => {
-              try {
-                if (
-                  thumb_search === img.src.split("/images/M/")[1].split(".")[0]
-                ) {
-                  cover_url = img.src;
-                }
-              } catch (e) {}
-            });
-            return resolve(cover_url);
-          } else {
-            return reject();
-          }
-        },
-      });
-    });
-  };
-
-  const checkImage = (anchor, thumb_url) => {
-    let anchor_search = anchor
-      .querySelector("img")
-      .src.split("/images/M/")[1]
-      .split(".")[0];
-    let thumb_search = thumb_url.split("/images/M/")[1].split(".")[0];
-    return anchor_search === thumb_search;
-  };
-
-  const fetchCover = async (imdbId) => {
-    let url =
-      "https://www.imdb.com/title/" + imdbId + "/mediaindex?refine=poster";
-
-    return new Promise((resolve, reject) => {
-      GM_xmlhttpRequest({
-        url: url,
-        method: "GET",
-        timeout: 10000,
-        onload: async function (response) {
-          if (response.status === 200) {
-            const parser = new DOMParser();
-            const result = parser.parseFromString(
-              response.responseText,
-              "text/html"
-            );
-
-            if (result.querySelector(".media_index_thumb_list") !== null) {
-              resolve(await insertCoverAlternative(imdbId));
-            }
-            let imageElement = result
-              .querySelector(".subpage_title_block")
-              .querySelector("img");
-            if (!imageElement) {
-              return resolve(result.querySelector("img.ipc-img").src);
-            }
-            let thumb_url = imageElement.src;
-            let big_cover_found = false;
-            if (!result.querySelector(".media_index_thumb_list")) {
-              return resolve(thumb_url);
-            }
-            for (
-              let n = 0;
-              n <
-              result
-                .querySelector(".media_index_thumb_list")
-                .querySelectorAll("a").length;
-              n++
-            ) {
-              let current_a = result
-                .querySelector(".media_index_thumb_list")
-                .querySelectorAll("a")[n];
-              if (checkImage(current_a, thumb_url) === true) {
-                const cover_page = current_a.href.replace(
-                  "https://passthepopcorn.me",
-                  "https://www.imdb.com"
-                );
-                const cover = await scrapeAndSetCover(cover_page, thumb_url);
-                return resolve(cover);
-              }
-            }
-            if (big_cover_found === false) {
-              return resolve(thumb_url);
-            }
-          } else {
-            return reject(`Got ${response.status} when fetching url: ${url}`);
-          }
-        },
-      });
-    });
-  };
   const fetchPtpImgApiToken = () => {
     return new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
@@ -175,55 +73,6 @@ await (async function () {
       });
     });
   };
-
-  const insertCoverAlternative = async (imdbId) => {
-    let url = "https://www.imdb.com/title/" + imdbId + "/mediaindex";
-    return new Promise((resolve, reject) => {
-      GM_xmlhttpRequest({
-        url: url,
-        method: "GET",
-        timeout: 10000,
-        onload: async function (response) {
-          if (response.status === 200) {
-            const parser = new DOMParser();
-            const result = parser.parseFromString(
-              response.responseText,
-              "text/html"
-            );
-            let thumb_url = result
-              .querySelector(".subpage_title_block")
-              .querySelector("img").src;
-            let big_cover_found = false;
-            for (
-              let n = 0;
-              n <
-              result
-                .querySelector(".media_index_thumb_list")
-                .querySelectorAll("a").length;
-              n++
-            ) {
-              let current_a = result
-                .querySelector(".media_index_thumb_list")
-                .querySelectorAll("a")[n];
-              if (checkImage(current_a, thumb_url) === true) {
-                const cover_page = current_a.href.replace(
-                  "https://passthepopcorn.me",
-                  "https://www.imdb.com"
-                );
-                const cover = await scrapeAndSetCover(cover_page, thumb_url);
-                return resolve(cover);
-              }
-            }
-            if (big_cover_found === false) {
-              return resolve(thumb_url); // if it doesn't find the big cover for some reason, it will use the small thumb as cover
-            }
-          }
-          reject(`Got ${response.status} when fetching url: ${url}`);
-        },
-      });
-    });
-  };
-
   const uploadToPtpimg = async (url, apiKey) => {
     const formData = new FormData();
     formData.append("link-upload", url);
@@ -268,29 +117,31 @@ await (async function () {
     return img.naturalHeight < 150;
   };
 
-  const fetchCoverFromMainPage = async (imdbId) => {
-    let url = "https://www.imdb.com/title/" + imdbId;
-
+  const fetchCover = (imdbId) => {
+    let graphQlReq = {
+      query: `query {
+       title(id: "${imdbId}") {
+         primaryImage {
+            url
+        }
+       }
+      }`,
+    };
     return new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
-        url: url,
-        method: "GET",
-        timeout: 10000,
-        onload: async function (response) {
-          if (response.status === 200) {
-            const parser = new DOMParser();
-            const result = parser.parseFromString(
-              response.responseText,
-              "text/html"
-            );
-            const images = result.querySelectorAll(
-              ".ipc-poster .ipc-poster__poster-image .ipc-image"
-            );
-            if (images.length > 0) {
-              resolve(images[0].src);
-            }
+        url: "https://api.graphql.imdb.com",
+        method: "POST",
+        data: JSON.stringify(graphQlReq),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        onload: function (response) {
+          if (response.status >= 200 && response.status < 300) {
+            let body = JSON.parse(response.response);
+            let { url } = body.data.title.primaryImage;
+            resolve(url);
           } else {
-            return reject(`Got ${response.status} when fetching url: ${url}`);
+            reject("Got error response " + response.responseText);
           }
         },
       });
