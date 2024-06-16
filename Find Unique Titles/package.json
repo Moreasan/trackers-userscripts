@@ -18,8 +18,8 @@
   "private": true,
   "dependencies": {
     "@trim21/gm-fetch": "^0.1.13",
-    "jquery": "^3.6.4",
-    "common": "1.0.0"
+    "common": "1.0.0",
+    "jquery": "^3.6.4"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json}": [
