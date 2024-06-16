@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Find Unique Titles
 // @description Find unique titles to cross seed
-// @version 0.0.9
+// @version 0.0.11
 // @author Mea01
 // @match https://cinemageddon.net/browse.php*
 // @match https://karagarga.in/browse.php*
@@ -27,6 +27,7 @@
 // @match https://ncore.pro/torrents.php*
 // @match https://greatposterwall.com/torrents.php*
 // @match https://ptchdbits.co/torrents.php*
+// @match https://js.chddiy.xyz/torrents.php*
 // @match https://hdsky.me/torrents.php*
 // @match https://www.cinematik.net/browse.php*
 // @match https://pterclub.com/torrents.php*
@@ -677,7 +678,7 @@
           return true;
         }
         canRun(url) {
-          return url.includes("ptchdbits.co");
+          return url.includes("ptchdbits.co") || url.includes("chddiy.xyz");
         }
         async* getSearchRequest() {
           let nodes = Array.from(document.querySelectorAll(".torrents")[0].children[0].children);
@@ -691,16 +692,18 @@
             let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_0__.fetchAndParseHtml)(link.href);
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(response);
             const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector(".rowfollow:nth-child(5)").textContent);
-            console.log("size:", size);
+            let torrentName = element.querySelector(".torrentname a")?.getAttribute("title");
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseYearAndTitle)(torrentName);
             const request = {
               torrents: [ {
                 size,
-                tags: [],
+                tags: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseTags)(torrentName),
                 dom: element
               } ],
               dom: [ element ],
               imdbId,
-              title: ""
+              title,
+              year
             };
             yield request;
           }

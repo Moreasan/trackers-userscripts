@@ -1,4 +1,9 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
+import {
+  parseImdbIdFromLink,
+  parseSize,
+  parseTags,
+  parseYearAndTitle,
+} from "../utils/utils";
 import {
   Category,
   MetaData,
@@ -20,7 +25,7 @@ export default class CHD implements tracker {
   }
 
   canRun(url: string): boolean {
-    return url.includes("ptchdbits.co");
+    return url.includes("ptchdbits.co") || url.includes("chddiy.xyz");
   }
 
   async *getSearchRequest(): AsyncGenerator<
@@ -50,18 +55,22 @@ export default class CHD implements tracker {
       const size = parseSize(
         element.querySelector(".rowfollow:nth-child(5)")!!.textContent!!
       );
-      console.log("size:", size);
+      let torrentName = element
+        .querySelector(".torrentname a")
+        ?.getAttribute("title");
+      const { title, year } = parseYearAndTitle(torrentName);
       const request: MovieRequest = {
         torrents: [
           {
             size,
-            tags: [],
+            tags: parseTags(torrentName),
             dom: element,
           },
         ],
         dom: [element],
         imdbId,
-        title: "",
+        title,
+        year,
       };
       yield request;
     }
