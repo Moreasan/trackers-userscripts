@@ -35,7 +35,7 @@ export const parseImdbId = (text: string) => {
   return results[0];
 };
 
-export const parseResolution = (text: string): Resolution | undefined => {
+export const parseResolution = (text: string|undefined): Resolution | undefined => {
   if (!text) return undefined;
   const resolutionsAndAliases: Record<Resolution, string[]> = {
     SD: ["sd", "pal", "ntsc"],

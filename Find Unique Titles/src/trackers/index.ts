@@ -16,6 +16,7 @@ import IPT from "./IPT";
 import JPTV from "./JPTV";
 import JPop from "./JPop";
 import KG from "./KG";
+import LatTeam from "./LatTeam.js";
 import MTV from "./MTV";
 import MTeam from "./MTeam";
 import NewInsane from "./NewInsane";
@@ -30,34 +31,35 @@ import TiK from "./TiK";
 import nCore from "./nCore";
 
 export {
-  PTP,
-  SC,
-  CLANSUD,
-  KG,
-  CG,
-  HDT,
-  IPT,
+  Aither,
+  AvistaZ,
   BHD,
   BLU,
-  NewInsane,
   BTarg,
+  CG,
+  CHD,
+  CLANSUD,
   CinemaZ,
-  AvistaZ,
-  JPTV,
   FL,
   GPW,
   HDB,
-  TL,
-  Aither,
+  HDSky,
+  HDT,
+  IPT,
+  JPTV,
+  JPop,
+  KG,
+  LatTeam,
+  MTV,
   MTeam,
   nCore,
-  CHD,
-  HDSky,
-  TiK,
+  NewInsane,
   Pter,
-  TSeeds,
-  MTV,
-  JPop,
+  PTP,
   RED,
+  SC,
+  TiK,
+  TL,
   TNT,
+  TSeeds,
 };
