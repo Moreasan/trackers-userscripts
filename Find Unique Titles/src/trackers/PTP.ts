@@ -48,7 +48,7 @@ const parseTorrents = (element: HTMLElement) => {
         tags.push("Remux");
       }
       const torrent: Torrent = {
-        dom: [element],
+        dom: element,
         size,
         tags,
         resolution,
@@ -111,9 +111,8 @@ export default class PTP extends AbstractTracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
     const nodes = findFirst(
-      document,
+      document.body,
       "#torrents-movie-view table.torrent_table > tbody",
       "table.torrent_table > tbody tr.basic-movie-list__details-row",
       ".cover-movie-list__movie"

@@ -1842,7 +1842,7 @@
               const tags = [];
               if (title.includes("Remux")) tags.push("Remux");
               const torrent = {
-                dom: [ element ],
+                dom: element,
                 size,
                 tags,
                 resolution
@@ -1875,7 +1875,7 @@
               return url.includes("passthepopcorn.me");
             }
             async* getSearchRequest() {
-              const nodes = (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.findFirst)(document, "#torrents-movie-view table.torrent_table > tbody", "table.torrent_table > tbody tr.basic-movie-list__details-row", ".cover-movie-list__movie");
+              const nodes = (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.findFirst)(document.body, "#torrents-movie-view table.torrent_table > tbody", "table.torrent_table > tbody tr.basic-movie-list__details-row", ".cover-movie-list__movie");
               yield {
                 total: nodes.length
               };
