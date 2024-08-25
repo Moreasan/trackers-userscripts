@@ -24,6 +24,12 @@ let code: string = await new Promise((resolve, reject) => {
 const ast = esprima.parseScript(code, { tolerant: true });
 
 let privateSitesConfig: PrivateSiteConfig[] = [];
+const sites = [
+  "private_sites",
+  "chinese_sites",
+  "french_sites",
+  "german_sites",
+];
 
 estraverse.traverse(ast, {
   enter: function (node) {
@@ -36,10 +42,10 @@ estraverse.traverse(ast, {
           continue;
         }
         if (
-          declaration.id.name === "private_sites" &&
+          sites.includes(declaration.id.name) &&
           declaration.init.type === "ArrayExpression"
         ) {
-          privateSitesConfig = declaration.init.elements.map((element: any) => {
+          const sitesConfig = declaration.init.elements.map((element: any) => {
             if (element.type === "Literal") {
               return element.value;
             } else if (element.type === "ObjectExpression") {
@@ -64,6 +70,7 @@ estraverse.traverse(ast, {
               return obj;
             }
           });
+          privateSitesConfig = privateSitesConfig.concat(sitesConfig);
           return;
         }
       }
@@ -82,6 +89,12 @@ if (privateSitesConfig) {
   spaceEncode?: string;
   [key: string]: boolean | string | RegExp | undefined | number;
 };\n\n`;
+
+  privateSitesConfig.sort((a, b) => {
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
 
   for (const item of privateSitesConfig) {
     const itemName = item.name;
