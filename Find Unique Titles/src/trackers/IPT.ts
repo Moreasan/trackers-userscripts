@@ -13,7 +13,7 @@ import {
   MusicReleaseType,
   Request,
   SearchResult,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { insertAfter } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -27,7 +27,7 @@ const parseCategory = (element: HTMLElement): Category => {
   if (categoryLogo.includes("TV-")) return Category.TV;
   if (categoryLogo.includes("Music-")) return Category.MUSIC;
 };
-export default class CG implements tracker {
+export default class CG extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

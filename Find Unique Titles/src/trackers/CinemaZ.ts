@@ -4,13 +4,13 @@ import {
   Request,
   MetaData,
   SearchResult,
-  Category,
+  Category, AbstractTracker
 } from "./tracker";
 import { addChild } from "common/dom";
 import { search, SearchResult as SR } from "common/searcher";
 import { CZ as CZTracker } from "common/trackers";
 
-export default class CinemaZ implements tracker {
+export default class CinemaZ extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

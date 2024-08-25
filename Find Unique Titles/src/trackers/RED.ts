@@ -5,7 +5,7 @@ import {
   MusicRequest,
   Request,
   SearchResult,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { fetchAndParseHtml } from "common/http";
 import { logger } from "common/logger";
@@ -31,7 +31,7 @@ function titlesAreEqual(first: string, second: string) {
   return first.toLowerCase() == second.toLowerCase();
 }
 
-export default class RED implements tracker {
+export default class RED extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return false;
   }

@@ -14,7 +14,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "moduleResolution": "NodeNext",
-    "lib": ["es2021", "dom"]
+    "module": "NodeNext",
+    "lib": ["es2021", "dom"],
   },
   "exclude": ["./dist"]
 }

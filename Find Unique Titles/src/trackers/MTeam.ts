@@ -5,7 +5,7 @@ import {
   parseTags,
   parseYearAndTitle,
 } from "../utils/utils";
-import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 
 const isTV = (title: string) => {
@@ -29,7 +29,7 @@ const getCategory = (element: HTMLElement) => {
   }
   return category;
 };
-export default class MTeam implements tracker {
+export default class MTeam extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

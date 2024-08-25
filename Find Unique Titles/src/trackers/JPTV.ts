@@ -4,12 +4,12 @@ import {
   Request,
   SearchResult,
   toGenerator,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
-export default class JPTV implements tracker {
+export default class JPTV extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

@@ -3,7 +3,7 @@ import {
   parseSize,
   parseYearAndTitleFromReleaseName
 } from "../utils/utils";
-import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 import { search, SearchResult as SR } from "common/searcher";
@@ -34,7 +34,7 @@ const parseYearAndTitle = (element: HTMLElement) => {
   const year = parseInt(yearText.substring(1, yearText.length - 1), 10);
   return { title, year };
 };
-export default class TSeeds implements tracker {
+export default class TSeeds extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

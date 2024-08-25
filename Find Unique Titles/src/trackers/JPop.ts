@@ -1,5 +1,5 @@
 import { parseContainerAndFormat, parseSize } from "../utils/utils";
-import { Category, MetaData, MusicReleaseType, MusicRequest, Request, SearchResult, Torrent, tracker } from "./tracker";
+import { Category, MetaData, MusicReleaseType, MusicRequest, Request, SearchResult, Torrent, AbstractTracker } from "./tracker";
 import { insertBefore } from "common/dom";
 
 
@@ -70,7 +70,7 @@ const parseAlbum = (element: Element): string[] => {
 
   return Array.from(titles);
 };
-export default class JPop implements tracker {
+export default class JPop extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

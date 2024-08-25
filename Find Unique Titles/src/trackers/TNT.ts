@@ -12,7 +12,7 @@ import {
   MusicReleaseType,
   Request,
   SearchResult,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseJson, sleep } from "common/http";
@@ -42,7 +42,7 @@ const getTorrentTitle = (element: HTMLElement) => {
   return h5!!.textContent!!;
 };
 
-export default class TNT implements tracker {
+export default class TNT extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

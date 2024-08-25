@@ -44,7 +44,7 @@ export const parseResolution = (text: string|undefined): Resolution | undefined 
     UHD: ["2160p", "uhd", "4k"],
   };
   for (let resolution in resolutionsAndAliases) {
-    let aliases = resolutionsAndAliases[resolution as keyof typeof Resolution];
+    let aliases = resolutionsAndAliases[resolution];
     for (let alias of aliases) {
       if (text.includes(alias)) {
         return resolution as Resolution;

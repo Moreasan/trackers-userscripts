@@ -1,5 +1,5 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, Resolution, SearchResult, toGenerator, tracker } from "./tracker";
+import { Category, MetaData, Request, Resolution, SearchResult, toGenerator, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -39,7 +39,7 @@ function parseTorrents(element: HTMLElement) {
   ];
 }
 
-export default class CG implements tracker {
+export default class CG extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

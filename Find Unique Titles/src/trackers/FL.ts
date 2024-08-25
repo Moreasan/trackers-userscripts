@@ -1,10 +1,9 @@
 import { parseImdbIdFromLink, parseSize } from "../utils/utils";
-import { tracker, Request, MetaData, SearchResult } from "./tracker";
+import { Request, MetaData, SearchResult, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
-import url from "url";
 
-export default class FL implements tracker {
+export default class FL extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

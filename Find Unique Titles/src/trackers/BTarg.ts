@@ -1,5 +1,5 @@
 import { parseImdbId, parseSize } from "../utils/utils";
-import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, AbstractTracker } from "./tracker";
 import { insertAfter } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
@@ -12,7 +12,7 @@ const parseCategory = (element: HTMLElement) => {
   return Category.OTHER;
 };
 
-export default class BTarg implements tracker {
+export default class BTarg extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

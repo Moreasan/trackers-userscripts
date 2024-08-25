@@ -9,12 +9,12 @@ import {
   SearchResult,
   toGenerator,
   Torrent,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
-export default class GPW implements tracker {
+export default class GPW extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

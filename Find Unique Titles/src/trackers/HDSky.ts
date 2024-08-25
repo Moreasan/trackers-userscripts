@@ -5,12 +5,12 @@ import {
   MovieRequest,
   Request,
   SearchResult,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
-export default class HDSky implements tracker {
+export default class HDSky extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

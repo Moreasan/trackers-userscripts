@@ -4,11 +4,11 @@ import {
   Request,
   SearchResult,
   toGenerator,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 
-export default class HDT implements tracker {
+export default class HDT extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

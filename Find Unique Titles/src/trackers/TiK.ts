@@ -1,10 +1,10 @@
 import { parseSize } from "../utils/utils";
-import { MetaData, Request, SearchResult, tracker } from "./tracker";
+import { MetaData, Request, SearchResult, AbstractTracker } from "./tracker";
 import { search, SearchResult as SR } from "common/searcher";
 import { Tik as TikTracker } from "common/trackers";
 import { addChild } from "common/dom";
 
-export default class TiK implements tracker {
+export default class TiK extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

@@ -11,6 +11,7 @@ import {
 import "./settings";
 import { getSettings } from "./settings";
 import { appendErrorMessage, showError } from "common/dom";
+import { sleep } from "common/http";
 import { LEVEL, logger } from "common/logger";
 
 function hideTorrents(request: Request) {
@@ -88,8 +89,9 @@ const main = async function () {
             hideTorrents(request);
             continue;
           }
+          await sleep(targetTracker.waitTimeInMillisBetweenRequest());
           const response = await targetTracker.search(request);
-          logger.debug("Search response: {0}", response)
+          logger.debug("Search response: {0}", response);
           if (
             response == SearchResult.EXIST ||
             response == SearchResult.NOT_ALLOWED
@@ -143,7 +145,7 @@ const main = async function () {
             }
           }
         } catch (e) {
-          console.trace("Error occurred: ", e)
+          console.trace("Error occurred: ", e);
           logger.info("Error occurred when checking {0}, {1]", request, e);
           request.dom[0].setAttribute(
             "title",

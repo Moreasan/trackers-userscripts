@@ -11,7 +11,7 @@ import {
   Request,
   SearchResult,
   Torrent,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { logger } from "common/logger";
@@ -66,7 +66,7 @@ function parseCategory(element: HTMLElement) {
   }
 }
 
-export default class HDB implements tracker {
+export default class HDB extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

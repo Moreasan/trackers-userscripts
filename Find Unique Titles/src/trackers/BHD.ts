@@ -11,7 +11,7 @@ import {
   SearchResult,
   toGenerator,
   Torrent,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -21,8 +21,8 @@ const parseTorrents = (element: HTMLElement): Array<Torrent> => {
   element
     .querySelectorAll('tr[id^="resulttorrent"]')
     .forEach((torrentElement) => {
-      const data = torrentElement.children[0].textContent.trim().split("/");
-      const size = parseSize(torrentElement.children[4].textContent.trim());
+      const data = torrentElement.children[0]!!.textContent!!.trim().split("/");
+      const size = parseSize(torrentElement.children[4]!!.textContent!!.trim());
       const tags = parseTags(torrentElement.textContent);
       const torrent: Torrent = {
         container: data[0].trim(),
@@ -106,7 +106,7 @@ const isTorrentsPage = () => {
   return window.location.href.includes("/torrents");
 };
 
-export default class BHD implements tracker {
+export default class BHD extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

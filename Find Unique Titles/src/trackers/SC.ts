@@ -6,7 +6,7 @@ import {
   Resolution,
   SearchResult,
   Torrent,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -58,7 +58,7 @@ const parseYearTitle = (element: Element) => {
   );
   return { title, year };
 };
-export default class SC implements tracker {
+export default class SC extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

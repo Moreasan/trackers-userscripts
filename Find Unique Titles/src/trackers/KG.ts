@@ -6,7 +6,7 @@ import {
   Resolution,
   SearchResult,
   Torrent,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { insertBefore } from "common/dom";
 import { search, SearchResult as SR } from "common/searcher";
@@ -56,7 +56,7 @@ const parseTorrent = (element: HTMLElement): Array<Torrent> => {
   return torrents;
 };
 
-export default class KG implements tracker {
+export default class KG extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

@@ -5,7 +5,7 @@ import {
   parseSize,
   parseTags, parseYearAndTitle
 } from "../utils/utils";
-import { Category, MetaData, Request, SearchResult, tracker } from "./tracker";
+import { Category, MetaData, Request, SearchResult, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 import { logger } from "common/logger";
 
@@ -22,7 +22,7 @@ const parseCategory = (element: Element) => {
   if (category == "books") return Category.BOOK;
   if (categoryLink.textContent!!.trim().includes("TV")) return Category.TV
 };
-export default class TL implements tracker {
+export default class TL extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

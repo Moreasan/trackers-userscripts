@@ -81,22 +81,48 @@ export enum SearchResult {
 export interface tracker {
   canRun(url: string): boolean;
 
-  search(request: Request): Promise<SearchResult>;
+  search(request: Request<Category>): Promise<SearchResult>;
 
   canBeUsedAsSource(): boolean;
 
   canBeUsedAsTarget(): boolean;
 
-  getSearchRequest(): AsyncGenerator<MetaData | Request, void, void>;
+  getSearchRequest(): AsyncGenerator<MetaData | Request<Category>, void, void>;
 
   name(): string;
+
+  waitTimeInMillisBetweenRequest(): number;
 
   insertTrackersSelect(select: HTMLSelectElement): void;
 }
 
+export abstract class AbstractTracker implements tracker {
+  abstract canBeUsedAsSource(): boolean;
+
+  abstract canBeUsedAsTarget(): boolean;
+
+  abstract canRun(url: string): boolean;
+
+  abstract getSearchRequest(): AsyncGenerator<
+    MetaData | Request<Category>,
+    void,
+    void
+  >;
+
+  abstract insertTrackersSelect(select: HTMLSelectElement): void;
+
+  abstract name(): string;
+
+  abstract search(request: Request<Category>): Promise<SearchResult>;
+
+  waitTimeInMillisBetweenRequest(): number {
+    return 1000;
+  }
+}
+
 export const toGenerator = async function* (
-  requests: Array<Request>
-): AsyncGenerator<MetaData | Request, void, void> {
+  requests: Array<Request<Category>>
+): AsyncGenerator<MetaData | Request<Category>, void, void> {
   yield {
     total: requests.length,
   };

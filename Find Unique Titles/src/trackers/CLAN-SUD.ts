@@ -1,9 +1,9 @@
 import { parseImdbIdFromLink, parseResolution, parseYearAndTitle } from "../utils/utils";
-import { MetaData, Request, SearchResult, tracker, Category } from "./tracker";
+import { MetaData, Request, SearchResult, Category, AbstractTracker } from "./tracker";
 import { insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 
-export default class CLANSUD implements tracker {
+export default class CLANSUD extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

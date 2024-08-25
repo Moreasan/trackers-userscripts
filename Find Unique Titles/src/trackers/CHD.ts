@@ -1,23 +1,13 @@
-import {
-  parseImdbIdFromLink,
-  parseSize,
-  parseTags,
-  parseYearAndTitle,
-} from "../utils/utils";
-import {
-  MetaData,
-  MovieRequest,
-  Request,
-  SearchResult,
-  tracker,
-} from "./tracker";
+import { parseImdbIdFromLink, parseSize, parseTags, parseYearAndTitle } from "../utils/utils";
+import { MetaData, MovieRequest, Request, SearchResult, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 import { search } from "common/searcher";
-import { CHD as CHDTracker } from "common/trackers";
 import { SearchResult as SR } from "common/searcher";
+import { CHD as CHDTracker } from "common/trackers";
 
-export default class CHD implements tracker {
+
+export default class CHD extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }
@@ -97,5 +87,9 @@ export default class CHD implements tracker {
       .querySelector(".searchbox")!!
       .children[2].querySelector("td td.rowfollow tr");
     addChild(element as HTMLElement, select);
+  }
+  
+  waitTimeInMillisBetweenRequest(): number {
+    return 5000;
   }
 }

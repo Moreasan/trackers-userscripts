@@ -6,7 +6,7 @@ import {
   SearchResult,
   toGenerator,
   Torrent,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -77,7 +77,7 @@ const isExclusive = (element: HTMLElement) => {
   return exclusiveLink != null;
 };
 
-export default class Pter implements tracker {
+export default class Pter extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

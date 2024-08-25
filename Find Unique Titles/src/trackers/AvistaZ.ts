@@ -1,10 +1,10 @@
 import { parseImdbIdFromLink, parseYearAndTitle } from "../utils/utils";
-import { tracker, Request, MetaData, SearchResult, Category } from "./tracker";
+import { Request, MetaData, SearchResult, Category, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 import { search, SearchResult as SR } from "common/searcher";
 import { AT as ATTracker } from "common/trackers";
 
-export default class AvistaZ implements tracker {
+export default class AvistaZ extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

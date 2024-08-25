@@ -6,12 +6,11 @@ import {
   parseYearAndTitle,
 } from "../utils/utils";
 import {
+  AbstractTracker,
   Category,
   MetaData,
   Request,
   SearchResult,
-  toGenerator,
-  tracker,
 } from "./tracker";
 import { addChild, insertAfter } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -29,7 +28,7 @@ const parseCategory = (element: HTMLElement): Category | undefined => {
 
   return undefined;
 };
-export default class Aither implements tracker {
+export default class Aither extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

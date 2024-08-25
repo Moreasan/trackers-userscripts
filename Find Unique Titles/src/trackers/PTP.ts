@@ -14,7 +14,7 @@ import {
   Resolution,
   SearchResult,
   Torrent,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { findFirst, insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
@@ -97,7 +97,7 @@ const isAllowedTorrent = (torrent: Torrent) => {
   return true;
 };
 
-export default class PTP implements tracker {
+export default class PTP extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }

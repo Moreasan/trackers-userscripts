@@ -4,11 +4,11 @@ import {
   Request,
   SearchResult,
   toGenerator,
-  tracker,
+  AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
 
-export default class NewInsane implements tracker {
+export default class NewInsane extends AbstractTracker {
   canBeUsedAsSource(): boolean {
     return true;
   }
