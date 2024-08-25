@@ -3,41 +3,41 @@
 // @description Find unique titles to cross seed
 // @version 0.0.11
 // @author Mea01
-// @match https://cinemageddon.net/browse.php*
-// @match https://karagarga.in/browse.php*
-// @match https://hdbits.org/browse.php*
-// @match https://passthepopcorn.me/torrents.php*
-// @match https://passthepopcorn.me/torrents.php?type=seeding
-// @match https://beyond-hd.me/library/*
-// @match https://beyond-hd.me/torrents*
-// @match https://cinemaz.to/movies*
-// @match https://avistaz.to/movies*
-// @match https://blutopia.cc/torrents?*
 // @match https://aither.cc/torrents?*
-// @match https://www.torrentleech.org/torrents/browse*
-// @match https://secret-cinema.pw/torrents.php*
-// @match https://www.clan-sudamerica.net/invision/*
-// @match https://newinsane.info/browse.php*
+// @match https://avistaz.to/movies*
+// @match https://beyond-hd.me/torrents*
+// @match https://beyond-hd.me/library/*
+// @match https://blutopia.cc/torrents?*
 // @match https://btarg.com.ar/tracker/browse.php*
+// @match https://js.chddiy.xyz/torrents.php*
+// @match https://ptchdbits.co/torrents.php*
+// @match https://cinemageddon.net/browse.php*
+// @match https://www.cinematik.net/browse.php*
+// @match https://cinemaz.to/movies*
 // @match https://filelist.io/browse.php*
-// @match https://jptv.club/torrents*
+// @match https://www.clan-sudamerica.net/invision/*
+// @match https://greatposterwall.com/torrents.php*
+// @match https://hdbits.org/browse.php*
+// @match https://hdsky.me/torrents.php*
 // @match https://hd-torrents.org/torrents.php*
 // @match https://iptorrents.com/t*
+// @match https://jpopsuki.eu/torrents.php*
+// @match https://jptv.club/torrents*
+// @match https://karagarga.in/browse.php*
 // @match https://kp.m-team.cc/*
+// @match https://lat-team.com/torrents*
+// @match https://www.morethantv.me/torrents/browse*
 // @match https://ncore.pro/torrents.php*
-// @match https://greatposterwall.com/torrents.php*
-// @match https://ptchdbits.co/torrents.php*
-// @match https://js.chddiy.xyz/torrents.php*
-// @match https://hdsky.me/torrents.php*
-// @match https://www.cinematik.net/browse.php*
+// @match https://newinsane.info/browse.php*
+// @match https://passthepopcorn.me/torrents.php*
+// @match https://passthepopcorn.me/torrents.php?type=seeding
 // @match https://pterclub.com/torrents.php*
+// @match https://secret-cinema.pw/torrents.php*
+// @match https://tntracker.org/*
+// @match https://www.torrentleech.org/torrents/browse*
 // @match https://pterc.com/torrents.php*
 // @match https://torrentseeds.org/torrents*
 // @match https://torrentseeds.org/categories/*
-// @match https://www.morethantv.me/torrents/browse*
-// @match https://jpopsuki.eu/torrents.php*
-// @match https://tntracker.org/*
-// @match https://lat-team.com/torrents*
 // @downloadURL https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js
 // @grant GM.xmlHttpRequest
 // @grant GM.setValue
@@ -669,8 +669,10 @@
       });
       var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
       var _tracker__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/trackers/tracker.ts");
-      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("../common/dist/dom/index.mjs");
       var common_http__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../common/dist/http/index.mjs");
+      var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/searcher/index.mjs");
+      var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("../common/dist/trackers/index.mjs");
       class CHD {
         canBeUsedAsSource() {
           return true;
@@ -713,19 +715,17 @@
           return "CHD";
         }
         async search(request) {
-          if (request.category === _tracker__WEBPACK_IMPORTED_MODULE_2__.Category.MOVIE) {
-            const movieRequest = request;
-            const queryUrl = "https://ptchdbits.co/torrents.php?medium1=1&incldead=0&spstate=0&inclbookmarked=0&search=" + movieRequest.imdbId + "&search_area=4&search_mode=0";
-            const result = await (0, common_http__WEBPACK_IMPORTED_MODULE_0__.fetchAndParseHtml)(queryUrl);
-            let notFound = null === result.querySelector(".torrentname");
-            if (notFound) return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_EXIST;
-            return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.EXIST;
-          }
-          return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_CHECKED;
+          if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_CHECKED;
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.search)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.CHD, {
+            movie_title: "",
+            movie_imdb_id: request.imdbId
+          });
+          if (result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.LOGGED_OUT) return _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_LOGGED_IN;
+          return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.SearchResult.NOT_FOUND ? _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_2__.SearchResult.EXIST;
         }
         insertTrackersSelect(select) {
           const element = document.querySelector(".searchbox").children[2].querySelector("td td.rowfollow tr");
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(element, select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.addChild)(element, select);
         }
       }
     },
@@ -1526,6 +1526,71 @@
         }
         insertTrackersSelect(select) {
           (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.insertBefore)(select, document.getElementById("showdead"));
+        }
+      }
+    },
+    "./src/trackers/LatTeam.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        default: () => LatTeam
+      });
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/dom/index.mjs");
+      const parseCategory = element => {
+        const icon = element.querySelector(".torrent-search--list__category i");
+        if (!icon) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.OTHER;
+        if (icon?.classList.contains("fa-film")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE;
+        if (icon?.classList.contains("fa-tv-retro")) return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.TV;
+        return _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.OTHER;
+      };
+      class LatTeam {
+        canBeUsedAsSource() {
+          return true;
+        }
+        canBeUsedAsTarget() {
+          return false;
+        }
+        canRun(url) {
+          return url.includes("lat-team.com");
+        }
+        async* getSearchRequest() {
+          const rows = document.querySelectorAll(".torrent-search--list__results tbody tr");
+          let elements = Array.from(rows);
+          yield {
+            total: elements.length
+          };
+          for (let element of elements) {
+            const imdbId = element.getAttribute("data-imdb-id");
+            let fullTitle = element.querySelector("a.torrent-search--list__name")?.textContent?.trim();
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseYearAndTitle)(fullTitle);
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector(".torrent-search--list__size")?.textContent?.trim());
+            const tags = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseTags)(fullTitle);
+            const category = parseCategory(element);
+            const resolution = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(element.querySelector(".torrent-search--list__resolution")?.textContent?.trim());
+            const request = {
+              torrents: [ {
+                dom: element,
+                size,
+                tags,
+                resolution,
+                container: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseCodec)(fullTitle)
+              } ],
+              dom: [ element ],
+              imdbId,
+              title,
+              year,
+              category
+            };
+            yield request;
+          }
+        }
+        name() {
+          return "LatTeam";
+        }
+        insertTrackersSelect(select) {
+          select.classList.add("form__select");
+          select.style.width = "180px";
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_2__.addChild)(document.querySelector(".panelV2.torrent-search__results .panel__actions"), select);
         }
       }
     },
@@ -2583,24 +2648,25 @@
         try {
           __webpack_require__.r(__webpack_exports__);
           __webpack_require__.d(__webpack_exports__, {
-            Aither: () => _Aither__WEBPACK_IMPORTED_MODULE_1__.default,
-            AvistaZ: () => _AvistaZ__WEBPACK_IMPORTED_MODULE_2__.default,
-            BHD: () => _BHD__WEBPACK_IMPORTED_MODULE_3__.default,
-            BLU: () => _BLU__WEBPACK_IMPORTED_MODULE_4__.default,
-            BTarg: () => _BTarg__WEBPACK_IMPORTED_MODULE_5__.default,
-            CG: () => _CG__WEBPACK_IMPORTED_MODULE_6__.default,
-            CHD: () => _CHD__WEBPACK_IMPORTED_MODULE_7__.default,
-            CLANSUD: () => _CLAN_SUD__WEBPACK_IMPORTED_MODULE_8__.default,
-            CinemaZ: () => _CinemaZ__WEBPACK_IMPORTED_MODULE_9__.default,
-            FL: () => _FL__WEBPACK_IMPORTED_MODULE_10__.default,
-            GPW: () => _GPW__WEBPACK_IMPORTED_MODULE_11__.default,
-            HDB: () => _HDB__WEBPACK_IMPORTED_MODULE_12__.default,
-            HDSky: () => _HDSky__WEBPACK_IMPORTED_MODULE_13__.default,
-            HDT: () => _HDT__WEBPACK_IMPORTED_MODULE_14__.default,
-            IPT: () => _IPT__WEBPACK_IMPORTED_MODULE_15__.default,
-            JPTV: () => _JPTV__WEBPACK_IMPORTED_MODULE_16__.default,
-            JPop: () => _JPop__WEBPACK_IMPORTED_MODULE_17__.default,
-            KG: () => _KG__WEBPACK_IMPORTED_MODULE_18__.default,
+            Aither: () => _Aither__WEBPACK_IMPORTED_MODULE_0__.default,
+            AvistaZ: () => _AvistaZ__WEBPACK_IMPORTED_MODULE_1__.default,
+            BHD: () => _BHD__WEBPACK_IMPORTED_MODULE_2__.default,
+            BLU: () => _BLU__WEBPACK_IMPORTED_MODULE_3__.default,
+            BTarg: () => _BTarg__WEBPACK_IMPORTED_MODULE_4__.default,
+            CG: () => _CG__WEBPACK_IMPORTED_MODULE_5__.default,
+            CHD: () => _CHD__WEBPACK_IMPORTED_MODULE_6__.default,
+            CLANSUD: () => _CLAN_SUD__WEBPACK_IMPORTED_MODULE_7__.default,
+            CinemaZ: () => _CinemaZ__WEBPACK_IMPORTED_MODULE_8__.default,
+            FL: () => _FL__WEBPACK_IMPORTED_MODULE_9__.default,
+            GPW: () => _GPW__WEBPACK_IMPORTED_MODULE_10__.default,
+            HDB: () => _HDB__WEBPACK_IMPORTED_MODULE_11__.default,
+            HDSky: () => _HDSky__WEBPACK_IMPORTED_MODULE_12__.default,
+            HDT: () => _HDT__WEBPACK_IMPORTED_MODULE_13__.default,
+            IPT: () => _IPT__WEBPACK_IMPORTED_MODULE_14__.default,
+            JPTV: () => _JPTV__WEBPACK_IMPORTED_MODULE_15__.default,
+            JPop: () => _JPop__WEBPACK_IMPORTED_MODULE_16__.default,
+            KG: () => _KG__WEBPACK_IMPORTED_MODULE_17__.default,
+            LatTeam: () => _LatTeam__WEBPACK_IMPORTED_MODULE_18__.default,
             MTV: () => _MTV__WEBPACK_IMPORTED_MODULE_19__.default,
             MTeam: () => _MTeam__WEBPACK_IMPORTED_MODULE_20__.default,
             NewInsane: () => _NewInsane__WEBPACK_IMPORTED_MODULE_22__.default,
@@ -2614,29 +2680,25 @@
             TiK: () => _TiK__WEBPACK_IMPORTED_MODULE_27__.default,
             nCore: () => _nCore__WEBPACK_IMPORTED_MODULE_21__.default
           });
-          var _Aither__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/Aither.ts");
-          var _AvistaZ__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/trackers/AvistaZ.ts");
-          var _BHD__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/trackers/BHD.ts");
-          var _BLU__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/trackers/BLU.ts");
-          var _BTarg__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/trackers/BTarg.ts");
-          var _CG__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/trackers/CG.ts");
-          var _CHD__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/trackers/CHD.ts");
-          var _CLAN_SUD__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/trackers/CLAN-SUD.ts");
-          var _CinemaZ__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/trackers/CinemaZ.ts");
-          var _FL__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/trackers/FL.ts");
-          var _GPW__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./src/trackers/GPW.ts");
-          var _HDB__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./src/trackers/HDB.ts");
-          var _HDSky__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./src/trackers/HDSky.ts");
-          var _HDT__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./src/trackers/HDT.ts");
-          var _IPT__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./src/trackers/IPT.ts");
-          var _JPTV__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./src/trackers/JPTV.ts");
-          var _JPop__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./src/trackers/JPop.ts");
-          var _KG__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./src/trackers/KG.ts");
-          Object(function webpackMissingModule() {
-            var e = new Error("Cannot find module './LatTeam.js'");
-            e.code = "MODULE_NOT_FOUND";
-            throw e;
-          }());
+          var _Aither__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/Aither.ts");
+          var _AvistaZ__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/AvistaZ.ts");
+          var _BHD__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/trackers/BHD.ts");
+          var _BLU__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/trackers/BLU.ts");
+          var _BTarg__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/trackers/BTarg.ts");
+          var _CG__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/trackers/CG.ts");
+          var _CHD__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/trackers/CHD.ts");
+          var _CLAN_SUD__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/trackers/CLAN-SUD.ts");
+          var _CinemaZ__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/trackers/CinemaZ.ts");
+          var _FL__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/trackers/FL.ts");
+          var _GPW__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/trackers/GPW.ts");
+          var _HDB__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./src/trackers/HDB.ts");
+          var _HDSky__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./src/trackers/HDSky.ts");
+          var _HDT__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./src/trackers/HDT.ts");
+          var _IPT__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./src/trackers/IPT.ts");
+          var _JPTV__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./src/trackers/JPTV.ts");
+          var _JPop__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./src/trackers/JPop.ts");
+          var _KG__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./src/trackers/KG.ts");
+          var _LatTeam__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./src/trackers/LatTeam.ts");
           var _MTV__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./src/trackers/MTV.ts");
           var _MTeam__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./src/trackers/MTeam.ts");
           var _NewInsane__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./src/trackers/NewInsane.ts");
@@ -3229,6 +3291,7 @@
       __webpack_require__.d(__webpack_exports__, {
         AT: () => AT,
         Aither: () => Aither,
+        CHD: () => CHD,
         CZ: () => CZ,
         HDb: () => HDb,
         KG: () => KG,
@@ -3237,6 +3300,13 @@
         TSeeds: () => TSeeds,
         Tik: () => Tik
       });
+      const AT = {
+        name: "AT",
+        searchUrl: "https://avistaz.to/movies?search=&imdb=%tt%",
+        loggedOutRegex: /Forgot Your Password/,
+        matchRegex: /class="overlay-container"|class="movie-poster/,
+        positiveMatch: true
+      };
       const Aither = {
         name: "Aither",
         searchUrl: "https://aither.cc/torrents?imdbId=%nott%",
@@ -3245,12 +3315,11 @@
         positiveMatch: true,
         both: true
       };
-      const AT = {
-        name: "AT",
-        searchUrl: "https://avistaz.to/movies?search=&imdb=%tt%",
-        loggedOutRegex: /Forgot Your Password/,
-        matchRegex: /class="overlay-container"|class="movie-poster/,
-        positiveMatch: true
+      const CHD = {
+        name: "CHD",
+        searchUrl: "https://chdbits.co/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search_area=4&search_mode=0&search=%tt%",
+        loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)/,
+        matchRegex: /Nothing found|没有种子|沒有種子/
       };
       const CZ = {
         name: "CZ",
@@ -3292,19 +3361,19 @@
         positiveMatch: true,
         TV: true
       };
-      const Tik = {
-        name: "Tik",
-        searchUrl: "https://www.cinematik.net/browse.php?cat=0&incldead=1&srchdtls=1&search=%tt%",
-        loggedOutRegex: /Not logged in!|Ray ID/,
-        matchRegex: /Nothing found!/,
-        rateLimit: 125,
-        both: true
-      };
       const TSeeds = {
         name: "TSeeds",
         searchUrl: "https://www.torrentseeds.org/torrents?tmdbId=%tmdbid%",
         loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
         matchRegex: /"Download">/,
+        positiveMatch: true,
+        both: true
+      };
+      const Tik = {
+        name: "Tik",
+        searchUrl: "https://cinematik.net/torrents?imdbId=%tt%",
+        loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+        matchRegex: /torrent-search--list__overview/,
         positiveMatch: true,
         both: true
       };

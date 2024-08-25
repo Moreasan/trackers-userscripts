@@ -5,7 +5,6 @@ import {
   parseYearAndTitle,
 } from "../utils/utils";
 import {
-  Category,
   MetaData,
   MovieRequest,
   Request,
@@ -14,6 +13,9 @@ import {
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
+import { search } from "common/searcher";
+import { CHD as CHDTracker } from "common/trackers";
+import { SearchResult as SR } from "common/searcher";
 
 export default class CHD implements tracker {
   canBeUsedAsSource(): boolean {
@@ -80,23 +82,14 @@ export default class CHD implements tracker {
     return "CHD";
   }
 
-  async search(request: Request<any>): Promise<SearchResult> {
-    if (request.category === Category.MOVIE) {
-      const movieRequest = request as MovieRequest;
-      const queryUrl =
-        "https://ptchdbits.co/torrents.php?medium1=1&incldead=0&spstate=0&inclbookmarked=0&search=" +
-        movieRequest.imdbId +
-        "&search_area=4&search_mode=0";
-
-      const result = await fetchAndParseHtml(queryUrl);
-      let notFound = result.querySelector(".torrentname") === null;
-      if (notFound) {
-        return SearchResult.NOT_EXIST;
-      }
-      return SearchResult.EXIST;
-    }
-
-    return SearchResult.NOT_CHECKED;
+  async search(request: Request): Promise<SearchResult> {
+    if (!request.imdbId) return SearchResult.NOT_CHECKED;
+    const result = await search(CHDTracker, {
+      movie_title: "",
+      movie_imdb_id: request.imdbId,
+    });
+    if (result == SR.LOGGED_OUT) return SearchResult.NOT_LOGGED_IN;
+    return result == SR.NOT_FOUND ? SearchResult.NOT_EXIST : SearchResult.EXIST;
   }
 
   insertTrackersSelect(select: HTMLElement): void {
