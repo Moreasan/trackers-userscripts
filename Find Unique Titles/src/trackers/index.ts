@@ -16,7 +16,7 @@ import IPT from "./IPT";
 import JPTV from "./JPTV";
 import JPop from "./JPop";
 import KG from "./KG";
-import LatTeam from "./LatTeam.js";
+import LatTeam from "./LatTeam";
 import MTV from "./MTV";
 import MTeam from "./MTeam";
 import NewInsane from "./NewInsane";
