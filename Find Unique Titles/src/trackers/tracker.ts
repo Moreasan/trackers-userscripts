@@ -5,6 +5,7 @@ export interface Torrent {
   format?: string | null;
   resolution?: Resolution;
   dom: HTMLElement;
+  releaseGroup?: string;
 }
 
 export enum Resolution {

@@ -35,7 +35,9 @@ export const parseImdbId = (text: string) => {
   return results[0];
 };
 
-export const parseResolution = (text: string|undefined): Resolution | undefined => {
+export const parseResolution = (
+  text: string | undefined
+): Resolution | undefined => {
   if (!text) return undefined;
   const resolutionsAndAliases: Record<Resolution, string[]> = {
     SD: ["sd", "pal", "ntsc"],
@@ -155,4 +157,14 @@ export const parseYear = (title: string) => {
   const regex = /-(\d{4})-/;
   const match = title.match(regex);
   if (match) return parseInt(match[1], 10);
+};
+
+export const parseReleaseGroup = (title: string): string | null => {
+  const lastDashIndex = title.lastIndexOf("-");
+  if (lastDashIndex === -1 || lastDashIndex === title.length - 1) {
+    return null;
+  }
+  const maybeGroup = title.substring(lastDashIndex + 1).trim();
+  if (maybeGroup.includes(" ")) return null;
+  return maybeGroup;
 };

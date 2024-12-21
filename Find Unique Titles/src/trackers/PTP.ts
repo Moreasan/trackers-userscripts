@@ -20,6 +20,47 @@ import { findFirst, insertBefore } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 import { logger } from "common/logger";
 
+const BANNED_RELEASE_GROUPS = [
+  "aXXo",
+  "BMDRu",
+  "BRrip",
+  "CM8",
+  "CrEwSaDe",
+  "CTFOH",
+  "d3g",
+  "DNL",
+  "FaNGDiNG0",
+  "HD2DVD",
+  "HDTime",
+  "ION10",
+  "iPlanet",
+  "KiNGDOM",
+  "mHD",
+  "mSD",
+  "nHD",
+  "nikt0",
+  "nSD",
+  "NhaNc3",
+  "OFT",
+  "PRODJi",
+  "SANTi",
+  "SPiRiT",
+  "STUTTERSHIT",
+  "ViSION",
+  "VXT",
+  "WAF",
+  "x0r",
+  "YIFY",
+  "OFT",
+  "BHDStudio",
+  "nikt0",
+  "HDT",
+  "LAMA",
+  "WORLD",
+  "SasukeducK",
+  "SPiRiT",
+];
+
 function isSupportedCategory(category: Category | undefined) {
   return (
     category === undefined ||
@@ -92,6 +133,12 @@ const isAllowedTorrent = (torrent: Torrent) => {
     !isHDR(torrent)
   ) {
     logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
+    return false;
+  }
+  if (BANNED_RELEASE_GROUPS.includes(torrent.releaseGroup)) {
+    logger.debug(
+      `[PTP] Torrent not allowed: banned release group: ${torrent.releaseGroup}`
+    );
     return false;
   }
   return true;

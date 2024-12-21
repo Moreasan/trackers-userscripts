@@ -1828,6 +1828,7 @@
           var common_logger__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../common/dist/logger/index.mjs");
           var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _utils_cache__WEBPACK_IMPORTED_MODULE_5__ ]);
           _utils_cache__WEBPACK_IMPORTED_MODULE_5__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+          const BANNED_RELEASE_GROUPS = [ "aXXo", "BMDRu", "BRrip", "CM8", "CrEwSaDe", "CTFOH", "d3g", "DNL", "FaNGDiNG0", "HD2DVD", "HDTime", "ION10", "iPlanet", "KiNGDOM", "mHD", "mSD", "nHD", "nikt0", "nSD", "NhaNc3", "OFT", "PRODJi", "SANTi", "SPiRiT", "STUTTERSHIT", "ViSION", "VXT", "WAF", "x0r", "YIFY", "OFT", "BHDStudio", "nikt0", "HDT", "LAMA", "WORLD", "SasukeducK", "SPiRiT" ];
           function isSupportedCategory(category) {
             return void 0 === category || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.MOVIE || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.DOCUMENTARY || category === _tracker__WEBPACK_IMPORTED_MODULE_0__.Category.LIVE_PERFORMANCE;
           }
@@ -1860,6 +1861,10 @@
           const isAllowedTorrent = torrent => {
             if ("x265" === torrent.container && torrent.resolution !== _tracker__WEBPACK_IMPORTED_MODULE_0__.Resolution.UHD && !isHDR(torrent)) {
               common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug("[PTP] Torrent not allowed: non HDR X265 and not 2160p");
+              return false;
+            }
+            if (BANNED_RELEASE_GROUPS.includes(torrent.releaseGroup)) {
+              common_logger__WEBPACK_IMPORTED_MODULE_2__.logger.debug(`[PTP] Torrent not allowed: banned release group: ${torrent.releaseGroup}`);
               return false;
             }
             return true;
@@ -2345,7 +2350,8 @@
                 tags: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseTags)(torrentTitle),
                 dom: element,
                 resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseResolution)(torrentTitle),
-                container: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseCodec)(torrentTitle)
+                container: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseCodec)(torrentTitle),
+                releaseGroup: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseReleaseGroup)(torrentTitle)
               } ],
               dom: [ element ],
               imdbId,
@@ -2940,6 +2946,7 @@
         parseContainerAndFormat: () => parseContainerAndFormat,
         parseImdbId: () => parseImdbId,
         parseImdbIdFromLink: () => parseImdbIdFromLink,
+        parseReleaseGroup: () => parseReleaseGroup,
         parseResolution: () => parseResolution,
         parseSize: () => parseSize,
         parseTags: () => parseTags,
@@ -3063,6 +3070,13 @@
         const regex = /-(\d{4})-/;
         const match = title.match(regex);
         if (match) return parseInt(match[1], 10);
+      };
+      const parseReleaseGroup = title => {
+        const lastDashIndex = title.lastIndexOf("-");
+        if (-1 === lastDashIndex || lastDashIndex === title.length - 1) return null;
+        const maybeGroup = title.substring(lastDashIndex + 1).trim();
+        if (maybeGroup.includes(" ")) return null;
+        return maybeGroup;
       };
     },
     "../common/dist/dom/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {

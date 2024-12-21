@@ -1,6 +1,6 @@
 import {
   parseCodec,
-  parseImdbIdFromLink,
+  parseImdbIdFromLink, parseReleaseGroup,
   parseResolution,
   parseSize,
   parseTags, parseYearAndTitle
@@ -63,6 +63,7 @@ export default class TL extends AbstractTracker {
             dom: element as HTMLElement,
             resolution: parseResolution(torrentTitle),
             container: parseCodec(torrentTitle),
+            releaseGroup: parseReleaseGroup(torrentTitle)
           },
         ],
         dom: [element as HTMLElement],
