@@ -3181,7 +3181,6 @@
         LEVEL: () => LEVEL,
         logger: () => logger
       });
-      var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
       var LEVEL;
       !function(LEVEL) {
         LEVEL[LEVEL.DEBUG = 0] = "DEBUG";
@@ -3197,18 +3196,10 @@
           logger.prefix = prefix;
         },
         info: (message, ...args) => {
-          if (logger.level <= LEVEL.INFO) {
-            let formattedMessage = formatMessage(LEVEL.INFO, message, args);
-            console.log(formattedMessage);
-            postMessage(formattedMessage);
-          }
+          if (logger.level <= LEVEL.INFO) console.log(formatMessage(LEVEL.INFO, message, args));
         },
         debug: (message, ...args) => {
-          if (logger.level <= LEVEL.DEBUG) {
-            let formattedMessage = formatMessage(LEVEL.DEBUG, message, args);
-            console.log(formattedMessage);
-            postMessage(formattedMessage);
-          }
+          if (logger.level <= LEVEL.DEBUG) console.log(formatMessage(LEVEL.DEBUG, message, args));
         }
       };
       const formatMessage = (level, message, args) => {
@@ -3222,7 +3213,7 @@
       };
       const stringifyWithoutDOM = obj => {
         const seen = new WeakSet;
-        function replacer(_key, value) {
+        function replacer(key, value) {
           if (value instanceof Node) return;
           if ("object" == typeof value && null !== value) {
             if (seen.has(value)) return "[Circular Reference]";
@@ -3231,15 +3222,6 @@
           return value;
         }
         return JSON.stringify(obj, replacer);
-      };
-      const postMessage = message => {
-        (0, _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__.default)("http://localhost:9898", {
-          method: "POST",
-          body: JSON.stringify(message),
-          headers: {
-            "content-type": "application/json"
-          }
-        }).then((() => {}));
       };
     },
     "../common/dist/searcher/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
