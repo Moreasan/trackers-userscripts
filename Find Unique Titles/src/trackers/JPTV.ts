@@ -24,7 +24,10 @@ export default class JPTV extends AbstractTracker {
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
-    let nodes = document.querySelectorAll(".view-torrent");
+    let nodes = Array.from(document.querySelectorAll(".view-torrent"));
+    yield {
+      total: nodes.length,
+    };
     for (const element of nodes) {
       let response = await fetchAndParseHtml(
         (element as HTMLAnchorElement).href
@@ -48,10 +51,8 @@ export default class JPTV extends AbstractTracker {
         imdbId,
         title: "",
       };
-      requests.push(request);
+      yield request
     }
-
-    yield* toGenerator(requests);
   }
 
   name(): string {

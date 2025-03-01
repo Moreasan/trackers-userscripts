@@ -1307,8 +1307,10 @@
           return url.includes("jptv.club");
         }
         async* getSearchRequest() {
-          const requests = [];
-          let nodes = document.querySelectorAll(".view-torrent");
+          let nodes = Array.from(document.querySelectorAll(".view-torrent"));
+          yield {
+            total: nodes.length
+          };
           for (const element of nodes) {
             let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(element.href);
             const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbIdFromLink)(response);
@@ -1323,9 +1325,8 @@
               imdbId,
               title: ""
             };
-            requests.push(request);
+            yield request;
           }
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_0__.toGenerator)(requests);
         }
         name() {
           return "JPTV";
