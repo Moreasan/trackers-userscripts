@@ -26,6 +26,17 @@ export const parseImdbIdFromLink = (element: HTMLElement) => {
   return null;
 };
 
+export const parseTmdbIdFromLink = (element: HTMLElement) => {
+  const tmdbLink: HTMLAnchorElement | null = element.querySelector(
+    '[href*="https://www.themoviedb.org"]'
+  );
+  if (tmdbLink) {
+    let parts = tmdbLink.href.split("/");
+    return parts[parts.length - 1].trim().replaceAll(/\?.+/g, "");
+  }
+  return null;
+};
+
 export const parseImdbId = (text: string) => {
   if (!text) return null;
   const results = text.match(/(tt\d+)/);

@@ -264,3 +264,10 @@ export const getRottenID1 = async (imdbID: string) => {
     }
   }
 };
+
+export const getImdbIdFromTmdbID = async (tmdbId: string) => {
+  const url = `https://api.themoviedb.org/3/movie/${tmdbId}/external_ids?api_key=d12b33d3f4fb8736dc06f22560c4f8d4`
+  const response = await fetchUrl(url);
+  const result = JSON.parse(response);
+  return result.imdb_id;
+}

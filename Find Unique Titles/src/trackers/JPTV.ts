@@ -1,4 +1,10 @@
-import { parseImdbIdFromLink, parseSize } from "../utils/utils";
+import {
+  parseCodec,
+  parseImdbIdFromLink, parseReleaseGroup, parseResolution,
+  parseSize, parseTags,
+  parseTmdbIdFromLink,
+  parseYearAndTitle
+} from "../utils/utils";
 import {
   MetaData,
   Request,
@@ -8,6 +14,9 @@ import {
 } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
+import { logger } from "common/logger";
+import { getImdbIdFromTmdbID } from "common/searcher";
+import * as url from "node:url";
 
 export default class JPTV extends AbstractTracker {
   canBeUsedAsSource(): boolean {
@@ -32,26 +41,42 @@ export default class JPTV extends AbstractTracker {
       let response = await fetchAndParseHtml(
         (element as HTMLAnchorElement).href
       );
-      const imdbId = parseImdbIdFromLink(response as HTMLElement);
+      let imdbId = parseImdbIdFromLink(response as HTMLElement);
+      if (!imdbId) {
+        const tmdb = parseTmdbIdFromLink(response as HTMLElement);
+        if (tmdb) {
+          logger.debug(
+            "{0} Will try find ImdbId from TmdbId {1}",
+            this.name(),
+            tmdb
+          );
+          imdbId = await getImdbIdFromTmdbID(tmdb);
+        }
+      }
       const size = parseSize(
-        document
-          .querySelector(".view-torrent")
-          .parentElement.parentElement.children[7].textContent.trim() as string
+        element?.parentElement?.parentElement?.children[7]?.textContent?.trim() as string
       );
-
+      let torrentTitle = element.textContent!!.trim();
+      const { title, year } = parseYearAndTitle(
+        torrentTitle
+      );
       const request: Request = {
         torrents: [
           {
             size,
-            tags: [],
+            tags: parseTags(torrentTitle),
+            resolution: parseResolution(torrentTitle),
+            container: parseCodec(torrentTitle),
+            releaseGroup: parseReleaseGroup(torrentTitle),
             dom: element,
           },
         ],
         dom: [element as HTMLElement],
         imdbId,
-        title: "",
+        title,
+        year,
       };
-      yield request
+      yield request;
     }
   }
 
@@ -64,9 +89,16 @@ export default class JPTV extends AbstractTracker {
   }
 
   insertTrackersSelect(select: HTMLElement): void {
-    addChild(
-      document.querySelector(".form-torrent-search") as HTMLElement,
-      select
-    );
+    if (window.location.toString().indexOf("/filter") > -1) {
+      addChild(
+        document.querySelector("ul.pagination") as HTMLUListElement,
+        select
+      );
+    } else {
+      addChild(
+        document.querySelector(".form-torrent-search") as HTMLElement,
+        select
+      );
+    }
   }
 }
