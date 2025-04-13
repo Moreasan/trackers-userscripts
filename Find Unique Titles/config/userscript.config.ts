@@ -32,7 +32,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://avistaz.to/movies*",
       "https://beyond-hd.me/torrents*",
       "https://beyond-hd.me/library/*",
-      "https://blutopia.cc/torrents?*",
+      "https://blutopia.cc/torrents*",
       "https://btarg.com.ar/tracker/browse.php*",
       "https://js.chddiy.xyz/torrents.php*",
       "https://ptchdbits.co/torrents.php*",

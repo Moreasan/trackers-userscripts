@@ -7,7 +7,7 @@
 // @match https://avistaz.to/movies*
 // @match https://beyond-hd.me/torrents*
 // @match https://beyond-hd.me/library/*
-// @match https://blutopia.cc/torrents?*
+// @match https://blutopia.cc/torrents*
 // @match https://btarg.com.ar/tracker/browse.php*
 // @match https://js.chddiy.xyz/torrents.php*
 // @match https://ptchdbits.co/torrents.php*
@@ -503,8 +503,11 @@
           return url.includes("blutopia.xyz") || url.includes("blutopia.cc");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll(".torrent-search--list__results tbody tr").forEach((element => {
+          let nodes = Array.from(document.querySelectorAll(".torrent-search--list__results tbody tr"));
+          yield {
+            total: nodes.length
+          };
+          for (let element of nodes) {
             let imdbId = "tt" + element.getAttribute("data-imdb-id");
             let size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(element.querySelector(".torrent-search--list__size").textContent);
             const request = {
@@ -517,9 +520,8 @@
               imdbId,
               title: ""
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_0__.toGenerator)(requests);
+            yield request;
+          }
         }
         name() {
           return "BLU";
@@ -532,7 +534,10 @@
         }
         insertTrackersSelect(select) {
           select.classList.add("form__select");
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelectorAll(".panel__actions")[1], select);
+          const wrapper = document.createElement("div");
+          wrapper.classList.add("panel_action");
+          wrapper.appendChild(select);
+          (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(document.querySelectorAll(".panel__actions")[0], wrapper);
         }
       }
     },
@@ -877,7 +882,7 @@
           return url.includes("filelist.io");
         }
         async* getSearchRequest() {
-          let nodes = document.querySelectorAll(".torrentrow");
+          let nodes = Array.from(document.querySelectorAll(".torrentrow"));
           yield {
             total: nodes.length
           };

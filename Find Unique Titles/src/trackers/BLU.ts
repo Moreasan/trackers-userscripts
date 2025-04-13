@@ -24,30 +24,32 @@ export default class BLU extends AbstractTracker {
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
     const requests: Array<Request> = [];
-    document
-      .querySelectorAll(".torrent-search--list__results tbody tr")
-      .forEach((element: HTMLElement) => {
-        let imdbId = "tt" + element.getAttribute("data-imdb-id");
+    let nodes = Array.from(
+      document.querySelectorAll(".torrent-search--list__results tbody tr")
+    );
+    yield {
+      total: nodes.length,
+    };
+    for (let element of nodes) {
+      let imdbId = "tt" + element.getAttribute("data-imdb-id");
 
-        let size = parseSize(
-          element.querySelector(".torrent-search--list__size")!.textContent!
-        );
-        const request: Request = {
-          torrents: [
-            {
-              size,
-              tags: [],
-              dom: element,
-            },
-          ],
-          dom: [element],
-          imdbId,
-          title: "",
-        };
-        requests.push(request);
-      });
-
-    yield* toGenerator(requests);
+      let size = parseSize(
+        element.querySelector(".torrent-search--list__size")!.textContent!
+      );
+      const request: Request = {
+        torrents: [
+          {
+            size,
+            tags: [],
+            dom: element,
+          },
+        ],
+        dom: [element],
+        imdbId,
+        title: "",
+      };
+      yield request;
+    }
   }
 
   name(): string {
@@ -70,9 +72,12 @@ export default class BLU extends AbstractTracker {
 
   insertTrackersSelect(select: HTMLElement): void {
     select.classList.add("form__select");
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('panel_action')
+    wrapper.appendChild(select)
     addChild(
-      document.querySelectorAll(".panel__actions")[1] as HTMLElement,
-      select
+      document.querySelectorAll(".panel__actions")[0] as HTMLElement,
+      wrapper
     );
   }
 }
