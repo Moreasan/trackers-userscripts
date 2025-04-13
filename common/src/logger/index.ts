@@ -1,3 +1,6 @@
+import GM_fetch from "@trim21/gm-fetch";
+
+
 export enum LEVEL {
   DEBUG,
   INFO,
@@ -50,10 +53,10 @@ const formatMessage = (level: LEVEL, message: string, args: any[]): string => {
   );
 };
 
-const stringifyWithoutDOM = (obj) => {
+const stringifyWithoutDOM = (obj: any) => {
   const seen = new WeakSet(); // Use a WeakSet to track visited objects
 
-  function replacer(key, value) {
+  function replacer(_key: string, value: any) {
     if (value instanceof Node) {
       // Ignore DOM elements
       return undefined;

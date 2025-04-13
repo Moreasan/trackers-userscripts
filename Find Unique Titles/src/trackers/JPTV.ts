@@ -1,22 +1,18 @@
 import {
   parseCodec,
-  parseImdbIdFromLink, parseReleaseGroup, parseResolution,
-  parseSize, parseTags,
+  parseImdbIdFromLink,
+  parseReleaseGroup,
+  parseResolution,
+  parseSize,
+  parseTags,
   parseTmdbIdFromLink,
-  parseYearAndTitle
+  parseYearAndTitle,
 } from "../utils/utils";
-import {
-  MetaData,
-  Request,
-  SearchResult,
-  toGenerator,
-  AbstractTracker,
-} from "./tracker";
+import { MetaData, Request, SearchResult, AbstractTracker } from "./tracker";
 import { addChild } from "common/dom";
 import { fetchAndParseHtml } from "common/http";
 import { logger } from "common/logger";
 import { getImdbIdFromTmdbID } from "common/searcher";
-import * as url from "node:url";
 
 export default class JPTV extends AbstractTracker {
   canBeUsedAsSource(): boolean {
@@ -32,18 +28,17 @@ export default class JPTV extends AbstractTracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
-    let nodes = Array.from(document.querySelectorAll(".view-torrent"));
+    let nodes = Array.from(document.querySelectorAll(".view-torrent"))
     yield {
       total: nodes.length,
     };
     for (const element of nodes) {
-      let response = await fetchAndParseHtml(
+      let response = (await fetchAndParseHtml(
         (element as HTMLAnchorElement).href
-      );
-      let imdbId = parseImdbIdFromLink(response as HTMLElement);
+      )) as HTMLElement;
+      let imdbId = parseImdbIdFromLink(response);
       if (!imdbId) {
-        const tmdb = parseTmdbIdFromLink(response as HTMLElement);
+        const tmdb = parseTmdbIdFromLink(response);
         if (tmdb) {
           logger.debug(
             "{0} Will try find ImdbId from TmdbId {1}",
@@ -57,9 +52,19 @@ export default class JPTV extends AbstractTracker {
         element?.parentElement?.parentElement?.children[7]?.textContent?.trim() as string
       );
       let torrentTitle = element.textContent!!.trim();
-      const { title, year } = parseYearAndTitle(
-        torrentTitle
+      let { title, year } = parseYearAndTitle(
+        response
+          .querySelector("h1.movie-heading")
+          ?.textContent?.replaceAll(/\s+/g, " ")
+          ?.trim()
       );
+      if (!title) {
+        const titleAndYear = parseYearAndTitle(torrentTitle);
+        if (titleAndYear) {
+          title = titleAndYear.title;
+          year = titleAndYear.year;
+        }
+      }
       const request: Request = {
         torrents: [
           {
@@ -68,7 +73,7 @@ export default class JPTV extends AbstractTracker {
             resolution: parseResolution(torrentTitle),
             container: parseCodec(torrentTitle),
             releaseGroup: parseReleaseGroup(torrentTitle),
-            dom: element,
+            dom: element?.parentElement?.parentElement,
           },
         ],
         dom: [element as HTMLElement],
