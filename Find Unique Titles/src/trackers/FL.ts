@@ -17,7 +17,7 @@ export default class FL extends AbstractTracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    let nodes = document.querySelectorAll(".torrentrow");
+    let nodes = Array.from(document.querySelectorAll(".torrentrow"));
     yield {
       total: nodes.length,
     };
