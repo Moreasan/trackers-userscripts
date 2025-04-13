@@ -935,29 +935,32 @@
           return true;
         }
         canRun(url) {
-          return url.includes("greatposterwall.com");
+          return url.includes("greatposterwall.com") && !url.includes("id=");
         }
         async* getSearchRequest() {
-          const requests = [];
-          document.querySelectorAll("#torrent_table tr.TableTorrent-rowMovieInfo").forEach((element => {
+          const elements = document.querySelectorAll("#torrent_table tr.TableTorrent-rowMovieInfo");
+          yield {
+            total: elements.length
+          };
+          for (let element of Array.from(elements)) {
             let imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseImdbIdFromLink)(element);
             const groupId = element.getAttribute("group-id");
             const torrents = [];
             if (groupId) {
               const torrentElements = document.querySelectorAll(`tr.TableTorrent-rowTitle[group-id="${groupId}"]`);
-              for (const torrentElement of torrentElements) {
-                const torrentTtitle = torrentElement.querySelector("span.TorrentTitle").textContent;
+              for (const torrentElement of Array.from(torrentElements)) {
+                const torrentTtitle = torrentElement.querySelector("span.TorrentTitle")?.textContent;
                 const tags = [];
-                if (torrentTtitle.includes("Remux")) tags.push("Remux");
+                if (torrentTtitle?.includes("Remux")) tags.push("Remux");
                 let container;
                 const containerElement = torrentElement.querySelector("span.TorrentTitle-item.codec");
-                if (containerElement) container = containerElement.textContent.trim();
+                if (containerElement) container = containerElement?.textContent?.trim();
                 const torrent = {
                   container,
                   dom: torrentElement,
                   format: "",
-                  resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(torrentElement.querySelector("span.TorrentTitle-item.resolution").textContent.trim()),
-                  size: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(torrentElement.querySelector("td.TableTorrent-cellStatSize").textContent),
+                  resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseResolution)(torrentElement.querySelector("span.TorrentTitle-item.resolution")?.textContent?.trim()),
+                  size: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_1__.parseSize)(torrentElement.querySelector("td.TableTorrent-cellStatSize")?.textContent),
                   tags
                 };
                 torrents.push(torrent);
@@ -969,9 +972,8 @@
               imdbId,
               title: ""
             };
-            requests.push(request);
-          }));
-          yield* (0, _tracker__WEBPACK_IMPORTED_MODULE_0__.toGenerator)(requests);
+            yield request;
+          }
         }
         name() {
           return "GPW";
