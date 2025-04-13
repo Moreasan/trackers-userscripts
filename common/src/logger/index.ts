@@ -1,6 +1,3 @@
-import GM_fetch from "@trim21/gm-fetch";
-
-
 export enum LEVEL {
   DEBUG,
   INFO,

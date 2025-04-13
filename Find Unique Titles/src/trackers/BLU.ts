@@ -3,7 +3,6 @@ import {
   MetaData,
   Request,
   SearchResult,
-  toGenerator,
   AbstractTracker,
 } from "./tracker";
 import { addChild } from "common/dom";
@@ -23,7 +22,6 @@ export default class BLU extends AbstractTracker {
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {
-    const requests: Array<Request> = [];
     let nodes = Array.from(
       document.querySelectorAll(".torrent-search--list__results tbody tr")
     );
