@@ -36,6 +36,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://btarg.com.ar/tracker/browse.php*",
       "https://js.chddiy.xyz/torrents.php*",
       "https://ptchdbits.co/torrents.php*",
+      "https://discfan.net/torrents.php*",
       "https://cinemageddon.net/browse.php*",
       "https://www.cinematik.net/browse.php*",
       "https://cinemaz.to/movies*",
