@@ -11,6 +11,7 @@
 // @match https://btarg.com.ar/tracker/browse.php*
 // @match https://js.chddiy.xyz/torrents.php*
 // @match https://ptchdbits.co/torrents.php*
+// @match https://discfan.net/torrents.php*
 // @match https://cinemageddon.net/browse.php*
 // @match https://www.cinematik.net/browse.php*
 // @match https://cinemaz.to/movies*
@@ -860,6 +861,64 @@
         }
         insertTrackersSelect(select) {
           (0, common_dom__WEBPACK_IMPORTED_MODULE_4__.addChild)(document.querySelector("#content-area > div.well.well-sm"), select);
+        }
+      }
+    },
+    "./src/trackers/DiscFan.ts": (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+      __webpack_require__.d(__webpack_exports__, {
+        default: () => DiscFan
+      });
+      var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/utils.ts");
+      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/tracker.ts");
+      var common_dom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("../common/dist/dom/index.mjs");
+      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../common/dist/http/index.mjs");
+      class DiscFan extends _tracker__WEBPACK_IMPORTED_MODULE_0__.AbstractTracker {
+        canBeUsedAsSource() {
+          return true;
+        }
+        canBeUsedAsTarget() {
+          return false;
+        }
+        canRun(url) {
+          return url.includes("https://discfan.net");
+        }
+        async* getSearchRequest() {
+          let elements = Array.from(document.querySelectorAll(".torrents")[0].children[0].children).filter((element => element.querySelector(".torrentname")));
+          yield {
+            total: elements.length
+          };
+          for (const element of elements) {
+            const link = element.querySelector('a[href*="details.php?id"]');
+            if (!link) continue;
+            let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.fetchAndParseHtml)(link.href);
+            const imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseImdbIdFromLink)(response);
+            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseSize)(element.children[4]?.textContent);
+            const fullTitle = element.querySelector(".torrentname a")?.textContent;
+            const {title, year} = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseYearAndTitle)(fullTitle);
+            const request = {
+              torrents: [ {
+                size,
+                tags: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseTags)(fullTitle),
+                resolution: (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.parseResolution)(fullTitle),
+                dom: element
+              } ],
+              dom: [ element ],
+              imdbId,
+              title,
+              year
+            };
+            yield request;
+          }
+        }
+        name() {
+          return "DiscFan";
+        }
+        async search(request) {
+          return _tracker__WEBPACK_IMPORTED_MODULE_0__.SearchResult.NOT_CHECKED;
+        }
+        insertTrackersSelect(select) {
+          const element = document.querySelector(".searchbox")?.children[2].querySelector("td td.rowfollow tr");
+          if (element) (0, common_dom__WEBPACK_IMPORTED_MODULE_3__.addChild)(element, select);
         }
       }
     },
@@ -2699,28 +2758,29 @@
             CHD: () => _CHD__WEBPACK_IMPORTED_MODULE_6__.default,
             CLANSUD: () => _CLAN_SUD__WEBPACK_IMPORTED_MODULE_7__.default,
             CinemaZ: () => _CinemaZ__WEBPACK_IMPORTED_MODULE_8__.default,
-            FL: () => _FL__WEBPACK_IMPORTED_MODULE_9__.default,
-            GPW: () => _GPW__WEBPACK_IMPORTED_MODULE_10__.default,
-            HDB: () => _HDB__WEBPACK_IMPORTED_MODULE_11__.default,
-            HDSky: () => _HDSky__WEBPACK_IMPORTED_MODULE_12__.default,
-            HDT: () => _HDT__WEBPACK_IMPORTED_MODULE_13__.default,
-            IPT: () => _IPT__WEBPACK_IMPORTED_MODULE_14__.default,
-            JPTV: () => _JPTV__WEBPACK_IMPORTED_MODULE_15__.default,
-            JPop: () => _JPop__WEBPACK_IMPORTED_MODULE_16__.default,
-            KG: () => _KG__WEBPACK_IMPORTED_MODULE_17__.default,
-            LatTeam: () => _LatTeam__WEBPACK_IMPORTED_MODULE_18__.default,
-            MTV: () => _MTV__WEBPACK_IMPORTED_MODULE_19__.default,
-            MTeam: () => _MTeam__WEBPACK_IMPORTED_MODULE_20__.default,
-            NewInsane: () => _NewInsane__WEBPACK_IMPORTED_MODULE_22__.default,
-            PTP: () => _PTP__WEBPACK_IMPORTED_MODULE_24__.default,
-            Pter: () => _Pter__WEBPACK_IMPORTED_MODULE_23__.default,
-            RED: () => _RED__WEBPACK_IMPORTED_MODULE_25__.default,
-            SC: () => _SC__WEBPACK_IMPORTED_MODULE_26__.default,
-            TL: () => _TL__WEBPACK_IMPORTED_MODULE_28__.default,
-            TNT: () => _TNT__WEBPACK_IMPORTED_MODULE_29__.default,
-            TSeeds: () => _TSeeds__WEBPACK_IMPORTED_MODULE_30__.default,
-            TiK: () => _TiK__WEBPACK_IMPORTED_MODULE_27__.default,
-            nCore: () => _nCore__WEBPACK_IMPORTED_MODULE_21__.default
+            DiscFan: () => _DiscFan__WEBPACK_IMPORTED_MODULE_9__.default,
+            FL: () => _FL__WEBPACK_IMPORTED_MODULE_10__.default,
+            GPW: () => _GPW__WEBPACK_IMPORTED_MODULE_11__.default,
+            HDB: () => _HDB__WEBPACK_IMPORTED_MODULE_12__.default,
+            HDSky: () => _HDSky__WEBPACK_IMPORTED_MODULE_13__.default,
+            HDT: () => _HDT__WEBPACK_IMPORTED_MODULE_14__.default,
+            IPT: () => _IPT__WEBPACK_IMPORTED_MODULE_15__.default,
+            JPTV: () => _JPTV__WEBPACK_IMPORTED_MODULE_16__.default,
+            JPop: () => _JPop__WEBPACK_IMPORTED_MODULE_17__.default,
+            KG: () => _KG__WEBPACK_IMPORTED_MODULE_18__.default,
+            LatTeam: () => _LatTeam__WEBPACK_IMPORTED_MODULE_19__.default,
+            MTV: () => _MTV__WEBPACK_IMPORTED_MODULE_20__.default,
+            MTeam: () => _MTeam__WEBPACK_IMPORTED_MODULE_21__.default,
+            NewInsane: () => _NewInsane__WEBPACK_IMPORTED_MODULE_23__.default,
+            PTP: () => _PTP__WEBPACK_IMPORTED_MODULE_25__.default,
+            Pter: () => _Pter__WEBPACK_IMPORTED_MODULE_24__.default,
+            RED: () => _RED__WEBPACK_IMPORTED_MODULE_26__.default,
+            SC: () => _SC__WEBPACK_IMPORTED_MODULE_27__.default,
+            TL: () => _TL__WEBPACK_IMPORTED_MODULE_29__.default,
+            TNT: () => _TNT__WEBPACK_IMPORTED_MODULE_30__.default,
+            TSeeds: () => _TSeeds__WEBPACK_IMPORTED_MODULE_31__.default,
+            TiK: () => _TiK__WEBPACK_IMPORTED_MODULE_28__.default,
+            nCore: () => _nCore__WEBPACK_IMPORTED_MODULE_22__.default
           });
           var _Aither__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/trackers/Aither.ts");
           var _AvistaZ__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("./src/trackers/AvistaZ.ts");
@@ -2731,30 +2791,31 @@
           var _CHD__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__("./src/trackers/CHD.ts");
           var _CLAN_SUD__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__("./src/trackers/CLAN-SUD.ts");
           var _CinemaZ__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__("./src/trackers/CinemaZ.ts");
-          var _FL__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/trackers/FL.ts");
-          var _GPW__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/trackers/GPW.ts");
-          var _HDB__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./src/trackers/HDB.ts");
-          var _HDSky__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./src/trackers/HDSky.ts");
-          var _HDT__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./src/trackers/HDT.ts");
-          var _IPT__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./src/trackers/IPT.ts");
-          var _JPTV__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./src/trackers/JPTV.ts");
-          var _JPop__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./src/trackers/JPop.ts");
-          var _KG__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./src/trackers/KG.ts");
-          var _LatTeam__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./src/trackers/LatTeam.ts");
-          var _MTV__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./src/trackers/MTV.ts");
-          var _MTeam__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./src/trackers/MTeam.ts");
-          var _NewInsane__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./src/trackers/NewInsane.ts");
-          var _PTP__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("./src/trackers/PTP.ts");
-          var _Pter__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("./src/trackers/Pter.ts");
-          var _RED__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("./src/trackers/RED.ts");
-          var _SC__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("./src/trackers/SC.ts");
-          var _TL__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__("./src/trackers/TL.ts");
-          var _TNT__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__("./src/trackers/TNT.ts");
-          var _TSeeds__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__("./src/trackers/TSeeds.ts");
-          var _TiK__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__("./src/trackers/TiK.ts");
-          var _nCore__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./src/trackers/nCore.ts");
-          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_24__ ]);
-          _PTP__WEBPACK_IMPORTED_MODULE_24__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+          var _DiscFan__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__("./src/trackers/DiscFan.ts");
+          var _FL__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__("./src/trackers/FL.ts");
+          var _GPW__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__("./src/trackers/GPW.ts");
+          var _HDB__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__("./src/trackers/HDB.ts");
+          var _HDSky__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__("./src/trackers/HDSky.ts");
+          var _HDT__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__("./src/trackers/HDT.ts");
+          var _IPT__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__("./src/trackers/IPT.ts");
+          var _JPTV__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__("./src/trackers/JPTV.ts");
+          var _JPop__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__("./src/trackers/JPop.ts");
+          var _KG__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__("./src/trackers/KG.ts");
+          var _LatTeam__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__("./src/trackers/LatTeam.ts");
+          var _MTV__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__("./src/trackers/MTV.ts");
+          var _MTeam__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__("./src/trackers/MTeam.ts");
+          var _NewInsane__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__("./src/trackers/NewInsane.ts");
+          var _PTP__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__("./src/trackers/PTP.ts");
+          var _Pter__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__("./src/trackers/Pter.ts");
+          var _RED__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__("./src/trackers/RED.ts");
+          var _SC__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__("./src/trackers/SC.ts");
+          var _TL__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__("./src/trackers/TL.ts");
+          var _TNT__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__("./src/trackers/TNT.ts");
+          var _TSeeds__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__("./src/trackers/TSeeds.ts");
+          var _TiK__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__("./src/trackers/TiK.ts");
+          var _nCore__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__("./src/trackers/nCore.ts");
+          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_25__ ]);
+          _PTP__WEBPACK_IMPORTED_MODULE_25__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           __webpack_async_result__();
         } catch (e) {
           __webpack_async_result__(e);
@@ -3195,7 +3256,6 @@
         LEVEL: () => LEVEL,
         logger: () => logger
       });
-      var _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../node_modules/@trim21/gm-fetch/dist/index.mjs");
       var LEVEL;
       !function(LEVEL) {
         LEVEL[LEVEL.DEBUG = 0] = "DEBUG";
@@ -3211,18 +3271,10 @@
           logger.prefix = prefix;
         },
         info: (message, ...args) => {
-          if (logger.level <= LEVEL.INFO) {
-            let formattedMessage = formatMessage(LEVEL.INFO, message, args);
-            console.log(formattedMessage);
-            postMessage(formattedMessage);
-          }
+          if (logger.level <= LEVEL.INFO) console.log(formatMessage(LEVEL.INFO, message, args));
         },
         debug: (message, ...args) => {
-          if (logger.level <= LEVEL.DEBUG) {
-            let formattedMessage = formatMessage(LEVEL.DEBUG, message, args);
-            console.log(formattedMessage);
-            postMessage(formattedMessage);
-          }
+          if (logger.level <= LEVEL.DEBUG) console.log(formatMessage(LEVEL.DEBUG, message, args));
         }
       };
       const formatMessage = (level, message, args) => {
@@ -3245,15 +3297,6 @@
           return value;
         }
         return JSON.stringify(obj, replacer);
-      };
-      const postMessage = message => {
-        (0, _trim21_gm_fetch__WEBPACK_IMPORTED_MODULE_0__.default)("http://localhost:9898", {
-          method: "POST",
-          body: JSON.stringify(message),
-          headers: {
-            "content-type": "application/json"
-          }
-        }).then((() => {}));
       };
     },
     "../common/dist/searcher/index.mjs": (__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
