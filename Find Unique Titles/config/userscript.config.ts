@@ -41,6 +41,7 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://www.cinematik.net/browse.php*",
       "https://cinemaz.to/movies*",
       "https://filelist.io/browse.php*",
+      "https://filelist.io/internal.php*",
       "https://www.clan-sudamerica.net/invision/*",
       "https://greatposterwall.com/torrents.php*",
       "https://hdbits.org/browse.php*",
