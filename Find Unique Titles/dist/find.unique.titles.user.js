@@ -16,7 +16,7 @@
 // @match https://www.cinematik.net/browse.php*
 // @match https://cinemaz.to/movies*
 // @match https://filelist.io/browse.php*
-// @match https://filelist.io/internal.php
+// @match https://filelist.io/internal.php*
 // @match https://www.clan-sudamerica.net/invision/*
 // @match https://greatposterwall.com/torrents.php*
 // @match https://hdbits.org/browse.php*
