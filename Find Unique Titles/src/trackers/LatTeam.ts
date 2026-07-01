@@ -26,7 +26,7 @@ export default class LatTeam extends AbstractTracker {
   }
 
   canRun(url: string): boolean {
-    return url.includes("lat-team.com");
+    return url.includes("lat-team.com") && !url.includes("/similar");
   }
 
   async *getSearchRequest(): AsyncGenerator<MetaData | Request, void, void> {

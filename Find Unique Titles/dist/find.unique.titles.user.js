@@ -1647,7 +1647,7 @@
           return false;
         }
         canRun(url) {
-          return url.includes("lat-team.com");
+          return url.includes("lat-team.com") && !url.includes("/similar");
         }
         async* getSearchRequest() {
           const rows = document.querySelectorAll(".torrent-search--list__results tbody tr");
