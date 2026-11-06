@@ -6,8 +6,8 @@
     "name": "Mea01"
   },
   "scripts": {
-    "dev": "webpack server --node-env development --config config/webpack.config.ts",
-    "build": "webpack --node-env production --progress --config config/webpack.config.ts",
+    "dev": "NODE_OPTIONS='--import tsx' webpack server --node-env development --config config/webpack.config.ts",
+    "build": "NODE_OPTIONS='--import tsx' webpack --node-env production --progress --config config/webpack.config.ts",
     "format": "prettier --write --ignore-unknown src",
     "check-types": "tsc --noEmit"
   },
@@ -44,6 +44,7 @@
     "sass-loader": "^13.2.2",
     "style-loader": "^3.3.2",
     "terser-webpack-plugin": "^5.3.7",
+    "tsx": "^4.23.15",
     "typed-emitter": "^2.1.0",
     "typescript": "^5.0.4",
     "webpack": "^5.78.0",
