@@ -2599,7 +2599,7 @@
         }
         async search(request) {
           if (!request.imdbId) return _tracker__WEBPACK_IMPORTED_MODULE_1__.q0.NOT_CHECKED;
-          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_4__.$P)(common_trackers__WEBPACK_IMPORTED_MODULE_5__.jsh, {
+          const result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_4__.$P)(common_trackers__WEBPACK_IMPORTED_MODULE_5__.TSeeds, {
             movie_title: "",
             movie_imdb_id: request.imdbId
           });
@@ -3458,8 +3458,9 @@
       const Aither = {
         name: "Aither",
         searchUrl: "https://aither.cc/torrents?imdbId=%nott%",
-        loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-        matchRegex: /torrent-search--list__overview/,
+        loggedOutRegex: /Cloudflare|Ray ID|Forgot your password/,
+        matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+        seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
         positiveMatch: true,
         both: true
       };
@@ -3480,8 +3481,10 @@
       const HDb = {
         name: "HDb",
         searchUrl: "https://hdbits.org/browse.php?c1=1&c2=1&c3=1&c4=1&c5=1&c7=1&c8=1&imdb=%tt%",
-        loggedOutRegex: /Make sure your passcode generating|nginx/,
+        loggedOutRegex: /Make sure your passcode generating|nginx|Scheduled Maintenance in progress/,
         matchRegex: /Nothing here!/,
+        seedingRegex: /tag tag_seeding/,
+        rateLimit: 250,
         both: true
       };
       const KG = {
@@ -3492,23 +3495,16 @@
         rateLimit: 125,
         both: true
       };
-      const TSeeds = {
-        name: "TSeeds",
-        searchUrl: "https://www.torrentseeds.org/torrents?tmdbId=%tmdbid%",
-        loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-        matchRegex: /"Download">/,
-        positiveMatch: true,
-        both: true
-      };
       const Tik = {
         name: "Tik",
         searchUrl: "https://cinematik.net/torrents?imdbId=%tt%",
-        loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-        matchRegex: /torrent-search--list__overview/,
+        loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+        matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+        seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
         positiveMatch: true,
         both: true
       };
-      __webpack_require__.d(__webpack_exports__, [ "AT", 0, AT, "CZ", 0, CZ, "KG", 0, KG, "RdY", 0, Tik, "e5O", 0, CHD, "hYc", 0, HDb, "jsh", 0, TSeeds, "mIQ", 0, Aither ]);
+      __webpack_require__.d(__webpack_exports__, [ "AT", 0, AT, "CZ", 0, CZ, "KG", 0, KG, "RdY", 0, Tik, "e5O", 0, CHD, "hYc", 0, HDb, "mIQ", 0, Aither ]);
     }
   };
   const __webpack_module_cache__ = {};
