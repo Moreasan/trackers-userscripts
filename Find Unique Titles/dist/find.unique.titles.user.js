@@ -28,7 +28,6 @@
 // @match https://karagarga.in/browse.php*
 // @match https://kp.m-team.cc/*
 // @match https://lat-team.com/torrents*
-// @match https://www.morethantv.me/torrents/browse*
 // @match https://ncore.pro/torrents.php*
 // @match https://newinsane.info/browse.php*
 // @match https://passthepopcorn.me/torrents.php*
@@ -1690,109 +1689,6 @@
         }
       }
     },
-    422: (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-      __webpack_require__.d(__webpack_exports__, {
-        Z: () => MTV
-      });
-      var _utils_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(657);
-      var _tracker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(84);
-      var common_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(933);
-      var common_http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(257);
-      var common_searcher__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(914);
-      var common_trackers__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(263);
-      const parseCategory = element => {
-        const movieBanner = element.querySelector('div[title="hd.movie"]');
-        if (movieBanner) return _tracker__WEBPACK_IMPORTED_MODULE_0__.WD.MOVIE;
-        return _tracker__WEBPACK_IMPORTED_MODULE_0__.WD.TV;
-      };
-      const parseYearAndTitle = htmlElement => {
-        const pageTitle = htmlElement.querySelector("#content h2")?.textContent?.trim();
-        if (pageTitle) {
-          const regex = /^(.*?)\s*\((\d{4})\)\s*-/;
-          const match = pageTitle.match(regex);
-          if (match) {
-            const title = match[1].trim();
-            const year = parseInt(match[2], 10);
-            return {
-              title,
-              year
-            };
-          }
-        }
-        return {
-          title: void 0,
-          year: void 0
-        };
-      };
-      class MTV extends _tracker__WEBPACK_IMPORTED_MODULE_0__.xw {
-        canBeUsedAsSource() {
-          return true;
-        }
-        canBeUsedAsTarget() {
-          return true;
-        }
-        canRun(url) {
-          return url.includes("morethantv.me");
-        }
-        async* getSearchRequest() {
-          let nodes = document.querySelectorAll("tr.torrent");
-          yield {
-            total: nodes.length
-          };
-          for (const element of nodes) {
-            const category = parseCategory(element);
-            let imdbId = null;
-            let title;
-            let year;
-            if (category == _tracker__WEBPACK_IMPORTED_MODULE_0__.WD.MOVIE) {
-              const link = element.querySelector('td a[href*="torrents.php?id="]');
-              let response = await (0, common_http__WEBPACK_IMPORTED_MODULE_1__.uU)(link.href);
-              imdbId = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__.VB)(response);
-              ({title, year} = parseYearAndTitle(response));
-            }
-            let sizeText = element.children[4]?.textContent;
-            const size = (0, _utils_utils__WEBPACK_IMPORTED_MODULE_2__._8)(sizeText);
-            const request = {
-              torrents: [ {
-                size,
-                tags: [],
-                dom: element
-              } ],
-              dom: [ element ],
-              imdbId,
-              title,
-              year,
-              category
-            };
-            yield request;
-          }
-        }
-        name() {
-          return "MTV";
-        }
-        async search(request) {
-          let result;
-          if (request.category == _tracker__WEBPACK_IMPORTED_MODULE_0__.WD.MOVIE) result = await (0, 
-          common_searcher__WEBPACK_IMPORTED_MODULE_3__.yC)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.FvT, {
-            movie_title: request.title
-          }); else result = await (0, common_searcher__WEBPACK_IMPORTED_MODULE_3__.yC)(common_trackers__WEBPACK_IMPORTED_MODULE_4__.YE3, {
-            movie_title: request.title
-          });
-          return result == common_searcher__WEBPACK_IMPORTED_MODULE_3__.lt.NOT_FOUND ? _tracker__WEBPACK_IMPORTED_MODULE_0__.lt.NOT_EXIST : _tracker__WEBPACK_IMPORTED_MODULE_0__.lt.EXIST;
-        }
-        insertTrackersSelect(select) {
-          const wrapper = document.createElement("tr");
-          const label = document.createElement("td");
-          const selectTd = document.createElement("td");
-          label.textContent = "Find Unique for:";
-          label.classList.add("label");
-          selectTd.appendChild(select);
-          wrapper.appendChild(label);
-          wrapper.appendChild(selectTd);
-          (0, common_dom__WEBPACK_IMPORTED_MODULE_5__.U_)(document.querySelector("#search_box table.noborder tbody"), wrapper);
-        }
-      }
-    },
     286: (__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
       __webpack_require__.d(__webpack_exports__, {
         Z: () => MTeam
@@ -2770,18 +2666,17 @@
             JPop: () => _JPop__WEBPACK_IMPORTED_MODULE_17__.Z,
             KG: () => _KG__WEBPACK_IMPORTED_MODULE_18__.Z,
             LatTeam: () => _LatTeam__WEBPACK_IMPORTED_MODULE_19__.Z,
-            MTV: () => _MTV__WEBPACK_IMPORTED_MODULE_20__.Z,
-            MTeam: () => _MTeam__WEBPACK_IMPORTED_MODULE_21__.Z,
-            NewInsane: () => _NewInsane__WEBPACK_IMPORTED_MODULE_23__.Z,
-            PTP: () => _PTP__WEBPACK_IMPORTED_MODULE_25__.Z,
-            Pter: () => _Pter__WEBPACK_IMPORTED_MODULE_24__.Z,
-            RED: () => _RED__WEBPACK_IMPORTED_MODULE_26__.Z,
-            SC: () => _SC__WEBPACK_IMPORTED_MODULE_27__.Z,
-            TL: () => _TL__WEBPACK_IMPORTED_MODULE_29__.Z,
-            TNT: () => _TNT__WEBPACK_IMPORTED_MODULE_30__.Z,
-            TSeeds: () => _TSeeds__WEBPACK_IMPORTED_MODULE_31__.Z,
-            TiK: () => _TiK__WEBPACK_IMPORTED_MODULE_28__.Z,
-            nCore: () => _nCore__WEBPACK_IMPORTED_MODULE_22__.Z
+            MTeam: () => _MTeam__WEBPACK_IMPORTED_MODULE_20__.Z,
+            NewInsane: () => _NewInsane__WEBPACK_IMPORTED_MODULE_22__.Z,
+            PTP: () => _PTP__WEBPACK_IMPORTED_MODULE_24__.Z,
+            Pter: () => _Pter__WEBPACK_IMPORTED_MODULE_23__.Z,
+            RED: () => _RED__WEBPACK_IMPORTED_MODULE_25__.Z,
+            SC: () => _SC__WEBPACK_IMPORTED_MODULE_26__.Z,
+            TL: () => _TL__WEBPACK_IMPORTED_MODULE_28__.Z,
+            TNT: () => _TNT__WEBPACK_IMPORTED_MODULE_29__.Z,
+            TSeeds: () => _TSeeds__WEBPACK_IMPORTED_MODULE_30__.Z,
+            TiK: () => _TiK__WEBPACK_IMPORTED_MODULE_27__.Z,
+            nCore: () => _nCore__WEBPACK_IMPORTED_MODULE_21__.Z
           });
           var _Aither__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(387);
           var _AvistaZ__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(168);
@@ -2803,20 +2698,19 @@
           var _JPop__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(196);
           var _KG__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(522);
           var _LatTeam__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(143);
-          var _MTV__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(422);
-          var _MTeam__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(286);
-          var _NewInsane__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(614);
-          var _PTP__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(961);
-          var _Pter__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(283);
-          var _RED__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(641);
-          var _SC__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(237);
-          var _TL__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(790);
-          var _TNT__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(510);
-          var _TSeeds__WEBPACK_IMPORTED_MODULE_31__ = __webpack_require__(707);
-          var _TiK__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(855);
-          var _nCore__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(754);
-          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_25__ ]);
-          _PTP__WEBPACK_IMPORTED_MODULE_25__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
+          var _MTeam__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(286);
+          var _NewInsane__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(614);
+          var _PTP__WEBPACK_IMPORTED_MODULE_24__ = __webpack_require__(961);
+          var _Pter__WEBPACK_IMPORTED_MODULE_23__ = __webpack_require__(283);
+          var _RED__WEBPACK_IMPORTED_MODULE_25__ = __webpack_require__(641);
+          var _SC__WEBPACK_IMPORTED_MODULE_26__ = __webpack_require__(237);
+          var _TL__WEBPACK_IMPORTED_MODULE_28__ = __webpack_require__(790);
+          var _TNT__WEBPACK_IMPORTED_MODULE_29__ = __webpack_require__(510);
+          var _TSeeds__WEBPACK_IMPORTED_MODULE_30__ = __webpack_require__(707);
+          var _TiK__WEBPACK_IMPORTED_MODULE_27__ = __webpack_require__(855);
+          var _nCore__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(754);
+          var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([ _PTP__WEBPACK_IMPORTED_MODULE_24__ ]);
+          _PTP__WEBPACK_IMPORTED_MODULE_24__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
           __webpack_async_result__();
         } catch (e) {
           __webpack_async_result__(e);
@@ -3551,11 +3445,9 @@
         AT: () => AT,
         CZ: () => CZ,
         FGl: () => TSeeds,
-        FvT: () => MTV,
         KG: () => KG,
         N24: () => HDb,
         Uxl: () => Tik,
-        YE3: () => MTV_TV,
         _0y: () => CHD,
         iep: () => Aither
       });
@@ -3602,23 +3494,6 @@
         matchRegex: /No torrents found/,
         rateLimit: 125,
         both: true
-      };
-      const MTV = {
-        name: "MTV",
-        searchUrl: "https://www.morethantv.me/torrents.php?filter_cat[1]=1&filter_cat[2]=1&title=+%2B%search_string%+%2B%year%",
-        loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
-        spaceEncode: "+%2B",
-        matchRegex: /action=download/,
-        positiveMatch: true
-      };
-      const MTV_TV = {
-        name: "MTV",
-        searchUrl: "https://www.morethantv.me/torrents.php?filter_cat[3]=1&filter_cat[5]=1&filter_cat[4]=1&filter_cat[6]=1&title=+%2B%search_string%",
-        loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
-        spaceEncode: "+%2B",
-        matchRegex: /action=download/,
-        positiveMatch: true,
-        TV: true
       };
       const TSeeds = {
         name: "TSeeds",

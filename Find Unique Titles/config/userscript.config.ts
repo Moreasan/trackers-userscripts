@@ -53,7 +53,6 @@ export const UserScriptConfig: IWebpackUserScript = {
       "https://karagarga.in/browse.php*",
       "https://kp.m-team.cc/*",
       "https://lat-team.com/torrents*",
-      "https://www.morethantv.me/torrents/browse*",
       "https://ncore.pro/torrents.php*",
       "https://newinsane.info/browse.php*",
       "https://passthepopcorn.me/torrents.php*",
