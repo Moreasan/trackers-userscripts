@@ -29,7 +29,7 @@ module.exports = {
   devServer: {
     port,
     hot: false,
-    https: true,
+    server: { type: "https" },
     devMiddleware: {
       writeToDisk: true,
     },

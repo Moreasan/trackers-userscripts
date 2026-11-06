@@ -1,5 +1,5 @@
-import { fetchAndParseHtml, fetchUrl, sleep } from "../http";
-import { PrivateTracker } from "../trackers";
+import { fetchAndParseHtml, fetchUrl, sleep } from "../http/index.js";
+import { PrivateTracker } from "../trackers/index.js";
 
 export type SearchOptions = {
   episode_id?: string;

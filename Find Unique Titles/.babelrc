@@ -4,8 +4,6 @@
     [
       "@babel/preset-env",
       {
-        "useBuiltIns": "entry",
-        "corejs": "3.22",
         "targets": {
           "browsers": [
             "last 1 chrome version",
@@ -14,5 +12,8 @@
         }
       }
     ]
+  ],
+  "plugins": [
+    ["babel-plugin-polyfill-corejs3", { "method": "entry-global" }]
   ]
 }

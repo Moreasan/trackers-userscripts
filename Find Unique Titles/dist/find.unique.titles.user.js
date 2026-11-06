@@ -45,7 +45,7 @@
 // @grant GM.getValue
 // @grant GM_registerMenuCommand
 // @namespace http://tampermonkey.net/
-// @require https://cdn.jsdelivr.net/npm/jquery@^3.6.4/dist/jquery.min.js
+// @require https://cdn.jsdelivr.net/npm/jquery@^4.0.0/dist/jquery.min.js
 // @require https://openuserjs.org/src/libs/sizzle/GM_config.js
 // @updateURL https://github.com/Moreasan/trackers-userscripts/blob/master/Find%20Unique%20Titles/dist/find.unique.titles.user.js
 // ==/UserScript==
@@ -3141,10 +3141,14 @@
         return new Headers(array);
       }
       function parseGMResponse(req, res) {
-        return new ResImpl(res.response, {
+        const headers = parseRawHeaders(res.responseHeaders);
+        const body = "string" == typeof res.response ? new Blob([ res.response ], {
+          type: headers.get("Content-Type") || "text/plain"
+        }) : res.response;
+        return new ResImpl(body, {
           statusCode: res.status,
           statusText: res.statusText,
-          headers: parseRawHeaders(res.responseHeaders),
+          headers,
           finalUrl: res.finalUrl,
           redirected: res.finalUrl === req.url
         });
@@ -3198,6 +3202,11 @@
           this._bodyUsed = true;
           return this.rawBody.text();
         }
+        async bytes() {
+          if (this.bodyUsed) throw new TypeError("Failed to execute 'bytes' on 'Response': body stream already read");
+          this._bodyUsed = true;
+          return new Uint8Array(await this.rawBody.arrayBuffer());
+        }
       }
       function decode(body) {
         const form = new FormData;
@@ -3227,7 +3236,11 @@
             data,
             responseType: "blob",
             onload(res) {
-              resolve(parseGMResponse(request, res));
+              try {
+                resolve(parseGMResponse(request, res));
+              } catch (e) {
+                reject(e);
+              }
             },
             onabort() {
               reject(new DOMException("Aborted", "AbortError"));

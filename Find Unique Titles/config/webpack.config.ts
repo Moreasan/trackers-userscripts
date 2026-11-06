@@ -31,7 +31,7 @@ const config: webpack.Configuration = {
   devServer: {
     port,
     hot: false,
-    https: true,
+    server: { type: "https" },
     devMiddleware: {
       writeToDisk: true,
     },
