@@ -7,7 +7,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c",
-    "generatePTConfig": "tsc -m esnext -t es2022 scripts/PrivateSitesGenerator.ts --moduleResolution node --outDir dist && node --es-module-specifier-resolution=node dist/scripts/PrivateSitesGenerator.js"
+    "generatePTConfig": "tsc --ignoreConfig -m esnext -t es2022 --types node scripts/PrivateSitesGenerator.ts --moduleResolution bundler --outDir dist && node dist/scripts/PrivateSitesGenerator.js"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",

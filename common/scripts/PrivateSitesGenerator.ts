@@ -1,4 +1,4 @@
-import { transformVariableName } from "../src/utils";
+import { transformVariableName } from "../src/utils.js";
 import * as esprima from "esprima";
 import * as estraverse from "estraverse";
 import * as fs from "fs";
