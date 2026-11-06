@@ -1,6 +1,6 @@
 import { transformVariableName } from "../src/utils.js";
-import * as esprima from "esprima";
-import * as estraverse from "estraverse";
+import { parse } from "@babel/parser";
+import traverse from "@babel/traverse";
 import * as fs from "fs";
 import * as http from "http";
 import * as https from "https";
@@ -21,7 +21,8 @@ let code: string = await new Promise((resolve, reject) => {
       reject(err);
     });
 });
-const ast = esprima.parseScript(code, { tolerant: true });
+
+const ast = parse(code, { sourceType: "script", errorRecovery: true });
 
 let privateSitesConfig: PrivateSiteConfig[] = [];
 const sites = [
@@ -31,48 +32,35 @@ const sites = [
   "german_sites",
 ];
 
-estraverse.traverse(ast, {
-  enter: function (node) {
-    if (node.type === "VariableDeclaration") {
-      for (let declaration of node.declarations) {
-        if (!("name" in declaration.id)) {
-          continue;
-        }
-        if (!declaration.init) {
-          continue;
-        }
-        if (
-          sites.includes(declaration.id.name) &&
-          declaration.init.type === "ArrayExpression"
-        ) {
-          const sitesConfig = declaration.init.elements.map((element: any) => {
-            if (element.type === "Literal") {
-              return element.value;
-            } else if (element.type === "ObjectExpression") {
-              let obj: PrivateSiteConfig = {
-                name: "",
-                searchUrl: "",
-              };
-              for (let property of element.properties) {
-                // Assuming property keys are of type 'Identifier'
-                let key = property.key.value;
-                let value = undefined;
-                if (property.value.type === "Literal" && property.value.regex) {
-                  value = new RegExp(
-                    property.value.regex.pattern,
-                    property.value.regex.flags
-                  );
-                } else {
-                  value = property.value.value;
-                }
-                obj[key] = value;
+traverse(ast, {
+  VariableDeclaration(path) {
+    for (const declaration of path.node.declarations) {
+      if (!("name" in declaration.id)) continue;
+      if (!declaration.init) continue;
+      if (
+        sites.includes(declaration.id.name as string) &&
+        declaration.init.type === "ArrayExpression"
+      ) {
+        const sitesConfig = declaration.init.elements.map((element: any) => {
+          if (element.type === "StringLiteral") {
+            return element.value;
+          } else if (element.type === "ObjectExpression") {
+            let obj: PrivateSiteConfig = { name: "", searchUrl: "" };
+            for (const property of element.properties) {
+              if (property.type !== "ObjectProperty") continue;
+              const key = (property.key as any).name ?? (property.key as any).value;
+              let value: any;
+              if (property.value.type === "RegExpLiteral") {
+                value = new RegExp(property.value.pattern, property.value.flags);
+              } else {
+                value = (property.value as any).value;
               }
-              return obj;
+              obj[key] = value;
             }
-          });
-          privateSitesConfig = privateSitesConfig.concat(sitesConfig);
-          return;
-        }
+            return obj;
+          }
+        });
+        privateSitesConfig = privateSitesConfig.concat(sitesConfig);
       }
     }
   },

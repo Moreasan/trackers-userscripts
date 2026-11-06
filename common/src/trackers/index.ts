@@ -12,7 +12,7 @@ export const _3CT: PrivateTracker = {
   name: '3CT',
   searchUrl: 'https://3changtrai.com/torrents.php?incldead=0&spstate=0&search=%tt%&search_area=4&search_mode=0',
   loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)/,
-  matchRegex: /Không tìm thấy/,
+  matchRegex: /Không tìm thấy|Not logged in/,
   both: true,
 };
 
@@ -21,7 +21,15 @@ export const _3CT_Req: PrivateTracker = {
   searchUrl: 'https://3changtrai.com/viewrequests.php',
   loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)/,
   mPOST: 'query=%search_string_orig%+%year%&action=list&finished=no',
-  matchRegex: /Không tìm thấy/,
+  matchRegex: /Không tìm thấy|Not logged in/,
+  both: true,
+};
+
+export const _52pt: PrivateTracker = {
+  name: '52pt',
+  searchUrl: 'https://52pt.site/torrents.php?search=%tt%&search_area=1',
+  loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)|Verify you are human|recover.php|confirm_resend.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
   both: true,
 };
 
@@ -65,17 +73,19 @@ export const ABN_Req_TV: PrivateTracker = {
 
 export const ACM: PrivateTracker = {
   name: 'ACM',
-  searchUrl: 'https://eiga.moi/torrents/filter?imdb=%tt%',
-  loggedOutRegex: /Forgot your password|Ray ID/,
-  matchRegex: /<tbody class="torrent-list">\s*<\/tbody>/,
+  searchUrl: 'https://eiga.moi/torrents?imdbId=%tt%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
+  positiveMatch: true,
   both: true,
 };
 
 export const ACM_Req: PrivateTracker = {
   name: 'ACM-Req',
   searchUrl: 'https://eiga.moi/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Forgot your password|Ray ID/,
-  matchRegex: /label-danger/,
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
 };
@@ -83,16 +93,16 @@ export const ACM_Req: PrivateTracker = {
 export const ADC2: PrivateTracker = {
   name: 'ADC2',
   searchUrl: 'https://asiandvdclub.org/torrents/?searchbox=%tt%&search=Search',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot password|title>Welcome/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot password|title>Welcome|AUTOMATICALLY REDIRECTED|Forgot your password/,
   matchRegex: /No torrents found/,
   both: true,
 };
 
-export const AE: PrivateTracker = {
-  name: 'AE',
-  searchUrl: 'http://www.arenaelite.eu/?p=torrents&pid=10&keywords=%tt%&search_type=description',
-  loggedOutRegex: /Cloudflare|Ray ID|Zaboravili ste lozinku/,
-  matchRegex: /Nema rezultata/,
+export const AGSV: PrivateTracker = {
+  name: 'AGSV',
+  searchUrl: 'https://www.agsvpt.com/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=%tt%&search_area=4&search_mode=0',
+  loggedOutRegex: /Cloudflare|Ray ID|recover.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
   both: true,
 };
 
@@ -101,6 +111,7 @@ export const ANT: PrivateTracker = {
   searchUrl: 'https://anthelion.me/torrents.php?searchstr=%tt%',
   loggedOutRegex: /You appear to have cookies disabled./,
   matchRegex: /Your search did not match anything/,
+  seedingRegex: /tl_seeding/,
 };
 
 export const ANT_Req: PrivateTracker = {
@@ -177,8 +188,9 @@ export const AT_Req: PrivateTracker = {
 export const Aither: PrivateTracker = {
   name: 'Aither',
   searchUrl: 'https://aither.cc/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -186,7 +198,7 @@ export const Aither: PrivateTracker = {
 export const Aither_Req: PrivateTracker = {
   name: 'Aither-Req',
   searchUrl: 'https://aither.cc/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -195,8 +207,8 @@ export const Aither_Req: PrivateTracker = {
 export const AnimeWorld: PrivateTracker = {
   name: 'AnimeWorld',
   searchUrl: 'https://animeworld.cx/torrents?tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Passwort vergessen|Service Unavailable/,
-  matchRegex: /"Download">/,
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
   positiveMatch: true,
   both: true,
 };
@@ -204,9 +216,16 @@ export const AnimeWorld: PrivateTracker = {
 export const AnimeWorld_Req: PrivateTracker = {
   name: 'AnimeWorld-Req',
   searchUrl: 'https://animeworld.cx/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Passwort vergessen|Service Unavailable/,
-  matchRegex: /label-danger/,
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /fa-circle text-red/,
   positiveMatch: true,
+  both: true,
+};
+
+export const Apple_Deluxe: PrivateTracker = {
+  name: 'Apple Deluxe',
+  searchUrl: 'https://www.apple-deluxe.co/index.php?ct=403&vt=%tt%',
+  matchRegex: /Keine Einträge für den gewählten Filter vorhanden./,
   both: true,
 };
 
@@ -248,7 +267,7 @@ export const AveTor: PrivateTracker = {
   name: 'AveTor',
   searchUrl: 'https://avetorrents.com/catalogue.php?cat=movies&tname=%search_string_orig%&year=%year%',
   loggedOutRegex: /Cloudflare|Ray ID|Забравили сте си паролата/,
-  matchRegex: /Няма нищо намерено/,
+  matchRegex: /Няма нищо намерено|Няма намерени резултати/,
   both: true,
 };
 
@@ -265,15 +284,17 @@ export const BHD: PrivateTracker = {
   searchUrl: 'https://beyond-hd.me/torrents/all?search=&doSearch=Search&imdb=%nott%',
   loggedOutRegex: /FORGET PASSWORD/,
   matchRegex: />N\/A</,
+  seedingRegex: /<i class="fal fa-seedling" title="Seeding"/,
   rateLimit: 625,
   both: true,
 };
 
 export const BHD_Req: PrivateTracker = {
   name: 'BHD-Req',
-  searchUrl: 'https://beyond-hd.me/requests?imdb=%nott%',
+  searchUrl: 'https://beyond-hd.me/requests?imdb=%nott%&status=1',
   loggedOutRegex: /FORGET PASSWORD/,
-  matchRegex: />N\/A</,
+  matchRegex: /fal fa-times text-red/,
+  positiveMatch: true,
   rateLimit: 625,
   both: true,
 };
@@ -304,7 +325,7 @@ export const BRT_Req: PrivateTracker = {
 
 export const BT4G: PrivateTracker = {
   name: 'BT4G',
-  searchUrl: 'https://bt4g.org/search/%search_string_orig% %year%',
+  searchUrl: 'https://bt4gprx.com/search/%search_string_orig% %year%',
   loggedOutRegex: /Cloudflare|Ray ID/,
   ignore404: true,
   spaceEncode: ' ',
@@ -313,7 +334,7 @@ export const BT4G: PrivateTracker = {
 
 export const BT4G_TV: PrivateTracker = {
   name: 'BT4G',
-  searchUrl: 'https://bt4g.org/search/%search_string_orig%',
+  searchUrl: 'https://bt4gprx.com/search/%search_string_orig%',
   loggedOutRegex: /Cloudflare|Ray ID/,
   ignore404: true,
   spaceEncode: ' ',
@@ -341,8 +362,9 @@ export const BTF: PrivateTracker = {
 export const BTN_TV: PrivateTracker = {
   name: 'BTN',
   searchUrl: 'https://broadcasthe.net/torrents.php?imdb=%tt%',
-  loggedOutRegex: /Lost your password\?/,
+  loggedOutRegex: /Lost your password\?|Service Temporarily Unavailable/,
   matchRegex: /action=download/,
+  seedingRegex: /tor_highlight_seed/,
   positiveMatch: true,
   TV: true,
 };
@@ -350,7 +372,7 @@ export const BTN_TV: PrivateTracker = {
 export const BTN_IMDb_Req_TV: PrivateTracker = {
   name: 'BTN-IMDb-Req',
   searchUrl: 'https://broadcasthe.net/torrents.php?imdb=%tt%',
-  loggedOutRegex: /Lost your password\?/,
+  loggedOutRegex: /Lost your password\?|Service Temporarily Unavailable/,
   matchRegex: /Error 404|Nothing found/,
   TV: true,
 };
@@ -358,7 +380,7 @@ export const BTN_IMDb_Req_TV: PrivateTracker = {
 export const BTN_Req_TV: PrivateTracker = {
   name: 'BTN-Req',
   searchUrl: 'https://broadcasthe.net/requests.php?search=%search_string%',
-  loggedOutRegex: /Lost your password\?/,
+  loggedOutRegex: /Lost your password\?|Service Temporarily Unavailable/,
   matchRegex: /Nothing found/,
   TV: true,
 };
@@ -366,7 +388,7 @@ export const BTN_Req_TV: PrivateTracker = {
 export const BTN_TVDb_TV: PrivateTracker = {
   name: 'BTN-TVDb',
   searchUrl: 'https://broadcasthe.net/torrents.php?tvdb=%tvdbid%',
-  loggedOutRegex: /Lost your password\?/,
+  loggedOutRegex: /Lost your password\?|Service Temporarily Unavailable/,
   matchRegex: /action=download/,
   positiveMatch: true,
   TV: true,
@@ -375,9 +397,17 @@ export const BTN_TVDb_TV: PrivateTracker = {
 export const BTN_Title_TV: PrivateTracker = {
   name: 'BTN-Title',
   searchUrl: 'https://broadcasthe.net/torrents.php?action=basic&searchstr=%search_string_orig%',
-  loggedOutRegex: /Lost your password\?/,
+  loggedOutRegex: /Lost your password\?|Service Temporarily Unavailable/,
   matchRegex: /No search results/,
   TV: true,
+};
+
+export const BTSchool: PrivateTracker = {
+  name: 'BTSchool',
+  searchUrl: 'https://pt.btschool.club/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=%tt%&search_area=1&search_mode=0',
+  loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
+  both: true,
 };
 
 export const BWT: PrivateTracker = {
@@ -404,6 +434,14 @@ export const Back_Ups: PrivateTracker = {
   mPOST: 'do=search&keywords=%tt%&search_type=t_both&category=0&include_dead_torrents=yes',
   matchRegex: /dl.png/,
   positiveMatch: true,
+  both: true,
+};
+
+export const Baozi: PrivateTracker = {
+  name: 'Baozi',
+  searchUrl: 'https://p.t-baozi.cc/torrents.php?search=%tt%&search_area=1',
+  loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)|Verify you are human|recover.php|confirm_resend.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
   both: true,
 };
 
@@ -463,8 +501,9 @@ export const Bithorlo_TV: PrivateTracker = {
 export const Blu: PrivateTracker = {
   name: 'Blu',
   searchUrl: 'https://blutopia.cc/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Service Unavailable/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -472,7 +511,7 @@ export const Blu: PrivateTracker = {
 export const Blu_Req: PrivateTracker = {
   name: 'Blu-Req',
   searchUrl: 'https://blutopia.cc/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Service Unavailable/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot your password|Service Unavailable/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -481,26 +520,28 @@ export const Blu_Req: PrivateTracker = {
 export const Blu_TMDb: PrivateTracker = {
   name: 'Blu-TMDb',
   searchUrl: 'https://blutopia.cc/torrents?tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Service Unavailable/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
 
-export const CBT: PrivateTracker = {
-  name: 'CBT',
-  searchUrl: 'https://chilebt.com/filterTorrents?imdb=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña/,
-  matchRegex: /<tbody>\s*<\/tbody>/,
-  both: true,
+export const C411: PrivateTracker = {
+  name: 'C411',
+  searchUrl: 'https://c411.org/api/torrents?page=1&perPage=25&sortBy=relevance&sortOrder=desc&name=%search_string_orig%+%year%',
+  goToUrl: 'https://c411.org/torrents?q=%search_string_orig%+%year%&cat=1',
+  loggedOutRegex: /Cloudflare|Ray ID|forgot-password/,
+  matchRegex: /"total":0/,
 };
 
-export const CBT_Req: PrivateTracker = {
-  name: 'CBT-Req',
-  searchUrl: 'https://chilebt.com/filterRequests?imdb=%nott%&unfilled=1',
-  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña/,
-  matchRegex: /<tbody>\s*<\/tbody>/,
-  both: true,
+export const C411_TV: PrivateTracker = {
+  name: 'C411',
+  searchUrl: 'https://c411.org/api/torrents?page=1&perPage=25&sortBy=relevance&sortOrder=desc&name=%search_string_orig%',
+  goToUrl: 'https://c411.org/torrents?q=%search_string_orig%&cat=1',
+  loggedOutRegex: /Cloudflare|Ray ID|forgot-password/,
+  matchRegex: /"total":0/,
+  TV: true,
 };
 
 export const CCT: PrivateTracker = {
@@ -545,6 +586,14 @@ export const CMS: PrivateTracker = {
   searchUrl: 'https://cinemamovies.pl/browse.php?incldead=1&blah=1&gatunek=0&quality=none&search=%tt%',
   loggedOutRegex: /Cloudflare|Ray ID|Zapomniałeś hasła/,
   matchRegex: /was not found|nie został odnaleziony/,
+  both: true,
+};
+
+export const CPS: PrivateTracker = {
+  name: 'CPS',
+  searchUrl: 'https://mycarpathians.net/browse.php?search=https%3A%2F%2Fwww.imdb.com%2Ftitle%2F%tt%%2F&incldead=0&onlyname2=false&imdbcat=0',
+  loggedOutRegex: /Nem vagy bejelentkezve!/,
+  matchRegex: /Nincs itt semmi|Nem található/,
   both: true,
 };
 
@@ -596,7 +645,8 @@ export const CapybaraBR: PrivateTracker = {
   name: 'CapybaraBR',
   searchUrl: 'https://capybarabr.com/torrents?imdbId=%nott%',
   loggedOutRegex: /Cloudflare|Ray ID|Esqueceu sua senha|Service Unavailable/,
-  matchRegex: /torrent-search--list__overview/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -618,45 +668,13 @@ export const CarPT: PrivateTracker = {
   both: true,
 };
 
-export const Classix: PrivateTracker = {
-  name: 'Classix',
-  searchUrl: 'http://classix-unlimited.co.uk/torrents-search.php?search="%search_string%"&parent_cat=Movies',
-  loggedOutRegex: /Sorry this is a private site|Connection refused/,
-  matchRegex: /Database Error/,
-};
-
-export const Classix_TV: PrivateTracker = {
-  name: 'Classix',
-  searchUrl: 'http://classix-unlimited.co.uk/torrents-search.php?search="%search_string%"&parent_cat=TV',
-  loggedOutRegex: /Sorry this is a private site|Connection refused/,
-  matchRegex: /Database Error/,
-  TV: true,
-};
-
-export const Classix_Req: PrivateTracker = {
-  name: 'Classix-Req',
-  searchUrl: 'http://classix-unlimited.co.uk/reqall.php?Section=View_Requests&search=%search_string_orig%',
-  loggedOutRegex: /Sorry this is a private site/,
-  matchRegex: />No</,
-  positiveMatch: true,
-  both: true,
-};
-
 export const Cpasbien: PrivateTracker = {
   name: 'Cpasbien',
-  searchUrl: 'https://cpasbien.tw/search_torrent/films/%search_string_orig%.html',
-  loggedOutRegex: /Cloudflare|Ray ID/,
-  matchRegex: />0 torrents/,
+  searchUrl: 'https://ww1-cpasbien.town/recherche/%search_string_orig%',
+  loggedOutRegex: /Cloudflare|Ray ID|la nouvelle adresse officiel/,
+  matchRegex: /Pas de torrents disponibles/,
   spaceEncode: ' ',
-};
-
-export const Cpasbien_TV: PrivateTracker = {
-  name: 'Cpasbien',
-  searchUrl: 'https://cpasbien.tw/search_torrent/series/%search_string_orig%.html',
-  loggedOutRegex: /Cloudflare|Ray ID/,
-  matchRegex: />0 torrents/,
-  spaceEncode: ' ',
-  TV: true,
+  both: true,
 };
 
 export const CrazyHD: PrivateTracker = {
@@ -702,43 +720,15 @@ export const Crna_Berza_Req: PrivateTracker = {
   both: true,
 };
 
-export const DBy: PrivateTracker = {
-  name: 'DBy',
-  searchUrl: 'https://danishbytes.club/torrents/filter?imdb=%tt%',
-  goToUrl: 'https://danishbytes.club/torrents?imdb=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|Glemt din adgangskode|Service Unavailable|Private Brugernavn/,
-  matchRegex: /resultsCount":0/,
-  both: true,
-};
-
-export const DBy_Req: PrivateTracker = {
-  name: 'DBy-Req',
-  searchUrl: 'https://danishbytes.club/requests?unfilled=1&imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Glemt din adgangskode|Service Unavailable|Private Brugernavn/,
-  matchRegex: /label-danger/,
-  positiveMatch: true,
-  both: true,
-};
-
 export const DC: PrivateTracker = {
   name: 'DC',
-  searchUrl: 'https://digitalcore.club/api/v1/torrents?categories[]=1&categories[]=2&categories[]=3&categories[]=4&categories[]=5&categories[]=6&categories[]=7&dead=false&limit=1&page=search&searchText=%search_string%+%year%',
-  goToUrl: 'https://digitalcore.club/search?search=%search_string%+%year%&cats=1,2,5,6,3,4,7&fc=true',
+  searchUrl: 'https://digitalcore.club/api/v1/torrents?dead=false&limit=1&page=search&searchText=%tt%',
+  goToUrl: 'https://digitalcore.club/search?search=%tt%',
   loggedOutRegex: /It doesnt work here/,
   matchRegex: /imdbid/,
   rateLimit: 250,
   positiveMatch: true,
-};
-
-export const DC_TV: PrivateTracker = {
-  name: 'DC',
-  searchUrl: 'https://digitalcore.club/api/v1/torrents?categories[]=8&categories[]=9&categories[]=10&categories[]=11&categories[]=12&categories[]=13&categories[]=14&dead=false&limit=1&page=search&searchText=%search_string%',
-  goToUrl: 'https://digitalcore.club/search?search=%search_string%&cats=8,9,10,11,13,12,14&fc=true',
-  loggedOutRegex: /It doesnt work here/,
-  matchRegex: /imdbid/,
-  rateLimit: 250,
-  positiveMatch: true,
-  TV: true,
+  both: true,
 };
 
 export const DDLW: PrivateTracker = {
@@ -749,18 +739,49 @@ export const DDLW: PrivateTracker = {
   both: true,
 };
 
-export const DVDSeed: PrivateTracker = {
-  name: 'DVDSeed',
-  searchUrl: 'https://www.dvdseed.eu/browse2.php?search=%tt%&wheresearch=2&incldead=1&polish=0&nuke=0&rodzaj=0',
-  loggedOutRegex: /Nie masz konta|Nie zalogowany!/,
-  matchRegex: /Nic tutaj nie ma!/,
+export const DarkPeers: PrivateTracker = {
+  name: 'DarkPeers',
+  searchUrl: 'https://darkpeers.org/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const DarkPeers_Req: PrivateTracker = {
+  name: 'DarkPeers-Req',
+  searchUrl: 'https://darkpeers.org/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const DarkPeers_TMDb: PrivateTracker = {
+  name: 'DarkPeers-TMDb',
+  searchUrl: 'https://darkpeers.org/torrents?tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Data_Load: PrivateTracker = {
+  name: 'Data-Load',
+  searchUrl: 'https://www.data-load.me/search/12345678/?q=%tt%&c[container_only]=1&o=date',
+  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen|Forgot your password/,
+  matchRegex: /No results found|Keine Ergebnisse gefunden/,
+  both: true,
 };
 
 export const DataScene: PrivateTracker = {
   name: 'DataScene',
   searchUrl: 'https://datascene.xyz/torrents?imdbId=%nott%',
   loggedOutRegex: /Cloudflare|Ray ID|Remember Me/,
-  matchRegex: /torrent-search--list__overview/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -777,8 +798,8 @@ export const DataScene_Req: PrivateTracker = {
 export const DesiTor: PrivateTracker = {
   name: 'DesiTor',
   searchUrl: 'https://torrent.desi/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your|Remember Me/,
-  matchRegex: /torrent-listings-name/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your|Remember Me|temporarily offline/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
   positiveMatch: true,
   both: true,
 };
@@ -786,7 +807,7 @@ export const DesiTor: PrivateTracker = {
 export const DesiTor_Req: PrivateTracker = {
   name: 'DesiTor-Req',
   searchUrl: 'https://torrent.desi/requests?unfilled=1&imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your|Remember Me/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your|Remember Me|temporarily offline/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -800,6 +821,14 @@ export const DiabloTor: PrivateTracker = {
   both: true,
 };
 
+export const DiscFan: PrivateTracker = {
+  name: 'DiscFan',
+  searchUrl: 'https://discfan.net/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=%tt%&search_area=4&search_mode=0',
+  loggedOutRegex: /Cloudflare|Ray ID|recover.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
+  both: true,
+};
+
 export const DokuJunkies: PrivateTracker = {
   name: 'DokuJunkies',
   searchUrl: 'https://dokujunkies.org/serie/search?q=%search_string_orig%',
@@ -808,9 +837,28 @@ export const DokuJunkies: PrivateTracker = {
   positiveMatch: true,
 };
 
+export const DreadVault: PrivateTracker = {
+  name: 'DreadVault',
+  searchUrl: 'https://dreadvault.org/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const DreadVault_Req: PrivateTracker = {
+  name: 'DreadVault-Req',
+  searchUrl: 'https://dreadvault.org/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
 export const EMP: PrivateTracker = {
   name: 'EMP',
-  searchUrl: 'https://www.empornium.is/torrents.php?title=%search_string%+%year%',
+  searchUrl: 'https://www.empornium.sx/torrents.php?title=%search_string%+%year%',
   loggedOutRegex: /Cloudflare|Ray ID|Authorization error|forgotten password|>Login</,
   matchRegex: /did not match anything/,
 };
@@ -821,6 +869,21 @@ export const EUC: PrivateTracker = {
   loggedOutRegex: /Not logged in/,
   matchRegex: /nijedan torent/,
   both: true,
+};
+
+export const Electro_Torrent: PrivateTracker = {
+  name: 'Electro Torrent',
+  searchUrl: 'https://electro-torrent.pl/szukaj.php?search=%search_string_orig%+%year%&cat=0',
+  loggedOutRegex: /Cloudflare|Ray ID|Nie zalogowany/,
+  matchRegex: /Nic tutaj nie ma/,
+};
+
+export const Electro_Torrent_TV: PrivateTracker = {
+  name: 'Electro Torrent',
+  searchUrl: 'https://electro-torrent.pl/szukaj.php?search=%search_string_orig%&cat=7',
+  loggedOutRegex: /Cloudflare|Ray ID|Nie zalogowany/,
+  matchRegex: /Nic tutaj nie ma/,
+  TV: true,
 };
 
 export const ExiTor: PrivateTracker = {
@@ -908,7 +971,7 @@ export const FL_Req: PrivateTracker = {
 
 export const FZ: PrivateTracker = {
   name: 'FZ',
-  searchUrl: 'https://www.fuzer.me/browse.php?ref_=basic&query=%tt%',
+  searchUrl: 'https://www.fuzer.xyz/browse.php?ref_=basic&query=%tt%',
   loggedOutRegex: /Cloudflare|Ray ID|Lost Password|הודעת מערכת/,
   matchRegex: /לא נמצאו תוצאות/,
   both: true,
@@ -916,7 +979,7 @@ export const FZ: PrivateTracker = {
 
 export const FZ_Req: PrivateTracker = {
   name: 'FZ-Req',
-  searchUrl: 'https://www.fuzer.me/requests.php?action=search&sq=%search_string_orig%&match=any&username=&hide_filled=1&show[movie]=1&show[ilmovie]=1&show[tv]=1&show[iltv]=1',
+  searchUrl: 'https://www.fuzer.xyz/requests.php?action=search&sq=%search_string_orig%&match=any&username=&hide_filled=1&show[movie]=1&show[ilmovie]=1&show[tv]=1&show[iltv]=1',
   loggedOutRegex: /Cloudflare|Ray ID|Lost Password/,
   matchRegex: /מילות מפתח אחרות/,
   both: true,
@@ -930,37 +993,12 @@ export const FZN: PrivateTracker = {
   both: true,
 };
 
-export const FearNoPeer: PrivateTracker = {
-  name: 'FearNoPeer',
-  searchUrl: 'https://fearnopeer.com/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const FearNoPeer_Req: PrivateTracker = {
-  name: 'FearNoPeer-Req',
-  searchUrl: 'https://fearnopeer.com/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /fa-circle text-red/,
-  positiveMatch: true,
-  both: true,
-};
-
 export const FilmFans: PrivateTracker = {
   name: 'FilmFans',
   searchUrl: 'https://filmfans.org/api/v2/search?q=%tt%',
   goToUrl: 'https://filmfans.org/',
   loggedOutRegex: /Cannot GET/,
   matchRegex: /"result":\[\]/,
-};
-
-export const FinVip: PrivateTracker = {
-  name: 'FinVip',
-  searchUrl: 'https://finvip.org/index.php?page=torrents&search=%tt%&options=1',
-  loggedOutRegex: /Sinulla ei ole oikeuksia sivulle/,
-  matchRegex: /<td colspan="2" align="center"> <\/td>/,
 };
 
 export const Francomac: PrivateTracker = {
@@ -974,8 +1012,9 @@ export const Francomac: PrivateTracker = {
 export const G_Free: PrivateTracker = {
   name: 'G-Free',
   searchUrl: 'https://generation-free.org/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Mot de passe oublié/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Mot de passe oublié/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -983,33 +1022,18 @@ export const G_Free: PrivateTracker = {
 export const G_Free_Req: PrivateTracker = {
   name: 'G-Free-Req',
   searchUrl: 'https://generation-free.org/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Mot de passe oublié/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Mot de passe oublié/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
-  both: true,
-};
-
-export const GD: PrivateTracker = {
-  name: 'GD',
-  searchUrl: 'https://greekdiamond.info/index.php?page=torrents&search=%search_string_orig%',
-  loggedOutRegex: /Cloudflare|Ray ID|Δεν είστε εξουσιοδοτημένος/,
-  matchRegex: />0<\/span> matches/,
   both: true,
 };
 
 export const GPW: PrivateTracker = {
   name: 'GPW',
   searchUrl: 'https://greatposterwall.com/torrents.php?groupname=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|remember me|保持登录/,
+  loggedOutRegex: /Cloudflare|Ray ID|login.php/,
   matchRegex: /first 0 matches|显示前 0 条匹配/,
   both: true,
-};
-
-export const GayTor: PrivateTracker = {
-  name: 'GayTor',
-  searchUrl: 'https://gay-torrents.org/torrents_beta.php?search=%search_string_orig%',
-  loggedOutRegex: /Cloudflare|Ray ID|not authorized/,
-  matchRegex: /No torrents here/,
 };
 
 export const GimmePeers: PrivateTracker = {
@@ -1103,7 +1127,8 @@ export const HD_Olimpo: PrivateTracker = {
   name: 'HD-Olimpo',
   searchUrl: 'https://hd-olimpo.club/torrents?imdbId=%tt%',
   loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña/,
-  matchRegex: /torrent-search--list__overview/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1128,8 +1153,9 @@ export const HD_Source: PrivateTracker = {
 export const HD_U: PrivateTracker = {
   name: 'HD-U',
   searchUrl: 'https://hd-united.vn/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1137,7 +1163,7 @@ export const HD_U: PrivateTracker = {
 export const HD_U_Req: PrivateTracker = {
   name: 'HD-U-Req',
   searchUrl: 'https://hd-united.vn/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -1148,13 +1174,14 @@ export const HDA: PrivateTracker = {
   searchUrl: 'https://hdarea.club/torrents.php?incldead=1&search=%tt%&search_area=4',
   loggedOutRegex: /Cloudflare|Ray ID|recover.php/,
   matchRegex: /Nothing found|没有种子|沒有種子/,
+  rateLimit: 11000,
   both: true,
 };
 
-export const HDAtmos: PrivateTracker = {
-  name: 'HDAtmos',
-  searchUrl: 'https://hdatmos.club/torrents.php?incldead=1&spstate=0&search=%tt%&search_area=1&search_mode=0',
-  loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)|站点关闭维护中/,
+export const HDDolby: PrivateTracker = {
+  name: 'HDDolby',
+  searchUrl: 'https://www.hddolby.com/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=%tt%&search_area=1&search_mode=0',
+  loggedOutRegex: /Ray ID|SSL \(HTTPS\)/,
   matchRegex: /Nothing found|没有种子|沒有種子/,
   both: true,
 };
@@ -1193,7 +1220,7 @@ export const HDS_TV: PrivateTracker = {
 export const HDSpace: PrivateTracker = {
   name: 'HDSpace',
   searchUrl: 'https://hd-space.org/index.php?page=torrents&active=0&options=2&search=%nott%',
-  loggedOutRegex: /not authorized to view the Torrents!/,
+  loggedOutRegex: /not authorized to view the Torrents!|ERR_SQL_ERR/,
   matchRegex: /<td colspan="2" align="center"> <\/td>/,
   both: true,
 };
@@ -1201,7 +1228,7 @@ export const HDSpace: PrivateTracker = {
 export const HDT: PrivateTracker = {
   name: 'HDT',
   searchUrl: 'https://hd-torrents.org/torrents.php?active=0&options=2&search=%tt%',
-  loggedOutRegex: /not authorized to view this/,
+  loggedOutRegex: /Cloudflare|Ray ID|not authorized to view this/,
   matchRegex: /No torrents here/,
   both: true,
 };
@@ -1209,7 +1236,7 @@ export const HDT: PrivateTracker = {
 export const HDT_Req: PrivateTracker = {
   name: 'HDT-Req',
   searchUrl: 'https://hd-torrents.org/requests.php?search=%search_string_orig%',
-  loggedOutRegex: /not autorized to view this/,
+  loggedOutRegex: /Cloudflare|Ray ID|not autorized to view this/,
   matchRegex: />No</,
   positiveMatch: true,
   both: true,
@@ -1231,19 +1258,41 @@ export const HDU: PrivateTracker = {
   matchRegex: /Nothing found!/,
 };
 
+export const HDZero: PrivateTracker = {
+  name: 'HDZero',
+  searchUrl: 'https://hdzero.org/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const HDZero_Req: PrivateTracker = {
+  name: 'HDZero-Req',
+  searchUrl: 'https://hdzero.org/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
 export const HDb: PrivateTracker = {
   name: 'HDb',
   searchUrl: 'https://hdbits.org/browse.php?c1=1&c2=1&c3=1&c4=1&c5=1&c7=1&c8=1&imdb=%tt%',
-  loggedOutRegex: /Make sure your passcode generating|nginx/,
+  loggedOutRegex: /Make sure your passcode generating|nginx|Scheduled Maintenance in progress/,
   matchRegex: /Nothing here!/,
+  seedingRegex: /tag tag_seeding/,
+  rateLimit: 250,
   both: true,
 };
 
 export const HDb_Req: PrivateTracker = {
   name: 'HDb-Req',
   searchUrl: 'https://hdbits.org/requests?open=&category=0&medium=0&resolution=&origin=0&is_subtitle_reseed=0&search=%tt%&filter=Filter',
-  loggedOutRegex: /Make sure your passcode generating|nginx/,
+  loggedOutRegex: /Make sure your passcode generating|nginx|Scheduled Maintenance in progress/,
   matchRegex: /There are no open bounty/,
+  rateLimit: 250,
   both: true,
 };
 
@@ -1255,9 +1304,28 @@ export const HDtime: PrivateTracker = {
   both: true,
 };
 
+export const HHD: PrivateTracker = {
+  name: 'HHD',
+  searchUrl: 'https://homiehelpdesk.net/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const HHD_Req: PrivateTracker = {
+  name: 'HHD-Req',
+  searchUrl: 'https://homiehelpdesk.net/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot your password|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
 export const HHanClub: PrivateTracker = {
   name: 'HHanClub',
-  searchUrl: 'https://hhanclub.top/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=%tt%&search_area=4&search_mode=0',
+  searchUrl: 'https://hhanclub.net/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=%tt%&search_area=4&search_mode=0',
   loggedOutRegex: /Cloudflare|Ray ID|type="password" name="password"/,
   matchRegex: /Nothing found|没有种子|沒有種子/,
   both: true,
@@ -1274,8 +1342,9 @@ export const HT: PrivateTracker = {
 export const HUNO: PrivateTracker = {
   name: 'HUNO',
   searchUrl: 'https://www.hawke.uno/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /torrent-listings-name/,
+  loggedOutRegex: /Cloudflare|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fal fa-leaf|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1283,26 +1352,18 @@ export const HUNO: PrivateTracker = {
 export const HUNO_Req: PrivateTracker = {
   name: 'HUNO-Req',
   searchUrl: 'https://www.hawke.uno/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
+  loggedOutRegex: /Cloudflare|Forgot Your Password|Forgot your password|Service Unavailable/,
   matchRegex: /label-danger/,
   positiveMatch: true,
   both: true,
 };
 
-export const Haidan: PrivateTracker = {
-  name: 'Haidan',
-  searchUrl: 'https://www.haidan.video/torrents.php?&search=%tt%&search_area=4&search_mode=0&inclbookmarked=0&incldead=1',
-  loggedOutRegex: /Cloudflare|Ray ID|找回密码/,
-  matchRegex: /没有种子/,
-  both: true,
-};
-
-export const Haidan_Req: PrivateTracker = {
-  name: 'Haidan-Req',
-  searchUrl: 'https://www.haidan.video/torrentrequest.php',
-  mPOST: 'query=%tt%&action=list&finished=all',
-  loggedOutRegex: /Cloudflare|Ray ID|找回密码/,
-  matchRegex: /求种中/,
+export const Hellenic_HD: PrivateTracker = {
+  name: 'Hellenic-HD',
+  searchUrl: 'https://hellenic-hd.cc/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Ξέχασες τον κωδικό σου/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1310,22 +1371,22 @@ export const Haidan_Req: PrivateTracker = {
 export const IPT: PrivateTracker = {
   name: 'IPT',
   searchUrl: 'https://imdbscout.octopus.town/t?q=%tt%',
-  loggedOutRegex: /Ray ID|security check to access|Forgot your password/,
-  matchRegex: /No Torrents Found!/,
+  loggedOutRegex: /Ray ID|security check to access|Forgot Password|recover.php/,
+  matchRegex: /No Torrents Found|No results for/,
 };
 
 export const IPT_TV: PrivateTracker = {
   name: 'IPT',
   searchUrl: 'https://imdbscout.octopus.town/t?72=&73=&q=%search_string%&qf=ti',
-  loggedOutRegex: /Ray ID|security check to access|Forgot your password/,
-  matchRegex: /No Torrents Found!/,
+  loggedOutRegex: /Ray ID|security check to access|Forgot Password|recover.php/,
+  matchRegex: /No Torrents Found|No results for/,
   TV: true,
 };
 
 export const IPT_Req: PrivateTracker = {
   name: 'IPT-Req',
   searchUrl: 'https://imdbscout.octopus.town/requests?72=&73=&q="%search_string_orig%"',
-  loggedOutRegex: /Ray ID|security check to access|Forgot your password/,
+  loggedOutRegex: /Ray ID|security check to access|Forgot Password|recover.php/,
   matchRegex: /\( 0 requests/,
   both: true,
 };
@@ -1340,9 +1401,10 @@ export const IS: PrivateTracker = {
 export const IS_TV: PrivateTracker = {
   name: 'IS',
   searchUrl: 'https://immortalseed.me/browse.php?do=search&keywords=%search_string_orig%&search_type=t_name',
-  mPOST: '{key:"selectcats[]",value:"4"},{key:"selectcats[]",value:"6"},{key:"selectcats[]",value:"8"},{key:"selectcats[]",value:"9"},{key:"selectcats[]",value:"47"},{key:"selectcats[]",value:"48"},{key:"selectcats[]",value:"53"},{key:"selectcats[]",value:"54"},{key:"filtercats",value:"Filter"}',
+  mPOST: '{key:"selectcats[]",value:"4"},{key:"selectcats[]",value:"6"},{key:"selectcats[]",value:"8"},{key:"selectcats[]",value:"9"},{key:"selectcats[]",value:"47"},{key:"selectcats[]",value:"48"},{key:"selectcats[]",value:"53"},{key:"selectcats[]",value:"54"},{key:"selectcats[]",value:"63"},{key:"selectcats[]",value:"64"},{key:"filtercats",value:"Filter"}',
   loggedOutRegex: /Cloudflare|Ray ID|Recover Password/,
-  matchRegex: />Nothing Found</,
+  positiveMatch: true,
+  matchRegex: /Showing results/,
   TV: true,
 };
 
@@ -1388,6 +1450,16 @@ export const Immortuos_Req: PrivateTracker = {
   both: true,
 };
 
+export const InfinityHD: PrivateTracker = {
+  name: 'InfinityHD',
+  searchUrl: 'https://infinityhd.net/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
 export const Infire: PrivateTracker = {
   name: 'Infire',
   searchUrl: 'https://infire.si/torrents.php?search=%search_string_orig%+%year%&active=0',
@@ -1399,8 +1471,9 @@ export const Infire: PrivateTracker = {
 export const ItaTorrents: PrivateTracker = {
   name: 'ItaTorrents',
   searchUrl: 'https://itatorrents.xyz/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Password Dimenticata|Service Unavailable/,
-  matchRegex: /torrent-listings-name/,
+  loggedOutRegex: /Cloudflare|Ray ID|Password Dimenticata|Service Unavailable|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1408,7 +1481,7 @@ export const ItaTorrents: PrivateTracker = {
 export const ItaTorrents_Req: PrivateTracker = {
   name: 'ItaTorrents-Req',
   searchUrl: 'https://itatorrents.xyz/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Password Dimenticata|Service Unavailable/,
+  loggedOutRegex: /Cloudflare|Ray ID|Password Dimenticata|Service Unavailable|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -1439,38 +1512,6 @@ export const JME_Req: PrivateTracker = {
   both: true,
 };
 
-export const JPTV: PrivateTracker = {
-  name: 'JPTV',
-  searchUrl: 'https://jptv.club/torrents/filter?imdb=%tt%',
-  loggedOutRegex: /Forgot your password/,
-  matchRegex: /<tbody>\s*<\/tbody>/,
-  both: true,
-};
-
-export const JPTV_Req: PrivateTracker = {
-  name: 'JPTV-Req',
-  searchUrl: 'https://jptv.club/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Forgot your password/,
-  matchRegex: /label-danger/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const JPTV_TMDb: PrivateTracker = {
-  name: 'JPTV-TMDb',
-  searchUrl: 'https://jptv.club/torrents/filter?tmdb=%tmdbid%',
-  loggedOutRegex: /Forgot your password/,
-  matchRegex: /<tbody>\s*<\/tbody>/,
-  both: true,
-};
-
-export const JoyHD: PrivateTracker = {
-  name: 'JoyHD',
-  searchUrl: 'https://www.joyhd.net/torrents.php?search_area=4&search=%tt%',
-  loggedOutRegex: /Resend Email Verification/,
-  matchRegex: /Nothing found! Try again with a refined search string/,
-};
-
 export const KG: PrivateTracker = {
   name: 'KG',
   searchUrl: 'https://karagarga.in/browse.php?sort=added&search=%nott%&search_type=imdb&d=DESC',
@@ -1490,28 +1531,12 @@ export const KG_Req: PrivateTracker = {
   both: true,
 };
 
-export const LBM: PrivateTracker = {
-  name: 'LBM',
-  searchUrl: 'https://laidbackmanor.xyz/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|Remember Me|Service Unavailable/,
-  matchRegex: /torrent-listings-no-result/,
-  both: true,
-};
-
-export const LBM_Req: PrivateTracker = {
-  name: 'LBM-Req',
-  searchUrl: 'https://laidbackmanor.xyz/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Remember Me|Service Unavailable/,
-  matchRegex: /label-danger/,
-  positiveMatch: true,
-  both: true,
-};
-
 export const LDU: PrivateTracker = {
   name: 'LDU',
   searchUrl: 'https://theldu.to/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1519,7 +1544,7 @@ export const LDU: PrivateTracker = {
 export const LDU_Req: PrivateTracker = {
   name: 'LDU-Req',
   searchUrl: 'https://theldu.to/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -1551,8 +1576,9 @@ export const LM_5z: PrivateTracker = {
 export const LST: PrivateTracker = {
   name: 'LST',
   searchUrl: 'https://lst.gg/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Service Unavailable/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1560,7 +1586,26 @@ export const LST: PrivateTracker = {
 export const LST_Req: PrivateTracker = {
   name: 'LST-Req',
   searchUrl: 'https://lst.gg/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Service Unavailable/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const LUME: PrivateTracker = {
+  name: 'LUME',
+  searchUrl: 'https://luminarr.me/torrents?imdbId=%tt%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const LUME_Req: PrivateTracker = {
+  name: 'LUME-Req',
+  searchUrl: 'https://luminarr.me/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -1586,8 +1631,9 @@ export const LastFiles_TV: PrivateTracker = {
 export const Lat_Team: PrivateTracker = {
   name: 'Lat-Team',
   searchUrl: 'https://lat-team.com/torrents?tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Olvidaste tu contraseña/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1595,68 +1641,81 @@ export const Lat_Team: PrivateTracker = {
 export const Lat_Team_Req: PrivateTracker = {
   name: 'Lat-Team-Req',
   searchUrl: 'https://lat-team.com/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Olvidaste tu contraseña/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
 };
 
-export const Le_Cinephile: PrivateTracker = {
-  name: 'Le-Cinephile',
-  searchUrl: 'https://le-cinephile.de/selection.php?search=%search_string_orig%+%year%&blah=0&orderby=added&sort=desc#1',
-  loggedOutRegex: /Cloudflare|Ray ID|Login</,
-  matchRegex: /Aucun torrent ne/,
-};
-
-export const Le_Cinephile_TV: PrivateTracker = {
-  name: 'Le-Cinephile',
-  searchUrl: 'https://le-cinephile.de/selection.php?search=%search_string_orig%&blah=0&orderby=added&sort=desc#1',
-  loggedOutRegex: /Cloudflare|Ray ID|Login</,
-  matchRegex: /Aucun torrent ne/,
-  TV: true,
+export const LemonHD: PrivateTracker = {
+  name: 'LemonHD',
+  searchUrl: 'https://lemonhd.net/torrents.php?search=%tt%&search_area=1',
+  loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)|Verify you are human|recover.php|confirm_resend.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
+  both: true,
 };
 
 export const Locadora: PrivateTracker = {
   name: 'Locadora',
   searchUrl: 'https://locadora.cc/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Esqueceu Sua Senha|Service Unavailable/,
-  matchRegex: /torrent-listings-no-result/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Esqueceu Sua Senha|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
   both: true,
 };
 
 export const Locadora_Req: PrivateTracker = {
   name: 'Locadora-Req',
   searchUrl: 'https://locadora.cc/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Esqueceu Sua Senha|Service Unavailable/,
-  matchRegex: /label-danger/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Esqueceu Sua Senha|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
 };
 
 export const M_T: PrivateTracker = {
   name: 'M-T',
-  searchUrl: 'https://kp.m-team.cc/browse?keyword=%search_string_orig%&visible=0',
+  searchUrl: 'https://kp.m-team.cc/browse?keyword=https%3A%2F%2Fwww.imdb.com%2Ftitle%2F%tt%&visible=0',
   loggedOutRegex: /Cloudflare|Ray ID|m-team/,
   matchRegex: /search is not working/,
   positiveMatch: true,
   both: true,
 };
 
-export const M_TB: PrivateTracker = {
-  name: 'M-TB',
-  searchUrl: 'https://masters-tb.com/browse.php?search=%tt%&cat=0&incldead=1&searchrs=1',
-  loggedOutRegex: /Cloudflare|Ray ID|Трябва да влезеш в акаунта/,
-  matchRegex: /Открити торенти - 0/,
-  rateLimit: 3000,
+export const M_T__Title_: PrivateTracker = {
+  name: 'M-T (Title)',
+  searchUrl: 'https://kp.m-team.cc/browse?keyword=%search_string%&visible=0',
+  loggedOutRegex: /Cloudflare|Ray ID|m-team/,
+  matchRegex: /search is not working/,
+  positiveMatch: true,
   both: true,
 };
 
 export const MKO: PrivateTracker = {
   name: 'MKO',
-  searchUrl: 'https://indice.makingoff.org/response.php?search_term=%tt%',
-  goToUrl: 'https://indice.makingoff.org/index.php?origem=busca&search_term=%tt%',
-  loggedOutRegex: /que todos efetuem login/,
-  matchRegex: /total":0/,
+  searchUrl: 'https://www.makingoff.org/indice/?q=%tt%&dir=&user=&ano=&pais=&gen=&limit=96',
+  loggedOutRegex: /precisa estar logado para visualizar/,
+  matchRegex: /Nenhuma postagem encontrada/,
+  both: true,
+};
+
+export const MNS: PrivateTracker = {
+  name: 'MNS',
+  searchUrl: 'https://midnightscene.cc/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|forgot-password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const MNS_Req: PrivateTracker = {
+  name: 'MNS-Req',
+  searchUrl: 'https://midnightscene.cc/requests?unfilled=true&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|forgot-password|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
   both: true,
 };
 
@@ -1677,7 +1736,7 @@ export const MOJBLiNK_TV: PrivateTracker = {
 
 export const MP: PrivateTracker = {
   name: 'MP',
-  searchUrl: 'https://majomparade.eu/letoltes.php?tipus=1&k=yes&name=https://www.imdb.com/title/%tt%&category[]=&tipuska=0&imdb_search=yes',
+  searchUrl: 'https://majomparade.eu/letoltes.php?tipus=1&k=yes&name=https%3A%2F%2Fwww.imdb.com%2Ftitle%2F%tt%&category[]=&tipuska=0&imdb_search=yes',
   loggedOutRegex: /Cloudflare|Ray ID|Az oldal használatához/,
   matchRegex: /Nincs találat/,
   both: true,
@@ -1700,25 +1759,6 @@ export const MS: PrivateTracker = {
   both: true,
 };
 
-export const MTV: PrivateTracker = {
-  name: 'MTV',
-  searchUrl: 'https://www.morethantv.me/torrents.php?filter_cat[1]=1&filter_cat[2]=1&title=+%2B%search_string%+%2B%year%',
-  loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
-  spaceEncode: '+%2B',
-  matchRegex: /action=download/,
-  positiveMatch: true,
-};
-
-export const MTV_TV: PrivateTracker = {
-  name: 'MTV',
-  searchUrl: 'https://www.morethantv.me/torrents.php?filter_cat[3]=1&filter_cat[5]=1&filter_cat[4]=1&filter_cat[6]=1&title=+%2B%search_string%',
-  loggedOutRegex: /Cloudflare|Ray ID|forgotten password/,
-  spaceEncode: '+%2B',
-  matchRegex: /action=download/,
-  positiveMatch: true,
-  TV: true,
-};
-
 export const MaDsRevolution: PrivateTracker = {
   name: 'MaDsRevolution',
   searchUrl: 'https://madsrevolution.net/torrents.php?type=&userid=&searchstr=%search_string_orig%+%year%&searchtags=&tags_type=0&order_by=s3&order_way=desc&filter_cat[52]=1&filter_cat[3]=1&filter_cat[4]=1&filter_cat[47]=1&filter_cat[2]=1&filter_cat[1]=1&filter_cat[20]=1&filter_cat[53]=1&filter_cat[24]=1&filter_cat[22]=1&filter_cat[49]=1&filter_cat[23]=1&filter_cat[21]=1&filter_cat[7]=1&filter_cat[5]=1',
@@ -1732,6 +1772,25 @@ export const MaDsRevolution_TV: PrivateTracker = {
   loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen/,
   matchRegex: /No search results/,
   TV: true,
+};
+
+export const MalayaBits: PrivateTracker = {
+  name: 'MalayaBits',
+  searchUrl: 'https://malayabits.cc/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const MalayaBits_Req: PrivateTracker = {
+  name: 'MalayaBits-Req',
+  searchUrl: 'https://malayabits.cc/requests?unfilled=true&imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
 };
 
 export const Milkie: PrivateTracker = {
@@ -1754,33 +1813,27 @@ export const Milkie_TV: PrivateTracker = {
 export const MonikaDesign: PrivateTracker = {
   name: 'MonikaDesign',
   searchUrl: 'https://monikadesign.uk/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|忘了用户名/,
-  matchRegex: /torrent-listings-no-result/,
+  loggedOutRegex: /Cloudflare|Ray ID|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  positiveMatch: true,
   both: true,
 };
 
 export const MonikaDesign_Req: PrivateTracker = {
   name: 'MonikaDesign-Req',
   searchUrl: 'https://monikadesign.uk/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|忘了用户名/,
-  matchRegex: /label-danger/,
+  loggedOutRegex: /Cloudflare|Ray ID|forgot-password/,
+  matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
 };
 
-export const MovieTorrentz: PrivateTracker = {
-  name: 'MovieTorrentz',
-  searchUrl: 'https://m2g.link/torrents-search.php?c112=1&c127=1&c113=1&c108=1&c110=1&c109=1&c126=1&c107=1&search=%search_string%+%year%',
-  loggedOutRegex: /Cloudflare|Ray ID|Recover Account/,
-  matchRegex: /Nothing Found/,
-};
-
-export const MovieTorrentz_TV: PrivateTracker = {
-  name: 'MovieTorrentz',
-  searchUrl: 'https://m2g.link/torrents-search.php?c116=1&c115=1&c128=1&c114=1&search=%search_string%',
-  loggedOutRegex: /Cloudflare|Ray ID|Recover Account/,
-  matchRegex: /Nothing Found/,
-  TV: true,
+export const MovieHunterz: PrivateTracker = {
+  name: 'MovieHunterz',
+  searchUrl: 'https://moviehunterz.cc/search/1234567/?q=%tt%&o=date',
+  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen|Forgot your password/,
+  matchRegex: /No results found|Keine Ergebnisse gefunden/,
+  both: true,
 };
 
 export const NB: PrivateTracker = {
@@ -1793,17 +1846,27 @@ export const NB: PrivateTracker = {
 
 export const NBL_TV: PrivateTracker = {
   name: 'NBL',
-  searchUrl: 'https://nebulance.io/torrents.php?order_by=time&order_way=desc&searchtext=%search_string%&search_type=0&taglist=&tags_type=0',
+  searchUrl: 'https://nebulance.io/torrents.php?action=show&showid=%tvmazeid%',
   loggedOutRegex: /Cloudflare|Ray ID|have cookies disabled|BpdhTfy/,
-  matchRegex: /search did not match|are Cylons aboard/,
+  matchRegex: /search did not match|are Cylons aboard|Not found/,
+  seedingRegex: /icon_disk_seed/,
   TV: true,
 };
 
 export const NBL_Req_TV: PrivateTracker = {
   name: 'NBL-Req',
-  searchUrl: 'https://nebulance.io/requests.php?type=&submit=true&search=%search_string_orig%',
+  searchUrl: 'https://nebulance.io/requests.php?action=view&id=%tvmazeid%',
   loggedOutRegex: /Cloudflare|Ray ID|have cookies disabled|BpdhTfy/,
   matchRegex: /No requests/,
+  TV: true,
+};
+
+export const NBL_Title_TV: PrivateTracker = {
+  name: 'NBL-Title',
+  searchUrl: 'https://nebulance.io/torrents.php?order_by=time&order_way=desc&searchtext=%search_string%&search_type=0&taglist=&tags_type=0',
+  loggedOutRegex: /Cloudflare|Ray ID|have cookies disabled|BpdhTfy/,
+  matchRegex: /search did not match|are Cylons aboard/,
+  seedingRegex: /icon_disk_seed/,
   TV: true,
 };
 
@@ -1848,24 +1911,6 @@ export const NRW_Req: PrivateTracker = {
   both: true,
 };
 
-export const NTELogo: PrivateTracker = {
-  name: 'NTELogo',
-  searchUrl: 'https://ntelogo.org/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const NTELogo_Req: PrivateTracker = {
-  name: 'NTELogo-Req',
-  searchUrl: 'https://ntelogo.org/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /fa-circle text-red/,
-  positiveMatch: true,
-  both: true,
-};
-
 export const NYPT: PrivateTracker = {
   name: 'NYPT',
   searchUrl: 'https://nanyangpt.com/torrents.php?incldead=0&spstate=0&inclbookmarked=0&rating=0&rating_section_lower=6&rating_section_upper=10&rating_orderby=0&search=%tt%&search_area=4&search_mode=0',
@@ -1898,26 +1943,67 @@ export const NewHeaven_TV: PrivateTracker = {
   TV: true,
 };
 
-export const NordicHD: PrivateTracker = {
-  name: 'NordicHD',
-  searchUrl: 'https://nordichd.org/?p=torrents&pid=10&keywords=%tt%&search_type=description',
-  loggedOutRegex: /Cloudflare|Ray ID|An error has occured|loginbox_remember/,
-  matchRegex: /no results found/,
+export const NordicBytes: PrivateTracker = {
+  name: 'NordicBytes',
+  searchUrl: 'https://nordicbytes.org/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
 };
 
-export const NordicHD_TV: PrivateTracker = {
-  name: 'NordicHD',
-  searchUrl: 'https://nordichd.org/?p=torrents&pid=32&cid=2&keywords=%search_string_orig%&search_type=name',
-  loggedOutRegex: /Cloudflare|Ray ID|An error has occured|loginbox_remember/,
-  matchRegex: /no results found/,
-  TV: true,
+export const NordicBytes_Req: PrivateTracker = {
+  name: 'NordicBytes-Req',
+  searchUrl: 'https://danishbytes.club/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const NordicQ: PrivateTracker = {
+  name: 'NordicQ',
+  searchUrl: 'https://nordicq.org/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Forgot Your Password|Forgot your password|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const NordicQ_Req: PrivateTracker = {
+  name: 'NordicQ-Req',
+  searchUrl: 'https://nordicq.org/requests?unfilled=1&imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Forgot Your Password|Forgot your password|forgot-password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const NovaHD: PrivateTracker = {
+  name: 'NovaHD',
+  searchUrl: 'https://pt.novahd.top/torrents.php?search=%tt%&search_area=1',
+  loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)|Verify you are human|recover.php|confirm_resend.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
+  both: true,
+};
+
+export const OldGreekTracker: PrivateTracker = {
+  name: 'OldGreekTracker',
+  searchUrl: 'https://oldgreektracker.xyz/browse.php?do=search&keywords=%search_string_orig%&search_type=t_name&category=0&include_dead_torrents=yes',
+  loggedOutRegex: /Cloudflare|Ray ID|Forget your password|Ξεχάσατε τον κωδικό πρόσβασής|Θα ανακατευθυνθείτε τώρα|You will now be redirected/,
+  matchRegex: /dl.png/,
+  positiveMatch: true,
+  both: true,
 };
 
 export const OldToonsWorld: PrivateTracker = {
   name: 'OldToonsWorld',
   searchUrl: 'https://oldtoons.world/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1925,7 +2011,7 @@ export const OldToonsWorld: PrivateTracker = {
 export const OldToonsWorld_Req: PrivateTracker = {
   name: 'OldToonsWorld-Req',
   searchUrl: 'https://oldtoons.world/requests?unfilled=1&imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -1934,8 +2020,9 @@ export const OldToonsWorld_Req: PrivateTracker = {
 export const OnlyEncodes: PrivateTracker = {
   name: 'OnlyEncodes',
   searchUrl: 'https://onlyencodes.cc/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Service Unavailable/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -1943,7 +2030,7 @@ export const OnlyEncodes: PrivateTracker = {
 export const OnlyEncodes_Req: PrivateTracker = {
   name: 'OnlyEncodes-Req',
   searchUrl: 'https://onlyencodes.cc/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Service Unavailable/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -1989,27 +2076,10 @@ export const PHD_Req: PrivateTracker = {
   positiveMatch: true,
 };
 
-export const PS: PrivateTracker = {
-  name: 'PS',
-  searchUrl: 'https://polishsource.cz/browse.php?search=%tt%&incldead=1&scene=0&pl=0&sub=&search_in=nfo',
-  loggedOutRegex: /Cloudflare|Ray ID|Rejestracja</,
-  matchRegex: /Nic nie znaleziono/,
-  both: true,
-};
-
-export const PS_Req: PrivateTracker = {
-  name: 'PS-Req',
-  searchUrl: 'https://polishsource.cz/viewrequests.php?action=search&keywords=%search_string_orig%&filter=hide',
-  loggedOutRegex: /Cloudflare|Ray ID|Rejestracja</,
-  matchRegex: />Nie</,
-  positiveMatch: true,
-  both: true,
-};
-
 export const PTE: PrivateTracker = {
   name: 'PTE',
   searchUrl: 'https://pte.nu/apitorrents?tpage=1&cat[]=6&cat[]=7&cat[]=9&search=%search_string%',
-  goToUrl: 'https://pte.nu/torrents?cat=["6","7","9"]&search=%search_string%',
+  goToUrl: 'https://pte.nu/torrents?search=%search_string%&cat=6&cat=7&cat=9',
   loggedOutRegex: /submit">Sign in|Wracamy za okolo/,
   matchRegex: /"count":0/,
   rateLimit: 250,
@@ -2018,8 +2088,8 @@ export const PTE: PrivateTracker = {
 
 export const PTE_TV: PrivateTracker = {
   name: 'PTE',
-  searchUrl: 'https://pte.nu/apitorrents?tpage=1&cat[]=11&cat[]=12&search=%search_string%',
-  goToUrl: 'https://pte.nu/torrents?cat=["11","12"]&search=%search_string%',
+  searchUrl: 'https://pte.nu/apitorrents?tpage=1&cat[]=11&cat[]=12&cat[]=14&search=%search_string%',
+  goToUrl: 'https://pte.nu/torrents?search=%search_string%&cat=14&cat=11&cat=12',
   loggedOutRegex: /submit">Sign in|Wracamy za okolo/,
   matchRegex: /"count":0/,
   rateLimit: 250,
@@ -2042,6 +2112,14 @@ export const PTF: PrivateTracker = {
   searchUrl: 'https://ptfiles.net/browse.php?search=%search_string%&incldead=0&title=0',
   loggedOutRegex: /Forgot your password/,
   matchRegex: /Nothing found!/,
+};
+
+export const PTFans: PrivateTracker = {
+  name: 'PTFans',
+  searchUrl: 'https://ptfans.cc/torrents.php?search=%tt%&search_area=1',
+  loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)|Verify you are human|recover.php|confirm_resend.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
+  both: true,
 };
 
 export const PTM: PrivateTracker = {
@@ -2067,7 +2145,8 @@ export const PTP: PrivateTracker = {
   name: 'PTP',
   searchUrl: 'https://passthepopcorn.me/torrents.php?imdb=%tt%',
   loggedOutRegex: /Cloudflare|Ray ID|Keep me logged in|Your popcorn quota/,
-  matchRegex: /Your search did not match anything/,
+  matchRegex: /Your search did not match anything|Browse Torrents/,
+  seedingRegex: /title="Seeding"/,
   rateLimit: 250,
   both: true,
 };
@@ -2080,6 +2159,14 @@ export const PTP_Req: PrivateTracker = {
   rateLimit: 250,
 };
 
+export const PTSBAO: PrivateTracker = {
+  name: 'PTSBAO',
+  searchUrl: 'https://ptsbao.club/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=%tt%&search_area=4&search_mode=0',
+  loggedOutRegex: /Cloudflare|Ray ID|recover.php/,
+  matchRegex: /Nothing found|没有种子|沒有種子/,
+  both: true,
+};
+
 export const PTTime: PrivateTracker = {
   name: 'PTTime',
   searchUrl: 'https://www.pttime.org/torrents.php?search=%tt%&search_area=1',
@@ -2090,7 +2177,7 @@ export const PTTime: PrivateTracker = {
 
 export const PTer: PrivateTracker = {
   name: 'PTer',
-  searchUrl: 'https://pterclub.com/torrents.php?search=%tt%&search_area=4',
+  searchUrl: 'https://pterclub.net/torrents.php?search=%tt%&search_area=4',
   loggedOutRegex: /Cloudflare|Ray ID|SSL \(HTTPS\)|Err code/,
   matchRegex: /Nothing found!|没有种子|沒有種子/,
   both: true,
@@ -2111,29 +2198,12 @@ export const Peeratiko_TV: PrivateTracker = {
   TV: true,
 };
 
-export const Plusteca: PrivateTracker = {
-  name: 'Plusteca',
-  searchUrl: 'https://plusteca.com/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-listings-name/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const Plusteca_Req: PrivateTracker = {
-  name: 'Plusteca-Req',
-  searchUrl: 'https://plusteca.com/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /fa-circle text-red/,
-  positiveMatch: true,
-  both: true,
-};
-
 export const PolishTorrent: PrivateTracker = {
   name: 'PolishTorrent',
   searchUrl: 'https://polishtorrent.top/torrents?imdbId=%nott%',
   loggedOutRegex: /Cloudflare|Ray ID|Zapamiętaj mnie|Service Unavailable/,
-  matchRegex: /torrent-search--list__overview/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -2150,16 +2220,18 @@ export const PolishTorrent_Req: PrivateTracker = {
 export const Portugas: PrivateTracker = {
   name: 'Portugas',
   searchUrl: 'https://portugas.org/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|content="Login/,
-  matchRegex: /torrent-listings-no-result/,
+  loggedOutRegex: /Cloudflare|Ray ID|content="Login|Esqueci-me da password|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  positiveMatch: true,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   both: true,
 };
 
 export const Portugas_Req: PrivateTracker = {
   name: 'Portugas-Req',
-  searchUrl: 'https://portugas.org/requests?unfilled=1&imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|content="Login/,
-  matchRegex: /fa-circle/,
+  searchUrl: 'https://portugas.org/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|content="Login|Esqueci-me da password|Forgot Your Password|Forgot your password/,
+  matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
 };
@@ -2171,54 +2243,58 @@ export const PxHD: PrivateTracker = {
   matchRegex: /Your search did not match anything/,
 };
 
-export const RareShare2_TV: PrivateTracker = {
-  name: 'RareShare2',
-  searchUrl: 'https://rareshare2.me/torrents?tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /"Download">/,
+export const RMC: PrivateTracker = {
+  name: 'RMC',
+  searchUrl: 'https://retro-movies.club/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
-  TV: true,
-};
-
-export const RareShare2_Req_TV: PrivateTracker = {
-  name: 'RareShare2-Req',
-  searchUrl: 'https://rareshare2.me/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /label-danger/,
-  positiveMatch: true,
-  TV: true,
-};
-
-export const RedBits: PrivateTracker = {
-  name: 'RedBits',
-  searchUrl: 'https://redbits.xyz/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|Remember Me|Olvidaste tu contraseña/,
-  matchRegex: /torrent-listings-no-result/,
   both: true,
 };
 
-export const RedBits_Req: PrivateTracker = {
-  name: 'RedBits-Req',
-  searchUrl: 'https://redbits.xyz/requests?unfilled=1&imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Remember Me|Olvidaste tu contraseña/,
-  matchRegex: /label-danger/,
+export const RMC_Req: PrivateTracker = {
+  name: 'RMC-Req',
+  searchUrl: 'https://retro-movies.club/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Rastastugan: PrivateTracker = {
+  name: 'Rastastugan',
+  searchUrl: 'https://rastastugan.org/torrents?imdbId=%tt%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Rastastugan_Req: PrivateTracker = {
+  name: 'Rastastugan-Req',
+  searchUrl: 'https://rastastugan.org/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
 };
 
 export const ReelFliX: PrivateTracker = {
   name: 'ReelFliX',
-  searchUrl: 'https://reelflix.xyz/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /torrent-search--list__overview/,
+  searchUrl: 'https://reelflix.cc/torrents?imdbId=%tt%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
 
 export const ReelFliX_Req: PrivateTracker = {
   name: 'ReelFliX-Req',
-  searchUrl: 'https://reelflix.xyz/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
+  searchUrl: 'https://reelflix.cc/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -2241,27 +2317,33 @@ export const Retroflix_Req: PrivateTracker = {
   both: true,
 };
 
-export const RevTT: PrivateTracker = {
-  name: 'RevTT',
-  searchUrl: 'https://revolutiontt.me/browse.php?search=%tt%&cat=0&incldead=1',
-  loggedOutRegex: /Cloudflare|Ray ID|Password Recovery/,
-  matchRegex: /Nothing found!/,
+export const RoTor: PrivateTracker = {
+  name: 'RoTor',
+  searchUrl: 'https://rotorrent.info/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  positiveMatch: true,
+  seedingRegex: /torrent-activity-indicator--seeding/,
   both: true,
 };
 
-export const RoTor: PrivateTracker = {
-  name: 'RoTor',
-  searchUrl: 'https://rotorrent.ro/torrents-search.php?search=%search_string_orig%+%year%&cat=0&incldead=0',
-  loggedOutRegex: /Cloudflare|Ray ID|only for members/,
-  matchRegex: /No torrents were found/,
+export const RocketHD: PrivateTracker = {
+  name: 'RocketHD',
+  searchUrl: 'https://rocket-hd.cc/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
 };
 
-export const RoTor_TV: PrivateTracker = {
-  name: 'RoTor',
-  searchUrl: 'https://rotorrent.ro/torrents-search.php?search=%search_string_orig%&cat=0&incldead=0',
-  loggedOutRegex: /Cloudflare|Ray ID|only for members/,
-  matchRegex: /No torrents were found/,
-  TV: true,
+export const RocketHD_Req: PrivateTracker = {
+  name: 'RocketHD-Req',
+  searchUrl: 'https://rocket-hd.cc/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
 };
 
 export const SB: PrivateTracker = {
@@ -2299,30 +2381,12 @@ export const SC_Req: PrivateTracker = {
   both: true,
 };
 
-export const SFP: PrivateTracker = {
-  name: 'SFP',
-  searchUrl: 'https://s-f-p.dyndns.dk/browse.php?do=search&keywords=%tt%&search_type=t_genre&category=0&include_dead_torrents=yes',
-  loggedOutRegex: /Cloudflare|Ray ID|Passwort Vergessen/,
-  matchRegex: /\/dl.png/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const SFP_Req: PrivateTracker = {
-  name: 'SFP-Req',
-  searchUrl: 'https://s-f-p.dyndns.dk/viewrequests.php?do=search_request',
-  mPOST: 'keywords=%search_string_orig%',
-  loggedOutRegex: /Cloudflare|Ray ID|Passwort Vergessen/,
-  matchRegex: /input_true.gif/,
-  positiveMatch: true,
-  both: true,
-};
-
 export const SI: PrivateTracker = {
   name: 'SI',
   searchUrl: 'https://shareisland.org/torrents?imdbId=%nott%',
   loggedOutRegex: /Cloudflare|Ray ID|Accedi con le|Sign In With|Dimenticata la Password/,
-  matchRegex: /torrent-search--list__overview/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -2346,68 +2410,54 @@ export const SPD: PrivateTracker = {
 
 export const ST: PrivateTracker = {
   name: 'ST',
-  searchUrl: 'https://www.scenetime.com/browse.php?c47=1&c57=1&c59=1&c64=1&c82=1&c16=1&search="%search_string% %year%"&cata=yes',
-  loggedOutRegex: /Cloudflare|Ray ID|need cookies enabled|Try again in/,
-  matchRegex: /Nothing found/,
+  searchUrl: 'https://www.scenetime.com/browse.php?c47=1&c57=1&c59=1&c64=1&c82=1&c16=1&c10=1&search=%search_string% %year%&cata=yes',
+  loggedOutRegex: /Cloudflare|Ray ID|need cookies enabled|login-form/,
+  matchRegex: /No results found/,
   rateLimit: 8000,
 };
 
 export const ST_TV: PrivateTracker = {
   name: 'ST',
-  searchUrl: 'https://www.scenetime.com/browse.php?c43=1&c2=1&c9=1&c77=1&search=%search_string%&cata=yes',
-  loggedOutRegex: /Cloudflare|Ray ID|need cookies enabled|Try again in/,
-  matchRegex: /tvuhdn.png|tvpackn.png|tvhdn.png|TVsdn.png/,
-  positiveMatch: true,
+  searchUrl: 'https://www.scenetime.com/browse.php?c43=1&c2=1&c9=1&c77=1&c1=1&search=%search_string%&cata=yes',
+  loggedOutRegex: /Cloudflare|Ray ID|need cookies enabled|login-form/,
+  matchRegex: /No results found/,
   rateLimit: 8000,
   TV: true,
 };
 
-export const STC_TV: PrivateTracker = {
+export const STC: PrivateTracker = {
   name: 'STC',
-  searchUrl: 'https://skipthecommericals.xyz/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /torrent-listings-name/,
-  positiveMatch: true,
-  TV: true,
-};
-
-export const STC_Req_TV: PrivateTracker = {
-  name: 'STC-Req',
-  searchUrl: 'https://skipthecommericals.xyz/requests?unfilled=1&imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /fa-circle text-red/,
-  positiveMatch: true,
-  TV: true,
-};
-
-export const STT: PrivateTracker = {
-  name: 'STT',
-  searchUrl: 'https://st-tracker.eu/tfiles.php?showsearch=1&h66=1&search=%search_string_orig%+%year%&orderby=added&sort=desc&incldead=0',
-  loggedOutRegex: /Cloudflare|Ray ID|Nicht eingelogt|Session wird geprüft/,
-  matchRegex: /Nichts gefunden/,
-};
-
-export const STT_TV: PrivateTracker = {
-  name: 'STT',
-  searchUrl: 'https://st-tracker.eu/tfiles.php?showsearch=1&h76=1&search=%search_string_orig%&orderby=added&sort=desc&incldead=0',
-  loggedOutRegex: /Cloudflare|Ray ID|Nicht eingelogt|Session wird geprüft/,
-  matchRegex: /Nichts gefunden/,
-  TV: true,
-};
-
-export const SceneLinks: PrivateTracker = {
-  name: 'SceneLinks',
-  searchUrl: 'https://scenelinks.me/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  searchUrl: 'https://skipthecommercials.xyz/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
   positiveMatch: true,
   both: true,
 };
 
-export const SceneLinks_Req: PrivateTracker = {
-  name: 'SceneLinks-Req',
-  searchUrl: 'https://scenelinks.me/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+export const STC_Req: PrivateTracker = {
+  name: 'STC-Req',
+  searchUrl: 'https://skipthecommercials.xyz/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /fa-circle text-red|request-status--unfilled/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Samaritano: PrivateTracker = {
+  name: 'Samaritano',
+  searchUrl: 'https://samaritano.cc/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Forgot Your Password|Forgot your password|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Samaritano_Req: PrivateTracker = {
+  name: 'Samaritano-Req',
+  searchUrl: 'https://samaritano.cc/requests?unfilled=true&imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Forgot Your Password|Forgot your password|forgot-password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -2428,6 +2478,25 @@ export const SceneRush_TV: PrivateTracker = {
   TV: true,
 };
 
+export const Seedpool: PrivateTracker = {
+  name: 'Seedpool',
+  searchUrl: 'https://seedpool.org/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Seedpool_Req: PrivateTracker = {
+  name: 'Seedpool-Req',
+  searchUrl: 'https://seedpool.org/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
 export const SerienFans_TV: PrivateTracker = {
   name: 'SerienFans',
   searchUrl: 'https://serienfans.org/api/v2/search?q=%tt%',
@@ -2446,29 +2515,11 @@ export const SerienJunkies_TV: PrivateTracker = {
   TV: true,
 };
 
-export const Sharewood: PrivateTracker = {
-  name: 'Sharewood',
-  searchUrl: 'https://www.sharewood.tv/filterTorrents?search=%search_string_orig%+%year%&categories[]=1',
-  loggedOutRegex: /Cloudflare|Ray ID|Mot de passe oublié/,
-  matchRegex: /table-responsive-line/,
-  positiveMatch: true,
-};
-
-export const Sharewood_TV: PrivateTracker = {
-  name: 'Sharewood',
-  searchUrl: 'https://www.sharewood.tv/filterTorrents?search=%search_string_orig%&categories[]=1',
-  loggedOutRegex: /Cloudflare|Ray ID|Mot de passe oublié/,
-  matchRegex: /table-responsive-line/,
-  positiveMatch: true,
-  TV: true,
-};
-
-export const Sharewood_Req: PrivateTracker = {
-  name: 'Sharewood-Req',
-  searchUrl: 'https://www.sharewood.tv/filterRequests?search=%search_string_orig%&categories[]=1',
-  loggedOutRegex: /Cloudflare|Ray ID|Mot de passe oublié/,
-  matchRegex: /btn-danger/,
-  positiveMatch: true,
+export const SilentGround: PrivateTracker = {
+  name: 'SilentGround',
+  searchUrl: 'https://www.silentground.org/search/999999/?q=%tt%&o=date',
+  loggedOutRegex: /Cloudflare|Ray ID|page could not be found/,
+  matchRegex: /No results found/,
   both: true,
 };
 
@@ -2481,26 +2532,11 @@ export const Snahp: PrivateTracker = {
   both: true,
 };
 
-export const SoR: PrivateTracker = {
-  name: 'SoR',
-  searchUrl: 'https://sor-next.tk/selection.php?scat[]=30&scat[]=134&scat[]=138&scat[]=137&scat[]=160&scat[]=186&scat[]=143&scat[]=133&scat[]=182&scat[]=183&scat[]=174&scat[]=173&scat[]=191&scat[]=147&search=%search_string_orig%+%year%&blah=0&orderby=added&sort=desc#1',
-  loggedOutRegex: /Cloudflare|Ray ID|Angemeldet bleiben/,
-  matchRegex: /Nicht gefunden was du/,
-};
-
-export const SoR_TV: PrivateTracker = {
-  name: 'SoR',
-  searchUrl: 'https://sor-next.tk/selection.php?scat[]=140&scat[]=135&scat[]=136&scat[]=180&scat[]=184&scat[]=179&scat[]=173&scat[]=191&scat[]=147&search=%search_string_orig%&blah=0&orderby=added&sort=desc#1',
-  loggedOutRegex: /Cloudflare|Ray ID|Angemeldet bleiben/,
-  matchRegex: /Nicht gefunden was du/,
-  TV: true,
-};
-
 export const SpeedApp: PrivateTracker = {
   name: 'SpeedApp',
   searchUrl: 'https://speedapp.io/browse?search=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forget Password|Remember me/,
-  matchRegex: /text-emphasis text-hover-primary/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forget Password|Remember me|SpeedApp/,
+  matchRegex: /text-emphasis text-hover-primary|autosearch doesnt work here anymore/,
   both: true,
 };
 
@@ -2534,7 +2570,7 @@ export const Swarmazon_TV: PrivateTracker = {
 
 export const TBD: PrivateTracker = {
   name: 'TBD',
-  searchUrl: 'https://www.torrentbd.net/torrent/movies.php?module=torrents&id=%nott%',
+  searchUrl: 'https://www.torrentbd.net/torrent/movies.php?module=torrents&id=%tt%',
   loggedOutRegex: /<title>TorrentBD : Login</,
   matchRegex: /This title is not available!/,
   both: true,
@@ -2582,9 +2618,10 @@ export const TG: PrivateTracker = {
 
 export const THR: PrivateTracker = {
   name: 'THR',
-  searchUrl: 'https://www.torrenthr.org/browse.php?search=%search_string%&blah=0&incldead=1',
+  searchUrl: 'https://www.torrenthr.org/browse.php?search=%tt%&blah=2&incldead=1',
   loggedOutRegex: /registraciju morate imati omogućene cookiese/,
   matchRegex: /Ništa nije pronađeno!/,
+  seedingRegex: /title="Seeding"/,
   both: true,
 };
 
@@ -2636,19 +2673,12 @@ export const TLFBits: PrivateTracker = {
   both: true,
 };
 
-export const TLPL: PrivateTracker = {
-  name: 'TLPL',
-  searchUrl: 'https://torrentleech.pl/browse.php?search=%tt%&incldead=0&titlesearch=1&polish=0&cat_film=&napisy=0',
-  loggedOutRegex: /Ray ID|Niezalogowany!/,
-  matchRegex: /Nic tutaj nie ma/,
-  both: true,
-};
-
 export const TLZ: PrivateTracker = {
   name: 'TLZ',
   searchUrl: 'https://tlzdigital.com/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -2656,7 +2686,7 @@ export const TLZ: PrivateTracker = {
 export const TLZ_Req: PrivateTracker = {
   name: 'TLZ-Req',
   searchUrl: 'https://tlzdigital.com/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -2698,7 +2728,8 @@ export const TOS: PrivateTracker = {
   name: 'TOS',
   searchUrl: 'https://theoldschool.cc/torrents?imdbId=%tt%',
   loggedOutRegex: /Cloudflare|Ray ID|title>Login|Mot de passe oubli/,
-  matchRegex: /torrent-search--list__overview/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -2723,7 +2754,7 @@ export const TP: PrivateTracker = {
 export const TRL: PrivateTracker = {
   name: 'TRL',
   searchUrl: 'https://torrent.ai/lt/torrents?in=2&search=%tt%',
-  loggedOutRegex: /Jums nepavyksta pasijungti/,
+  loggedOutRegex: /Jums nepavyksta pasijungti|Pamiršai slaptažodį/,
   matchRegex: /nieko nerasta!/,
   both: true,
 };
@@ -2731,7 +2762,7 @@ export const TRL: PrivateTracker = {
 export const TRL_TV: PrivateTracker = {
   name: 'TRL',
   searchUrl: 'https://torrent.ai/lt/torrents?search=%search_string%&cats[]=53&cats[]=56&cats[]=79&cats[]=42&cats[]=58&cats[]=59&cats[]=45&cats[]=69&cats[]=70&cats[]=39&cats[]=28',
-  loggedOutRegex: /Jums nepavyksta pasijungti/,
+  loggedOutRegex: /Jums nepavyksta pasijungti|Pamiršai slaptažodį/,
   matchRegex: /nieko nerasta!/,
   TV: true,
 };
@@ -2744,88 +2775,20 @@ export const TS: PrivateTracker = {
   both: true,
 };
 
-export const TSC: PrivateTracker = {
-  name: 'TSC',
-  searchUrl: 'https://tsctracker.org/browse.php?c130=1&c76=1&c78=1&c75=1&c113=1&c54=1&c5=1&c55=1&c43=1&c20=1&c120=1&c119=1&c36=1&c121=1&c124=1&search=%search_string_orig%+%year%&incldead=0&orderby=added&sort=desc',
-  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen/,
-  matchRegex: /keine Torrents/,
-};
-
-export const TSC_TV: PrivateTracker = {
-  name: 'TSC',
-  searchUrl: 'https://tsctracker.org/browse.php?c112=1&c128=1&c129=1&c69=1&c72=1&c66=1&c125=1&c68=1&c126=1&c127=1&search=%search_string_orig%&incldead=0&orderby=added&sort=desc',
-  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen/,
-  matchRegex: /keine Torrents/,
-  TV: true,
-};
-
-export const TSH: PrivateTracker = {
-  name: 'TSH',
-  searchUrl: 'https://theshinning.me/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen/,
-  matchRegex: /torrent-listings-name/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const TSH_Req: PrivateTracker = {
-  name: 'TSH-Req',
-  searchUrl: 'https://theshinning.me/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Passwort vergessen/,
-  matchRegex: /fa-circle text-red/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const TSP: PrivateTracker = {
-  name: 'TSP',
-  searchUrl: 'https://www.thesceneplace.com/index.php?page=torrents&search=%search_string_orig%+%year%&category=20;21;22;23;24&options=0&active=0',
-  loggedOutRegex: /Cloudflare|Ray ID|not authorized to view/,
-  positiveMatch: true,
-  matchRegex: /onMouseOut="this.className/,
-};
-
-export const TSP_TV: PrivateTracker = {
-  name: 'TSP',
-  searchUrl: 'https://www.thesceneplace.com/index.php?page=torrents&search=%search_string_orig%&category=15;16;17;18;25&options=0&active=0',
-  loggedOutRegex: /Cloudflare|Ray ID|not authorized to view/,
-  positiveMatch: true,
-  matchRegex: /onMouseOut="this.className/,
-  TV: true,
-};
-
-export const TSP_Req: PrivateTracker = {
-  name: 'TSP-Req',
-  searchUrl: 'https://www.thesceneplace.com/index.php?page=viewrequests&search=%search_string_orig%',
-  loggedOutRegex: /Cloudflare|Ray ID|not authorized to view/,
-  positiveMatch: true,
-  matchRegex: />No</,
-  both: true,
-};
-
-export const TSeeds: PrivateTracker = {
-  name: 'TSeeds',
-  searchUrl: 'https://www.torrentseeds.org/torrents?tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /"Download">/,
-  positiveMatch: true,
-  both: true,
-};
-
-export const TSeeds_Req: PrivateTracker = {
-  name: 'TSeeds-Req',
-  searchUrl: 'https://www.torrentseeds.org/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Forgot Your Password|Service Unavailable/,
-  matchRegex: /label-danger/,
-  positiveMatch: true,
-  both: true,
-};
-
 export const TT: PrivateTracker = {
   name: 'TT',
   searchUrl: 'https://tt.smallfoot.me/t?q=%tt%',
   loggedOutRegex: /Cloudflare|Ray ID|Reset Password/,
   matchRegex: /No Torrents Found!/,
+  both: true,
+};
+
+export const TT_Req: PrivateTracker = {
+  name: 'TT-Req',
+  searchUrl: 'https://tt.smallfoot.me/requests?q=%search_string%',
+  loggedOutRegex: /Cloudflare|Ray ID|Reset Password/,
+  matchRegex: /torrentNameInfo/,
+  positiveMatch: true,
   both: true,
 };
 
@@ -2840,8 +2803,9 @@ export const TTG: PrivateTracker = {
 export const TTR: PrivateTracker = {
   name: 'TTR',
   searchUrl: 'https://torrenteros.org/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña/,
-  matchRegex: /torrent-listings-name/,
+  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -2855,20 +2819,12 @@ export const TTR_Req: PrivateTracker = {
   both: true,
 };
 
-export const TVCK: PrivateTracker = {
-  name: 'TVCK',
-  searchUrl: 'https://tvchaosuk.com/torrents/filter?imdb=%tt%',
-  loggedOutRegex: /Forgot Your Password/,
-  matchRegex: /<tbody>\s*<\/tbody>/,
-  both: true,
-};
-
 export const TVV_TV: PrivateTracker = {
   name: 'TVV',
   searchUrl: 'https://tv-vault.me/torrents.php?action=advanced&imdbid=%tt%&order_by=s3&order_way=desc',
   loggedOutRegex: /Lost your password\?|Browse quota exceeded|Cloudflare Ray ID/,
   matchRegex: /Nothing found<\/h2>/,
-  rateLimit: 5200,
+  rateLimit: 6100,
   TV: true,
 };
 
@@ -2877,7 +2833,7 @@ export const TVV_Desc_TV: PrivateTracker = {
   searchUrl: 'https://tv-vault.me/torrents.php?action=advanced&torrentdesc=%tt%&order_by=s3&order_way=desc',
   loggedOutRegex: /Lost your password\?|Browse quota exceeded|Cloudflare Ray ID/,
   matchRegex: /Nothing found<\/h2>/,
-  rateLimit: 5200,
+  rateLimit: 6100,
   TV: true,
 };
 
@@ -2914,34 +2870,12 @@ export const Tasmanites_TV: PrivateTracker = {
   TV: true,
 };
 
-export const TeRaCoD: PrivateTracker = {
-  name: 'TeRaCoD',
-  searchUrl: 'https://teracod.net/browse.php?search=%search_string_orig%+%year%&cat=0&genre=0&incldead=0&blah=0',
-  loggedOutRegex: /Cloudflare|Ray ID|Nem vagy bejelentkezve/,
-  matchRegex: /Nincs találat/,
-};
-
-export const TeRaCoD_TV: PrivateTracker = {
-  name: 'TeRaCoD',
-  searchUrl: 'https://teracod.net/browse.php?search=%search_string_orig%&c12=1&c13=1&c37=1&c38=1&c39=1&c40=1&genre=0&incldead=0&blah=0',
-  loggedOutRegex: /Cloudflare|Ray ID|Nem vagy bejelentkezve/,
-  matchRegex: /Nincs találat/,
-  TV: true,
-};
-
-export const Tigers: PrivateTracker = {
-  name: 'Tigers',
-  searchUrl: 'https://www.tigers-dl.net/torrents-search.php?search=%22%search_string_orig%%22',
-  loggedOutRegex: /Cloudflare|Ray ID/,
-  matchRegex: /Nothing found/,
-  both: true,
-};
-
 export const Tik: PrivateTracker = {
   name: 'Tik',
   searchUrl: 'https://cinematik.net/torrents?imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -2949,7 +2883,7 @@ export const Tik: PrivateTracker = {
 export const Tik_Req: PrivateTracker = {
   name: 'Tik-Req',
   searchUrl: 'https://cinematik.net/requests?unfilled=1&imdbId=%tt%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -2957,17 +2891,18 @@ export const Tik_Req: PrivateTracker = {
 
 export const Toca_Share: PrivateTracker = {
   name: 'Toca Share',
-  searchUrl: 'https://tocashare.com/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
-  matchRegex: /torrent-search--list__overview/,
+  searchUrl: 'https://tocashare.biz/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
 
 export const Toca_Share_Req: PrivateTracker = {
   name: 'Toca Share-Req',
-  searchUrl: 'https://tocashare.com/requests?unfilled=1&tmdbId=%tmdbid%',
-  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password/,
+  searchUrl: 'https://tocashare.biz/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -2975,15 +2910,16 @@ export const Toca_Share_Req: PrivateTracker = {
 
 export const Tor911: PrivateTracker = {
   name: 'Tor911',
-  searchUrl: 'https://www.torrent911.tv/recherche/%search_string_orig%',
+  searchUrl: 'https://www.torrent911.app/recherche/%search_string_orig%',
   loggedOutRegex: /Cloudflare|Ray ID/,
   matchRegex: /Pas de torrents disponibles/,
+  spaceEncode: ' ',
   both: true,
 };
 
 export const TorSyndikat: PrivateTracker = {
   name: 'TorSyndikat',
-  searchUrl: 'https://torrent-syndikat.org/browse.php?search=1&sterm=%tt%&stype=imdb&genre=0&ttype=all&timespan=all',
+  searchUrl: 'https://torrent-syndikat.org/torrents/torrents.php?ms=1&cat=all&lb=0&sterm=%tt%&stype=imdb&timespan=all&ttype=all&foreign=yes',
   loggedOutRegex: /Cloudflare|Ray ID|Domain erwerben/,
   matchRegex: /Keine Ergebnisse/,
   both: true,
@@ -3005,11 +2941,19 @@ export const TorSyndikat_Req: PrivateTracker = {
   both: true,
 };
 
+export const Tornado: PrivateTracker = {
+  name: 'Tornado',
+  searchUrl: 'https://www.tornado.si/?p=torrents&pid=10&keywords=%search_string_orig%&search_type=both&cid[]=32&cid[]=33&cid[]=34&cid[]=35&cid[]=36&cid[]=48',
+  loggedOutRegex: /Cloudflare|Ray ID|not have permission|Ste pozabili geslo/,
+  matchRegex: /no results found/,
+  both: true,
+};
+
 export const TorrentLand: PrivateTracker = {
   name: 'TorrentLand',
   searchUrl: 'https://torrentland.li/torrents?imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Recordar usuario/,
-  matchRegex: /torrent-listings-name/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Recordar usuario/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
   positiveMatch: true,
   both: true,
 };
@@ -3017,7 +2961,35 @@ export const TorrentLand: PrivateTracker = {
 export const TorrentLand_Req: PrivateTracker = {
   name: 'TorrentLand-Req',
   searchUrl: 'https://torrentland.li/requests?unfilled=1&imdbId=%nott%',
-  loggedOutRegex: /Cloudflare|Ray ID|Recordar usuario/,
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Recordar usuario/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Tr4ker: PrivateTracker = {
+  name: 'Tr4ker',
+  searchUrl: 'https://tr4ker.net/api/torrents?limit=30&page=1&q=tmdb:%tmdbid%',
+  goToUrl: 'https://tr4ker.net/torrents?q=tmdb%3A%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|unauthenticated|non authentifié/,
+  matchRegex: /total":0/,
+  both: true,
+};
+
+export const TurkSeed: PrivateTracker = {
+  name: 'TurkSeed',
+  searchUrl: 'https://turkseed.com/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Şifreni mi Unuttun|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const TurkSeed_Req: PrivateTracker = {
+  name: 'TurkSeed-Req',
+  searchUrl: 'https://turkseed.com/requests?unfilled=1&imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Şifreni mi Unuttun|forgot-password/,
   matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
@@ -3039,19 +3011,22 @@ export const U2: PrivateTracker = {
   both: true,
 };
 
-export const UHDB: PrivateTracker = {
-  name: 'UHDB',
-  searchUrl: 'https://uhdbits.org/torrents.php?action=advanced&groupname=%tt%',
-  loggedOutRegex: /Lost your password/,
-  matchRegex: /Your search did not match anything/,
+export const ULCX: PrivateTracker = {
+  name: 'ULCX',
+  searchUrl: 'https://upload.cx/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
   both: true,
 };
 
-export const UHDB_Req: PrivateTracker = {
-  name: 'UHDB-Req',
-  searchUrl: 'https://uhdbits.org/requests.php?submit=true&search=%search_string_orig%&showall=on&filter_cat[1]=1&filter_cat[3]=1',
-  loggedOutRegex: /Lost your password/,
-  matchRegex: /Nothing found/,
+export const ULCX_Req: PrivateTracker = {
+  name: 'ULCX-Req',
+  searchUrl: 'https://upload.cx/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
   both: true,
 };
 
@@ -3081,11 +3056,31 @@ export const Unlimitz: PrivateTracker = {
   both: true,
 };
 
+export const UpscaleVault: PrivateTracker = {
+  name: 'UpscaleVault',
+  searchUrl: 'https://upscalevault.com/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Forgot Your Password|Forgot your password|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const UpscaleVault_Req: PrivateTracker = {
+  name: 'UpscaleVault-Req',
+  searchUrl: 'https://upscalevault.com/requests?imdbId=%nott%&unfilled=true',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|Forgot Your Password|Forgot your password|forgot-password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
 export const Utopia: PrivateTracker = {
   name: 'Utopia',
   searchUrl: 'https://utp.to/torrents?imdbId=%nott%',
   loggedOutRegex: /Cloudflare|Ray ID|Забули Пароль/,
-  matchRegex: /torrent-search--list__overview/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
   positiveMatch: true,
   both: true,
 };
@@ -3108,15 +3103,6 @@ export const WCX: PrivateTracker = {
   both: true,
 };
 
-export const WF: PrivateTracker = {
-  name: 'WF',
-  searchUrl: 'https://warezforums.com/search.php?action=do_search&keywords=%tt%&postthread=imdbid',
-  loggedOutRegex: /Cloudflare|Ray ID|You are not logged/,
-  matchRegex: /no results were returned/,
-  rateLimit: 5100,
-  both: true,
-};
-
 export const WoT: PrivateTracker = {
   name: 'WoT',
   searchUrl: 'https://w-o-t.pro/browse.php?showsearch=1&c87=1&c64=1&c91=1&c66=1&c11=1&c49=1&c90=1&c48=1&c47=1&c60=1&c62=1&c89=1&search=%search_string_orig%+%year%&incldead=0&orderby=added&sort=desc',
@@ -3134,16 +3120,34 @@ export const WoT_TV: PrivateTracker = {
 
 export const XS: PrivateTracker = {
   name: 'XS',
-  searchUrl: 'https://www.xspeeds.eu/browse.php?do=search&keywords=%search_string%&search_type=t_name&category=0&include_dead_torrents=yes',
+  searchUrl: 'https://www.xspeeds.eu/browse.php?do=search&keywords=%search_string%+%year%&search_type=t_name&category=0&include_dead_torrents=yes',
   loggedOutRegex: /Forget your password/,
   matchRegex: /<b>Nothing Found<\/b>/,
 };
 
-export const YGG: PrivateTracker = {
-  name: 'YGG',
-  searchUrl: 'https://www3.yggtorrent.wtf/engine/search?name=%search_string_orig%&category=2145&sub_category=all&do=search',
-  loggedOutRegex: /Ray ID|security check to access/,
-  matchRegex: 'Aucun résultat',
+export const XS_ID: PrivateTracker = {
+  name: 'XS-ID',
+  searchUrl: 'https://www.xspeeds.eu/browse.php?do=search&keywords=%tt%&search_type=t_description&category=0&include_dead_torrents=yes',
+  loggedOutRegex: /Forget your password/,
+  matchRegex: /<b>Nothing Found<\/b>/,
+};
+
+export const Yu_Scene: PrivateTracker = {
+  name: 'Yu-Scene',
+  searchUrl: 'https://yu-scene.net/torrents?imdbId=%tt%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Yu_Scene_Req: PrivateTracker = {
+  name: 'Yu-Scene-Req',
+  searchUrl: 'https://yu-scene.net/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Forgot Your Password|Forgot your password|Service Unavailable/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
   both: true,
 };
 
@@ -3166,19 +3170,33 @@ export const Yubraca_Req: PrivateTracker = {
   both: true,
 };
 
-export const Zamunda: PrivateTracker = {
-  name: 'Zamunda',
-  searchUrl: 'http://zelka.org/browse.php?search=%search_string_orig%+%year%&c42=1&c25=1&c51=1&c53=1&c46=1&c5=1&c20=1&c54=1&c35=1&c19=1&c24=1&c31=1&c28=1&incldead=1',
-  loggedOutRegex: /Cloudflare|Ray ID|cookies enabled|активирани Бисквитки/,
-  matchRegex: /Нищо не е намерено|No Results/,
+export const Zenith: PrivateTracker = {
+  name: 'Zenith',
+  searchUrl: 'https://znth.cx/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
 };
 
-export const Zamunda_TV: PrivateTracker = {
-  name: 'Zamunda',
-  searchUrl: 'http://zelka.org/browse.php?search=%search_string_orig%&c42=1&c50=1&c25=1&c51=1&c7=1&c33=1&incldead=1',
-  loggedOutRegex: /Cloudflare|Ray ID|cookies enabled|активирани Бисквитки/,
-  matchRegex: /Нищо не е намерено|No Results/,
-  TV: true,
+export const Zenith_Req: PrivateTracker = {
+  name: 'Zenith-Req',
+  searchUrl: 'https://znth.cx/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /fa-circle text-red/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const Zenith_TMDb: PrivateTracker = {
+  name: 'Zenith-TMDb',
+  searchUrl: 'https://znth.cx/torrents?tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Service Unavailable|forgot-password/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
 };
 
 export const ZmPT: PrivateTracker = {
@@ -3191,7 +3209,7 @@ export const ZmPT: PrivateTracker = {
 
 export const Zone_Telechargement: PrivateTracker = {
   name: 'Zone Telechargement',
-  searchUrl: 'https://www.zone-telechargement.store/index.php?q=%search_string_orig%',
+  searchUrl: 'https://www.zone-telechargement.meme/index.php?q=%search_string_orig%',
   loggedOutRegex: /Cloudflare|Ray ID/,
   matchRegex: />Found/,
   positiveMatch: true,
@@ -3213,6 +3231,25 @@ export const Ztracker_Req: PrivateTracker = {
   mPOST: 'do=search_request&searchwords=%search_string_orig%&cat=0',
   loggedOutRegex: /Cloudflare|Ray ID|takelogin.php|Léptessen ki 15 perc/,
   matchRegex: /not_filled.gif/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const eMuwarez: PrivateTracker = {
+  name: 'eMuwarez',
+  searchUrl: 'https://emu-warez.com/torrents?imdbId=%nott%',
+  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña|Remember me/,
+  matchRegex: /torrents\/download|torrent\/download|torrent-search--poster__poster/,
+  seedingRegex: /fa-arrow-circle-up|torrent-activity-indicator--seeding/,
+  positiveMatch: true,
+  both: true,
+};
+
+export const eMuwarez_Req: PrivateTracker = {
+  name: 'eMuwarez-Req',
+  searchUrl: 'https://emu-warez.com/requests?unfilled=1&tmdbId=%tmdbid%',
+  loggedOutRegex: /Cloudflare|Ray ID|Olvidaste tu contraseña|Remember me/,
+  matchRegex: /fa-circle text-red/,
   positiveMatch: true,
   both: true,
 };
@@ -3264,23 +3301,24 @@ export const nCore_Req: PrivateTracker = {
 export const sHD: PrivateTracker = {
   name: 'sHD',
   searchUrl: 'https://scenehd.org/browse.php?search=%tt%',
-  loggedOutRegex: /If you have forgotten your password/,
+  loggedOutRegex: /Cloudflare|Ray ID|If you have forgotten your password|HTTP error 202|HTTP error 0/,
   matchRegex: /No torrents found!/,
+  ignoreEmpty: true,
   both: true,
 };
 
-export const xThor: PrivateTracker = {
-  name: 'xThor',
-  searchUrl: 'https://xthor.tk/browse.php?c118=1&c119=1&c107=1&c1=1&c2=1&c100=1&c4=1&c5=1&c7=1&c3=1&c6=1&c8=1&c122=1&c94=1&c95=1&c12=1&c31=1&c33=1&c9=1&searchin=title&incldead=0&group=0&state=0&accent=0&price=0&gang=0&mqr=0&staff=0&sch=%search_string_orig% %year%',
-  loggedOutRegex: /Cloudflare|Ray ID|autoriser les cookies|Cliquer sur le bouton marqué/,
-  matchRegex: 'Aucun résultat',
+export const yggReborn: PrivateTracker = {
+  name: 'yggReborn',
+  searchUrl: 'https://www.yggreborn.org/torrents?q=%search_string_orig%+%year%',
+  loggedOutRegex: /Cloudflare|Ray ID|reset-password/,
+  matchRegex: /Aucun résultat/,
 };
 
-export const xThor_TV: PrivateTracker = {
-  name: 'xThor',
-  searchUrl: 'https://xthor.tk/browse.php?c104=1&c13=1&c15=1&c14=1&c98=1&c17=1&c16=1&c101=1&c32=1&c110=1&c123=1&c109=1&c30=1&searchin=title&incldead=0&group=0&state=0&accent=0&price=0&gang=0&mqr=0&staff=0&sch=%search_string_orig%',
-  loggedOutRegex: /Cloudflare|Ray ID|autoriser les cookies|Cliquer sur le bouton marqué/,
-  matchRegex: 'Aucun résultat',
+export const yggReborn_TV: PrivateTracker = {
+  name: 'yggReborn',
+  searchUrl: 'https://www.yggreborn.org/torrents?q=%search_string_orig%',
+  loggedOutRegex: /Cloudflare|Ray ID|reset-password/,
+  matchRegex: /Aucun résultat/,
   TV: true,
 };
 
